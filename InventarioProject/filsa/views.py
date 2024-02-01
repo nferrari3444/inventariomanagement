@@ -213,7 +213,7 @@ def inboundReceptionView(request, requested_id):
     productsToReceive = pendingTask.stockmovements_set.all().values()
     #task = Tasks.objects.filter(task_id = requested_id)
     tasks = Tasks.objects.filter(task_id=requested_id).prefetch_related('stockmovements_set')
-
+    print('tasks', tasks)
      # if this is a POST request we need to process the form data
     if request.method == "POST":
         

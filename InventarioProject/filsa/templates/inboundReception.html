@@ -13,18 +13,13 @@
         <form action="{% url 'outboundorder' %}" method="POST">
             {% csrf_token %}
             <div class="grid gap-4 sm:grid-cols-2 sm:gap-6">
-                <div>
-                    <label for="productname" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">{{form.product.label_tag}}</label>
-                    {{form.product}} 
-                   
-
-                    </div>
+              
                 <div class="w-full">
                     <label for="brand" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">{{form.date.label_tag}}</label>
                   
-                    <input type="date" name="date" id="date" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Ingresar Fecha" required="">
-                    
-                       
+                    <!-- <input type="date" name="date" id="date" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Ingresar Fecha" required="">
+                     -->
+                    {{form.date}}     
                     </div>
                 <!-- <div class="w-full">
                     <label for="price" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Código de Barras</label>
@@ -56,13 +51,9 @@
                    
                 </div>
 
-                <div class="flex">
-                    <div class="block">
-                    <label for="cantidad" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Cantidad Solicitada</label>
-                    {{form.cantidad}}
-                </div>
+            
                    
-                </div>
+                
                 
                 <div>
                 <label for="departamento" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Departamento</label>
@@ -79,10 +70,10 @@
                     </div>
 
                 
-                <div>
+                
 
-                            {{task}}
-                 <table class="py-8 px-4 mx-auto max-w-4xl lg:py-16 text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                 <div>          
+                 <table class="py-8 px-4 max-w-4xl lg:py-16 text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
                     <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                         <tr>
                             
@@ -99,9 +90,9 @@
                         {% for product in task.stockmovements_set.all %}
                        
                             <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                                <td class="px-6 py-4">{{product.product.name}}</td>
-                                <td class="px-6 py-4">{{product.cantidad}}</td>
-                                <td class="px-6 py-4"><input type="number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" type="text" id="" name="" placeholder="" required></td>
+                                <td class="px-6 py-4" name="producto_{{ forloop.counter0 }}">{{product.product.name}}</td>
+                                <td class="px-6 py-4" name="cantidad_{{ forloop.counter0 }}">{{product.cantidad}}</td>
+                                <td class="px-6 py-4"><input type="number" name="cantidadNeta_{{forloop.counter0}}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" type="text" id="" name="" placeholder="" required></td>
                             </tr>
                         
 

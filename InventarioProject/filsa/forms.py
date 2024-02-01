@@ -18,8 +18,8 @@ class SignUpForm(UserCreationForm):
             user.save()
         return user
 
-# class DateInput(forms.DateInput):
-#     input_type = 'date'
+class DateInput(forms.DateInput):
+    input_type = 'date'
 
 
 ### Inbound Form
@@ -43,6 +43,16 @@ class InboundForm(forms.ModelForm):
     #                                      'style': 'max-width: auto;',
     #                                  }), empty_label='-------------', to_field_name='name')
 
+    
+    
+    class Meta:
+        model = Tasks
+        fields = ['warehouse','motivoIngreso','issuer', 'receptor', 'department' , 'date']
+        widgets = {
+            'date': forms.DateInput(attrs={'type': 'date'})
+        }
+    
+    
     def __init__(self, *args, **kwargs):
         
         extra_fields = kwargs.pop('extra',0)
@@ -60,9 +70,7 @@ class InboundForm(forms.ModelForm):
             self.fields['internalCode_{index}'.format(index=index)] = forms.CharField()
             self.fields['cantidad_{index}'.format(index=index)] = forms.IntegerField()
 
-    class Meta:
-        model = Tasks
-        fields = ['warehouse','motivoIngreso','issuer', 'receptor', 'department']
+   
 
     # def __init__(self, *args, **kwargs):
     #     user = kwargs.pop('user','')
@@ -90,24 +98,25 @@ class InboundForm(forms.ModelForm):
 
 class InboundReceptionForm(forms.ModelForm):
 
-    receptor = ModelChoiceField(queryset=CustomUser.objects.all()
-                                       ,widget=forms.Select(attrs={
-                                          'class': "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500",
-                                          'style': 'max-width: auto;',
-                                      }), empty_label='-------------', to_field_name=  'username')
+    # receptor = ModelChoiceField(queryset=CustomUser.objects.all()
+    #                                    ,widget=forms.Select(attrs={
+    #                                       'class': "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500",
+    #                                       'style': 'max-width: auto;',
+    #                                   }), empty_label='-------------', to_field_name=  'username')
     
-    warehouse = forms.ModelChoiceField(queryset=Warehouses.objects.all()
-                                      ,widget=forms.Select(attrs={
-                                         'class': "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500",
-                                         'style': 'max-width: auto;',
-                                     }), empty_label='-------------', to_field_name='name')
+    # warehouse = forms.ModelChoiceField(queryset=Warehouses.objects.all()
+    #                                   ,widget=forms.Select(attrs={
+    #                                      'class': "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500",
+    #                                      'style': 'max-width: auto;',
+    #                                  }), empty_label='-------------', to_field_name='name')
     
     #task =  forms.ModelChoiceField(queryset=None)
     
-    widgets = {
-            'deliveryDate': forms.widgets.DateInput(attrs={'type': 'date'}),
-         #   'cantidad': forms.Input(attrs={'class':"bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"})
-    }
+    # widgets = {
+    #         'deliveryDate': forms.widgets.DateInput(attrs={'type': 'date'}),
+    #      #   'cantidad': forms.Input(attrs={'class':"bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"})
+    # }
+    
     
     class Meta:
         model = Tasks
@@ -119,9 +128,16 @@ class InboundReceptionForm(forms.ModelForm):
         
         
         super(InboundReceptionForm, self).__init__(*args, **kwargs)
-       # numberOfProducts = self.instance.stockmovements_set.all()
+
         print('kwargs is :', kwargs['initial']['task_id'])
         task_id =  kwargs['initial']['task_id']
+
+        task = Tasks.objects.filter(task_id=task_id).prefetch_related('stockmovements_set')
+        print('task in form', task)
+        
+        print('stockmovements in task in form', task[0].stockmovements_set.all().count())
+       # numberOfProducts = self.instance.stockmovements_set.all()
+        numberOfProducts = task[0].stockmovements_set.all().count() 
      #   self.fields['task'].queryset = Tasks.objects.filter(task_id=task_id)  #self.instance
         print('self.instance is:', self.instance)
         self.fields['department'].widget.attrs.update({'class':'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 flex w-1/2 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500', 'disabled':True }) #= self.instance.department
@@ -129,6 +145,17 @@ class InboundReceptionForm(forms.ModelForm):
         self.fields['receptor'].widget.attrs.update({'class':'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 flex w-1/2 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500', 'disabled':True })    #.widget.value_from_datadict = self.instance.receptor
         self.fields['warehouse'].widget.attrs.update({'class':'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 flex w-1/2 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500', 'disabled':True })      #.widget.value_from_datadict = self.instance.warehouse
         self.fields['issuer'].widget.attrs.update({'class':'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 flex w-1/2 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500', 'disabled':True }) #    .widget.value_from_datadict = self.instance.issuer
+        self.fields['date'].widget.attrs.update({'class':'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 flex w-1/2 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500', 'disabled':True }) #    .widget.value_from_datadict = self.instance.issuer
+        
+        for i in range(numberOfProducts +1):
+            field_name = 'producto_%s' % (i,)
+            quantity = 'cantidad_%s' % (i,)
+            netQuantity = 'cantidadNeta_%' % (i,)
+
+            self.fields[field_name] = forms.CharField()
+            self.fields[quantity] = forms.CharField()
+            self.fields[netQuantity] = forms.CharField()
+
         #self.fields['cantidad'] = self.instance.stockmovements_set.values_list('cantidad',flat=True)
         #self.fields['products'] = [self.instance.stockmovements_set.all()[i].product.name for i in range(0,len(numberOfProducts))]
         #self.fields['products'] = self.instance.stockmovements_set.all()

@@ -16,7 +16,7 @@
             {% csrf_token %}
 
                 {{form.extra_field_count}}
-            <!-- {{ form.as_p }} -->
+       
             <div class="grid gap-4 sm:grid-cols-2 sm:gap-6">
                 <!-- <div>
                     <label for="productname" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">{{form.product.label_tag}}</label>
@@ -62,6 +62,13 @@
                 <div>
                     <label for="receptor" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Solicitante</label>
                     {{form.issuer}}
+
+                   
+                </div>
+
+                <div>
+                    <label for="date" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Fecha</label>
+                    {{form.date}}
 
                    
                 </div>
