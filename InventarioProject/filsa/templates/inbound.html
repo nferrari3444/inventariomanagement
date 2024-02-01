@@ -6,13 +6,17 @@
 </head>
 
 {% block content %}
+
+
 <!-- sm:col-span-2 -->
 <section class="bg-white dark:bg-gray-900">
     <div class="py-8 px-4 mx-auto max-w-3xl lg:py-16">
         <h2 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">Ingreso de Nuevo Producto</h2>
-        <form action="{% url 'inbound' %}" method="POST">
+        <form id="forms" action="{% url 'inbound' %}" method="POST">
             {% csrf_token %}
 
+                {{form.extra_field_count}}
+            <!-- {{ form.as_p }} -->
             <div class="grid gap-4 sm:grid-cols-2 sm:gap-6">
                 <!-- <div>
                     <label for="productname" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">{{form.product.label_tag}}</label>
@@ -43,6 +47,10 @@
                      <input type="number" name="internal-code" id="internal-code" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="12" required=""> 
                  
                 </div>  -->
+                <div>
+                    <label for="motivoIngreso" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Departamento</label>
+                    {{form.department}}
+                </div>
 
                 <div>
                     <label for="receptor" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Receptor</label>
@@ -51,30 +59,15 @@
                    
                 </div>
 
-            </div>
-<!-- 
-                
-                <div class="flex">
-                    <div class="block">
-                    <label for="cantidad" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Cantidad</label>
-                    {{form.cantidad}}
-                </div>
-                   
-                
-
-                <div class="block">
-                    <label for="cantidad-neta" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Cantidad Neta</label>
-                    {{form.cantidadNeta}}
-                </div>
-                   
-                </div>
-
                 <div>
-                    <label for="receptor" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Subir Imágen</label>
-                    {{form.image}}
+                    <label for="receptor" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Solicitante</label>
+                    {{form.issuer}}
 
                    
-                </div> -->
+                </div>
+
+            </div>
+
                 
             <div class="max-w-4xl mt-10">
             <table id="productTable" class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
@@ -95,13 +88,13 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                    <!-- <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
                         <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                          
                            
                              <label for="productname" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"></label>
-                            <input type="text" id="productname"  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="John" required> 
-                            <input type="hidden" id="product_id">
+                            <input type="text" id="productname" +   class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="John" required> 
+                            
                         
                         </th>
                         <td class="px-6 py-4">
@@ -116,15 +109,21 @@
 
                         
 
-                    </tr>
+                    </tr> -->
                  
                 </tbody>
-                <td class="px-6 py-4">
-                    <button  id="btnAdd" class="inline-flex items-center px-3 py-1.5 mt-2 sm:mt-6 text-sm font-medium text-center text-white bg-primary-700 rounded-lg focus:ring-4 focus:ring-primary-200 dark:focus:ring-primary-900 hover:bg-primary-800">
-                        Add New Product
-                     </button>
-                </td>
+             
             </table>
+            <td class="px-6 py-4">
+                <button  id="add-product" class="inline-flex items-center px-3 py-1.5 mt-2 sm:mt-6 text-sm font-medium text-center text-white bg-primary-700 rounded-lg focus:ring-4 focus:ring-primary-200 dark:focus:ring-primary-900 hover:bg-primary-800">
+                    Add New Product
+                 </button>
+
+                 <button  id="remove-product" class="inline-flex items-center px-3 py-1.5 mt-2 sm:mt-6 text-sm font-medium text-center text-white bg-primary-700 rounded-lg focus:ring-4 focus:ring-primary-200 dark:focus:ring-primary-900 hover:bg-primary-800">
+                    Remove Product
+                 </button>
+
+            </td>
         </div>
 
                 
@@ -135,7 +134,7 @@
         </div>
             
             
-            <button type="submit" class="inline-flex items-center px-5 py-2.5 mt-4 sm:mt-6 text-sm font-medium text-center text-white bg-primary-700 rounded-lg focus:ring-4 focus:ring-primary-200 dark:focus:ring-primary-900 hover:bg-primary-800">
+            <button type="submit" id='nuevoIngreso' class="inline-flex items-center px-5 py-2.5 mt-4 sm:mt-6 text-sm font-medium text-center text-white bg-primary-700 rounded-lg focus:ring-4 focus:ring-primary-200 dark:focus:ring-primary-900 hover:bg-primary-800">
                 Confirma Ingreso
             </button>
         </div>
@@ -156,40 +155,176 @@
 
 <script>
 
-
-$('#btnAdd').click(function() {
-  
-    var name = $('<input class=bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500>').attr({ type: 'text', id: 'productname', name: 'name',
-    class : "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
-})
-
-    var barcode = $('<input class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">').attr({ type: 'text', id: 'barcode', name: 'barcode',
-    class : "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" })
-         
-    var internalCode = $('<input class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">').attr({ type: 'text', id: 'internalCode', name: 'internalcode',
-    class : "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" })
-         
-    var cantidad = $('<input class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">').attr({ type: 'text', id: 'cantidad', name: 'cantidad',
-    class : "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" })
-         
-
-    var markup = "<tr class=bg-white border-b dark:bg-gray-800 dark:border-gray-700><td class=px-6 py-4>" + name + "</td><td class=px-6 py-4>" + barcode + "</td><td class=px-6 py-4>" + internalCode + "</td><td class=px-6 py-4" +  cantidad + "</td></tr>";
-
-    $("#productTable tbody").append(markup);
-}
-)
+let form_count = Number($("[name=extra_field_count]").val());
+console.log('form_count is ', form_count)
+$("#add-product").click(function(event) {
+    
+    event.preventDefault()
+// get extra form count so we know what index to use for the next item
+    console.log(event.target.value)
+   
+    var table = document.getElementById('productTable')
+    var lastRow = table.rows[ table.rows.length - 1 ];
+    var product = lastRow.cells[0].firstElementChild
+    var quantity = lastRow.cells[3].firstElementChild
+    
+    console.log('product first Round', product)
+    console.log('quantity first Round', quantity)
 
 
-$(function () {
+    if (form_count >0) {
+        console.log('form_count', form_count)
 
-    $('#productname').autocomplete({
+        var table = document.getElementById('productTable')
+    var lastRow = table.rows[ table.rows.length - 1 ];
+    var product = lastRow.cells[0].firstElementChild.value
+    var quantity = lastRow.cells[3].firstElementChild.value
+    
+    console.log('product second Round', product)
+    console.log('quantity second Round', quantity)
+
+    if (product === '') {
+
+        alert('Ingresar un Nuevo Producto')
+        return
+    }
+
+    if (quantity === '') {
+
+    alert('Ingresar la cantidad comprada del Producto')
+            return
+    }
+
+    }
+
+
+    var newRow = document.getElementById('productTable').insertRow();
+
+    
+    var newCell = newRow.insertCell();
+
+    $("[name=extra_field_count]").val(form_count);
+    newCell.innerHTML=  `<tr><td><input type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" type="text" id="productname_${form_count}" name="product_${form_count}" placeholder="producto" required></td></tr>`;
+
+    newCell = newRow.insertCell();
+    newCell.innerHTML=`<tr><td><input type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" type='text' id="barcode_${form_count}" name="barcode_${form_count}" placeholder="barcode" required></td></tr>`;
+
+    newCell = newRow.insertCell();
+    newCell.innerHTML=`<tr><td><input type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" type='text' id="internal-code_${form_count}" name="internalCode_${form_count}" placeholder="internalCode" required></td></tr>`;
+
+    newCell = newRow.insertCell();
+    newCell.innerHTML= `<tr><td><input type = "number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" type='text' id="cantidad_${form_count}" name="cantidad_${form_count}" placeholder="cantidad" required></td></tr>`; 
+
+    $(`#productname_${form_count}`).autocomplete({
         source: '{% url "autocomplete-name" %}',
         minLength:1,
         select: function(event, ui) {
-                     console.log(ui)
-                 $('#productname').val(ui.item.value)
+                    //  console.log(ui)
+                 $(`#productname_${form_count}`).val(ui.item.value)
+
+                let product = ui.item.value
+                console.log('product',product)
+                var dataLS = JSON.parse(localStorage.getItem('products'))
+
+                // console.log('dataLS', dataLS)
+
+                // console.log('productSelected', dataLS[String(product)])
+
+                var productId = dataLS[product]
+
+                console.log('productId',productId)
+
+                request_url = '/product/' + productId + '/';
+                $.ajax({
+                    url: request_url,
+                    success: function(data){
+                        console.log('data.product',data.product)
+                    let barcode = data.product[0][0]
+                    let internalCode = data.product[0][1]
+                     console.log(barcode)
+
+                     console.log(internalCode)
+                     console.log('form_count is', form_count)
+                    $(`#barcode_${form_count -1}`).val(barcode)
+                    $(`#internal-code_${form_count -1 }`).val(internalCode)
+//             $('productname').attr('')
+           }
+        });
+
     }})
+
+    form_count ++;
+
+
 })
+
+$("#remove-product").click(function(event) {
+
+    event.preventDefault()
+    var table = document.getElementById('productTable')
+    var lastRow = table.rows[ table.rows.length - 1 ];
+
+
+    lastRow.remove()
+    form_count --;
+
+
+})
+
+
+//  $(`#productname_${form_count}`).(function(){
+   
+//    product = $(this).val();
+//    console.log('product es', product)
+//    product_ = $(`#productname_${form_count}`).val()
+//    console.log(product_)
+//    console.log('product in front is:', product)
+
+//   var dataLS = JSON.parse(localStorage.getItem('products'))
+
+//   console.log('dataLS', dataLS)
+
+//   console.log('productSelected', dataLS[String(product)])
+
+//   var product = dataLS[product]
+//    request_url = '/product/' + product + '/';
+//        $.ajax({
+//            url: request_url,
+//            success: function(data){
+//                let barcode = data.product[0][0]
+//                let internalCode = data.product[0][1]
+//                console.log(barcode)
+
+//                console.log(internalCode)
+//                console.log('form_count is', form_count)
+//                $(`#barcode_${form_count}`).val(barcode)
+//                $(`#internal-code_${form_count}`).val(internalCode)
+//   //             $('productname').attr('')
+    
+//              }
+//           });
+          
+//       })
+      
+      
+     
+//   // let name = $('<input type="text"/>').attr({id: 'productname', name: 'product' + form_count,
+//   //  class : "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
+// })
+
+    
+// $('#nuevoIngreso').click(function() {
+//     console.log('form_count antes', form_count)
+//      form_count = 0 //Number($("[name=extra_field_count]").val());
+
+//   //   document.getElementById("nuevoIngresoInitNumber").value = "0";
+//     console.log('form_count despues', form_count)
+
+//     })
+
+// .find('input[name^="name"]').
+
+
 
 
 
@@ -224,11 +359,11 @@ $(function () {
             url: `/products/`,
         type: 'get', 
         success: function(data) {
-            console.log(data.products)
+            // console.log(data.products)
 
-            console.log('llega aca')
+            // console.log('llega aca')
 
-            console.log(data.products)
+            // console.log(data.products)
 
             localStorage.setItem('products', JSON.stringify(data.products))
           //  for (let i = 0 ; i< data.products.length ; i++) {
@@ -238,37 +373,39 @@ $(function () {
         }
     })
     
- $('#productname').change(function(){
-     product = $(this).val();
-     product_ = $('#productname').val()
-     console.log(product_)
-     console.log('product in front is:', product)
+//  $(`#productname_${form_count}`).change(function(){
+   
+//      product = $(this).val();
+//      console.log('product es', product)
+//      product_ = $(`#productname_${form_count}`).val()
+//      console.log(product_)
+//      console.log('product in front is:', product)
 
-    var dataLS = JSON.parse(localStorage.getItem('products'))
+//     var dataLS = JSON.parse(localStorage.getItem('products'))
 
-    console.log('dataLS', dataLS)
+//     console.log('dataLS', dataLS)
 
-    console.log('productSelected', dataLS[String(product)])
+//     console.log('productSelected', dataLS[String(product)])
 
-    var product = dataLS[product]
-     request_url = '/product/' + product + '/';
-         $.ajax({
-             url: request_url,
-             success: function(data){
-                 let barcode = data.product[0][0]
-                 let internalCode = data.product[0][1]
-                 console.log(barcode)
+//     var product = dataLS[product]
+//      request_url = '/product/' + product + '/';
+//          $.ajax({
+//              url: request_url,
+//              success: function(data){
+//                  let barcode = data.product[0][0]
+//                  let internalCode = data.product[0][1]
+//                  console.log(barcode)
 
-                 console.log(internalCode)
+//                  console.log(internalCode)
 
-                 $('#barcode').val(barcode)
-                 $('#internal-code').val(internalCode)
-    //             $('productname').attr('')
+//                  $(`#barcode_${form_count}`).val(barcode)
+//                  $(`#internal-code_${form_count}`).val(internalCode)
+//     //             $('productname').attr('')
       
-               }
-            });
+//                }
+//             });
             
-        })       
+//         })       
 
 
 

@@ -21,8 +21,8 @@ from django.views import generic
 from annoying.functions import get_object_or_None
 from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
 
-from .forms import SignUpForm , InboundForm, OutboundOrderForm, OutboundDeliveryForm
-from .models import CustomUser, StockMovements, DiffProducts, Product, Warehouses
+from .forms import SignUpForm , InboundForm, OutboundOrderForm, OutboundDeliveryForm, InboundReceptionForm
+from .models import CustomUser, StockMovements, DiffProducts, Product, Warehouses, Tasks
 from django.core.cache import cache
 
 # Create your views here.
@@ -73,6 +73,7 @@ def getProducts(request):
 
 def getProductsNames(request):
     
+    print('autocomplete', request.GET.get('term'))
     if 'term' in request.GET:
         qs = Product.objects.filter(name__istartswith=request.GET.get('term'))
         titles = []
@@ -101,68 +102,151 @@ def getProduct(request, productId):
 def inboundView(request):
 
     productNames = Product.objects.values_list('name', flat=True)
+    print('extra_Field_count', request.POST.get('extra_field_count'))
+    numberOfProducts = request.POST.get('extra_field_count')
+
+    nuevoIngreso = StockMovements()
     # if this is a POST request we need to process the form data
     if request.method == "POST":
-        # create a form instance and populate it with data from the request:
-        form = InboundForm(request.POST, request.FILES)
-        # check whether it's valid:
+        # # create a form instance and populate it with data from the request:
+        form = InboundForm(request.POST, request.FILES, extra = request.POST.get('extra_field_count'))
+        # # check whether it's valid:
         print('form is valid', form.is_valid())
-
-        product = request.POST.get('product')
-        print('product in view is', product)
-        # print(form.cleaned_data['product'])
+       # print('form is', form)
+        # product = request.POST.get('product')
+        # print('product in view is', product)
+        # # print(form.cleaned_data['product'])
         if form.is_valid():
-            # process the data in form.cleaned_data as 
-            product = form.cleaned_data['product']
+        #     # process the data in form.cleaned_data as 
+        #     product = form.cleaned_data['product']
             date  =   datetime.today().strftime('%Y-%m-%d')
+           # print('form is:', form)
+
+        #     print(product)
+        #     print(date)
             
-            print(product)
-            print(date)
             receptor = form.cleaned_data['receptor']
             warehouse = form.cleaned_data['warehouse']
-            cantidad = form.cleaned_data['cantidad']
-            cantidadNeta = form.cleaned_data['cantidadNeta']
-            deltaDiff =  cantidadNeta - cantidad
+            solicitante = form.cleaned_data['issuer']
+            department = form.cleaned_data['department']
+        #     cantidad = form.cleaned_data['cantidad']
+        #     cantidadNeta = form.cleaned_data['cantidadNeta']
+        #     deltaDiff =  cantidadNeta - cantidad
             motivoIngreso = form.cleaned_data['motivoIngreso']
             actionType = 'Nuevo Ingreso'
+          #  product = form.cleaned_data['product_23']
+         #   print('product_23 is {}'.format(product))
 
-            print('cantidad in view is:', cantidad)
-
-            StockMovements.objects.create(product = product, date=date, receptor=receptor,
-                                        warehouse=warehouse, actionType = actionType,
-                                        cantidad=cantidad, cantidadNeta=cantidadNeta,
-                                        motivoIngreso=motivoIngreso)
-
-            productToUpdate= Product.objects.filter(product_id=product.product_id, warehouse=warehouse)
+            print('number of Products in form is {}'.format(numberOfProducts))
+            datalist = []
+            task = Tasks.objects.create(date= date, receptor= receptor, warehouse= warehouse, issuer=solicitante,
+                                        motivoIngreso=motivoIngreso,  actionType=actionType, department=department)
             
-            print('productToUpdate is:', productToUpdate)
+            for i in range(0,int(numberOfProducts) + 1):
 
-            productToUpdate.update(quantity = F('quantity') + cantidadNeta)
-
-            # Product.objects.update(name=product.name, warehouse=warehouse, quantity = F('quantity') + cantidadNeta,
-            #                     deltaQuantity = F('deltaQuantity') + deltaDiff)
-            
-            productInWH = DiffProducts.objects.filter(warehouse=warehouse,product=product)
-
-            if productInWH.exists():
-                productInWH.update(totalPurchase= F('totalPurchase') + cantidad, 
-                                        totalQuantity= F('totalQuantity') + cantidadNeta,
-                                        productDiff=F('productDiff') + deltaDiff )
-            else:
+                product = form.cleaned_data['product_{}'.format(i)]
+                newproduct = Product.objects.get(name= product)
                 
-                DiffProducts.objects.create(product = product, warehouse=warehouse, totalPurchase=cantidad, 
-                                        totalQuantity=cantidadNeta, productDiff= deltaDiff)
+                # nuevoIngreso.barcode = form.cleaned_data['barcode_{}'.format(i)]
+                # nuevoIngreso.internalCode = form.cleaned_data['internalCode_{}'.format(i)]
+                quantity = form.cleaned_data['cantidad_{}'.format(i)]
+
+                print('product is:', product)
+                print('quantity is:', quantity)
+
+                newProduct = StockMovements(product = newproduct, 
+                             actionType = actionType,
+                                         cantidad= quantity, task = task )
+                
+                datalist.append(newProduct)
+            print('new_product is:', datalist)
+
+            StockMovements.objects.bulk_create(datalist)
+
+
+        #     print('cantidad in view is:', cantidad)
+
+        #     StockMovements.objects.create(product = product, date=date, receptor=receptor,
+        #                                 warehouse=warehouse, actionType = actionType,
+        #                                 cantidad=cantidad, cantidadNeta=cantidadNeta,
+        #                                 motivoIngreso=motivoIngreso)
+
+        #     productToUpdate= Product.objects.filter(product_id=product.product_id, warehouse=warehouse)
+            
+        #     print('productToUpdate is:', productToUpdate)
+
+        #     productToUpdate.update(quantity = F('quantity') + cantidadNeta)
+
+        #     # Product.objects.update(name=product.name, warehouse=warehouse, quantity = F('quantity') + cantidadNeta,
+        #     #                     deltaQuantity = F('deltaQuantity') + deltaDiff)
+            
+        #     productInWH = DiffProducts.objects.filter(warehouse=warehouse,product=product)
+
+        #     if productInWH.exists():
+        #         productInWH.update(totalPurchase= F('totalPurchase') + cantidad, 
+        #                                 totalQuantity= F('totalQuantity') + cantidadNeta,
+        #                                 productDiff=F('productDiff') + deltaDiff )
+        #     else:
+                
+        #         DiffProducts.objects.create(product = product, warehouse=warehouse, totalPurchase=cantidad, 
+        #                                 totalQuantity=cantidadNeta, productDiff= deltaDiff)
 
             # ...
             # redirect to a new URL:
-            #return HttpResponseRedirect("/thanks/")
+            #return http.HttpResponseRedirect('')
+            return HttpResponseRedirect("/inbound/")
 
     # if a GET (or any other method) we'll create a blank form
     else:
+        
         form = InboundForm()
 
-    return render(request, "inbound.html", {"form": form, "products" :productNames})
+    return render(request, "inbound.html", {"form": form}) #, "products" :productNames})
 
+def inboundReceptionView(request, requested_id):
+
+    pendingTask = get_object_or_None(Tasks, pk=requested_id)
+    print('request is:', request.method)
+    print('request product data', request.POST.get('product'))
+    product = request.POST.get('product')
+    issuer = request.POST.get('issuer')
+    productsToReceive = pendingTask.stockmovements_set.all().values()
+    #task = Tasks.objects.filter(task_id = requested_id)
+    tasks = Tasks.objects.filter(task_id=requested_id).prefetch_related('stockmovements_set')
+
+     # if this is a POST request we need to process the form data
+    if request.method == "POST":
+        
+        form = InboundReceptionForm(request.POST, instance= pendingTask)
+
+        print('form is valid', form.is_valid())
+        #print('form is', form)
+
+        # check whether it's valid:
+        if form.is_valid():
+            print('el form es valido')
+            product = form.cleaned_data['product']
+            date  =   form.cleaned_data['date']
+            
+            print(product)
+            print(date)
+            department = form.cleaned_data['department']
+            issuer = form.cleaned_data['issuer']
+            cantidad = form.cleaned_data['cantidad']
+            actionType = 'Nueva Solicitud'
+            motivoEgreso = form.cleaned_data['motivoEgreso']
+            
+            StockMovements.objects.create(product = product, date=date, department=department,
+                                        issuer=issuer, actionType = actionType, cantidad=cantidad,
+                                        motivoEgreso=motivoEgreso,status='Pending')
+            
+    else:
+       # form = OutboundOrderForm()
+        form = InboundReceptionForm(instance= pendingTask ,
+                                    initial={"task_id": requested_id })
+        #form.task.queryset = Tasks.objects.filter(task_id = requested_id) 
+        
+    return render(request, "inboundReception.html", {"form": form, "tasks": tasks, "numberOfProducts": len(productsToReceive)})
 
 def outboundOrderView(request):
     print('request is:', request.method)
@@ -204,13 +288,13 @@ def outboundOrderView(request):
 
 class TaskListView(generic.ListView):
     template_name = 'tasks.html'
-    model = StockMovements
+    model = Tasks
 
     
     
 
     def get_queryset(self) -> QuerySet[Any]:
-        self.tasks = StockMovements.objects.filter(status='Pending' , actionType='Nueva Solicitud')
+        self.tasks = Tasks.objects.filter(status='Pending') # , actionType='Nueva Solicitud')
 
         return self.tasks
     def get_context_data(self, **kwargs):
@@ -248,16 +332,19 @@ class StockListView(generic.ListView):
         return context
     
 def outboundDeliveryView(request, requested_id):
-    pendingRequest = get_object_or_None(StockMovements, pk=requested_id)
-    print('pendingRequest product is:', pendingRequest.product)
-
-
+   # pendingRequest = get_object_or_None(StockMovements, pk=requested_id)
+    #print('pendingRequest product is:', pendingRequest.product)
+    pendingTask = get_object_or_None(Tasks, pk=requested_id)
+    
+    task = Tasks.objects.filter(task_id=requested_id)[0]
+    productsToRecibe = task.stockmovements_set.all()
+    print('pendingTask products', pendingTask.stockmovements_set.all().values())
     print('requested_id is:', requested_id)
      # if this is a POST request we need to process the form data
     if request.method == "POST":
         #print('request product data', request.POST.get('product'))
         # create a form instance and populate it with data from the request:
-        form = OutboundDeliveryForm(request.POST, instance= pendingRequest)
+        form = OutboundDeliveryForm(request.POST, instance= pendingTask)
 
         print('form is valid:' , form.is_valid)
         # check whether it's valid:
@@ -306,7 +393,8 @@ def outboundDeliveryView(request, requested_id):
 
     # if a GET (or any other method) we'll create a blank form
     else:
-        form = OutboundDeliveryForm(instance= pendingRequest)
+        form = OutboundDeliveryForm(instance= pendingTask ,
+                                    initial={"products": pendingTask.stockmovements_set.all().values() })
         
 
     return render(request, "outboundDelivery.html", {"form": form , 'task_id': requested_id })

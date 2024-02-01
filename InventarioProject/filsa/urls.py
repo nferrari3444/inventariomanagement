@@ -1,12 +1,13 @@
 from django.urls import path, include
 from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
-from .views import index, inboundView, getProducts, getProduct, getProductsNames, outboundDeliveryView, outboundOrderView, finishTask, TaskListView, StockListView, StockHistoryView
+from .views import index, inboundView, getProducts, getProduct, getProductsNames, outboundDeliveryView, outboundOrderView, finishTask, inboundReceptionView, TaskListView, StockListView, StockHistoryView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', index, name='index'),
     path('inbound/', inboundView, name='inbound'),
+    path('inbound-reception/<int:requested_id>', inboundReceptionView, name='inboundreception'),
     path('outbound-order/', outboundOrderView, name='outboundorder'),
     path('outbound-delivery/<int:requested_id>', outboundDeliveryView, name='outbounddelivery'),
     path('finishtask/<int:requested_id>', finishTask,  name='finishtask'),
