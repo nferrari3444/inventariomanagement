@@ -10,8 +10,10 @@
 <section class="bg-white dark:bg-gray-900">
     <div class="py-8 px-4 mx-auto max-w-2xl lg:py-16">
         <h2 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">Recepción de Producto</h2>
-        <form action="{% url 'outboundorder' %}" method="POST">
+        <form id ='productsreception' action="{% url 'inboundreception' task_id %}" method="POST">
             {% csrf_token %}
+
+            {{form.extra_field_count}}
             <div class="grid gap-4 sm:grid-cols-2 sm:gap-6">
               
                 <div class="w-full">
@@ -51,10 +53,6 @@
                    
                 </div>
 
-            
-                   
-                
-                
                 <div>
                 <label for="departamento" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Departamento</label>
                     
@@ -73,7 +71,7 @@
                 
 
                  <div>          
-                 <table class="py-8 px-4 max-w-4xl lg:py-16 text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                 <table id="productTable" class="py-8 px-4 max-w-4xl lg:py-16 text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
                     <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                         <tr>
                             
@@ -122,6 +120,22 @@
 
   <script>
 
+let form_count = Number($("[name=extra_field_count]").val());
+
+$('#productsreception').submit(function(e) {
+
+   // e.preventDefault()
+
+    var table = document.getElementById('productTable')
+    
+    form_count = table.rows.length -1;
+
+    console.log('form_count', form_count)
+    $("[name=extra_field_count]").val(form_count);
+})
+    
+
+    
 
     </script>
 

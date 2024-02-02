@@ -97,7 +97,7 @@ class InboundForm(forms.ModelForm):
 
 
 class InboundReceptionForm(forms.ModelForm):
-
+    extra_field_count = forms.CharField(widget=forms.HiddenInput())
     # receptor = ModelChoiceField(queryset=CustomUser.objects.all()
     #                                    ,widget=forms.Select(attrs={
     #                                       'class': "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500",
@@ -126,19 +126,22 @@ class InboundReceptionForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         
+        extra_fields = kwargs.pop('extra',0)
+        print('extra_fields', extra_fields)
         
         super(InboundReceptionForm, self).__init__(*args, **kwargs)
+        self.fields['extra_field_count'].initial = extra_fields
+        print('kwargs is :', kwargs)
+      #  task_id =  kwargs['initial']['task_id']
 
-        print('kwargs is :', kwargs['initial']['task_id'])
-        task_id =  kwargs['initial']['task_id']
-
-        task = Tasks.objects.filter(task_id=task_id).prefetch_related('stockmovements_set')
-        print('task in form', task)
+      #  task = Tasks.objects.filter(task_id=task_id).prefetch_related('stockmovements_set')
+       # print('task in form', task)
         
-        print('stockmovements in task in form', task[0].stockmovements_set.all().count())
+       # print('stockmovements in task in form', task[0].stockmovements_set.all().count())
        # numberOfProducts = self.instance.stockmovements_set.all()
-        numberOfProducts = task[0].stockmovements_set.all().count() 
+       # numberOfProducts = task[0].stockmovements_set.all().count() 
      #   self.fields['task'].queryset = Tasks.objects.filter(task_id=task_id)  #self.instance
+        numberOfProducts = 2
         print('self.instance is:', self.instance)
         self.fields['department'].widget.attrs.update({'class':'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 flex w-1/2 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500', 'disabled':True }) #= self.instance.department
         self.fields['motivoIngreso'].widget.attrs.update({'class':'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 flex w-1/2 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500', 'disabled':True })    #widget.value_from_datadict = self.instance.motivoIngreso
@@ -147,10 +150,10 @@ class InboundReceptionForm(forms.ModelForm):
         self.fields['issuer'].widget.attrs.update({'class':'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 flex w-1/2 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500', 'disabled':True }) #    .widget.value_from_datadict = self.instance.issuer
         self.fields['date'].widget.attrs.update({'class':'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 flex w-1/2 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500', 'disabled':True }) #    .widget.value_from_datadict = self.instance.issuer
         
-        for i in range(numberOfProducts +1):
+        for i in range(int(extra_fields) +1):
             field_name = 'producto_%s' % (i,)
             quantity = 'cantidad_%s' % (i,)
-            netQuantity = 'cantidadNeta_%' % (i,)
+            netQuantity = 'cantidadNeta_%s' % (i,)
 
             self.fields[field_name] = forms.CharField()
             self.fields[quantity] = forms.CharField()

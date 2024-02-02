@@ -214,10 +214,12 @@ def inboundReceptionView(request, requested_id):
     #task = Tasks.objects.filter(task_id = requested_id)
     tasks = Tasks.objects.filter(task_id=requested_id).prefetch_related('stockmovements_set')
     print('tasks', tasks)
+
+    numberOfProducts = request.POST.get('extra_field_count')
      # if this is a POST request we need to process the form data
     if request.method == "POST":
         
-        form = InboundReceptionForm(request.POST, instance= pendingTask)
+        form = InboundReceptionForm(request.POST, instance= pendingTask, extra= request.POST.get('extra_field_count'))
 
         print('form is valid', form.is_valid())
         #print('form is', form)
@@ -232,13 +234,55 @@ def inboundReceptionView(request, requested_id):
             print(date)
             department = form.cleaned_data['department']
             issuer = form.cleaned_data['issuer']
-            cantidad = form.cleaned_data['cantidad']
-            actionType = 'Nueva Solicitud'
-            motivoEgreso = form.cleaned_data['motivoEgreso']
+            receptor = form.cleaned_data['receptor']
+            warehouse = form.cleaned_data['warehouse']
+            actionType = 'Recepcion Solicitud'
+            motivoIngreso = form.cleaned_data['motivoIngreso']
             
-            StockMovements.objects.create(product = product, date=date, department=department,
-                                        issuer=issuer, actionType = actionType, cantidad=cantidad,
-                                        motivoEgreso=motivoEgreso,status='Pending')
+            # StockMovements.objects.create(product = product, date=date, department=department,
+            #                             issuer=issuer, actionType = actionType, cantidad=cantidad,
+            #                             motivoEgreso=motivoIngreso,status='Pending')
+            
+            datalist = []
+            # task = Tasks.objects.create(date= date, receptor= receptor, warehouse= warehouse, issuer= issuer,
+            #                             motivoIngreso=motivoIngreso,  actionType=actionType, department=department)
+            
+            taskToUpdate = Tasks.objects.filter(task_id=requested_id)
+            taskToUpdate.update(status='Confirmed')
+            
+            
+            for i in range(0,int(numberOfProducts) + 1):
+
+                product = form.cleaned_data['product_{}'.format(i)]
+                newproduct = Product.objects.get(name= product)
+                
+                # nuevoIngreso.barcode = form.cleaned_data['barcode_{}'.format(i)]
+                # nuevoIngreso.internalCode = form.cleaned_data['internalCode_{}'.format(i)]
+                quantity = form.cleaned_data['cantidad_{}'.format(i)]
+                netQuantity = form.cleaned_data['cantidadNeta_{}'.format(i)]
+
+                diffQuantity = quantity - netQuantity
+                print('product is:', product)
+                print('quantity is:', quantity)
+
+                productToUpdate= Product.objects.filter(product_id= newproduct.product_id, warehouse=warehouse)
+            
+                print('productToUpdate is:', productToUpdate)
+
+                productToUpdate.update(quantity = F('quantity') + netQuantity, deltaQuantity = F('deltaQuantity') - diffQuantity  )
+            
+
+                newProduct = StockMovements(product = newproduct, 
+                             actionType = actionType,
+                                         cantidad= quantity, cantidadNeta=netQuantity, task = taskToUpdate )
+                
+                datalist.append(newProduct)
+            print('new_product is:', datalist)
+
+            StockMovements.objects.bulk_create(datalist)     
+
+
+            return redirect('/tasks/')
             
     else:
        # form = OutboundOrderForm()
@@ -246,7 +290,7 @@ def inboundReceptionView(request, requested_id):
                                     initial={"task_id": requested_id })
         #form.task.queryset = Tasks.objects.filter(task_id = requested_id) 
         
-    return render(request, "inboundReception.html", {"form": form, "tasks": tasks, "numberOfProducts": len(productsToReceive)})
+    return render(request, "inboundReception.html", {"form": form, 'task_id': requested_id , "tasks": tasks, "numberOfProducts": len(productsToReceive)})
 
 def outboundOrderView(request):
     print('request is:', request.method)
@@ -373,7 +417,8 @@ def outboundDeliveryView(request, requested_id):
 
             productToUpdate.update(quantity = F('quantity') - cantidadEntregada, deltaQuantity = F('deltaQuantity') + diffQuantity  )
             
-
+            # Antes estaba esta linea porque la tarea estaba para un producto y el StockMovement
+            # también.    
             StockMovements.objects.filter(id=requested_id).update(status='Confirmed')
             #taskToConfirm = StockMovements.objects.filter(id=requested_id)
             #print('taskToConfirm is:', taskToConfirm)
