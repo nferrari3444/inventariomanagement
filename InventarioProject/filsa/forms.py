@@ -136,10 +136,12 @@ class InboundReceptionForm(forms.ModelForm):
 
       #  task = Tasks.objects.filter(task_id=task_id).prefetch_related('stockmovements_set')
        # print('task in form', task)
-        
+        #productsToReceive = pendingTask.stockmovements_set.all().values()
        # print('stockmovements in task in form', task[0].stockmovements_set.all().count())
-       # numberOfProducts = self.instance.stockmovements_set.all()
-       # numberOfProducts = task[0].stockmovements_set.all().count() 
+        products = self.instance.stockmovements_set.all()
+        #print('products in form are {}'.format(products))
+
+        # numberOfProducts = task[0].stockmovements_set.all().count() 
      #   self.fields['task'].queryset = Tasks.objects.filter(task_id=task_id)  #self.instance
         numberOfProducts = 2
         print('self.instance is:', self.instance)
@@ -150,15 +152,87 @@ class InboundReceptionForm(forms.ModelForm):
         self.fields['issuer'].widget.attrs.update({'class':'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 flex w-1/2 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500', 'disabled':True }) #    .widget.value_from_datadict = self.instance.issuer
         self.fields['date'].widget.attrs.update({'class':'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 flex w-1/2 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500', 'disabled':True }) #    .widget.value_from_datadict = self.instance.issuer
         
-        for i in range(int(extra_fields) +1):
-            field_name = 'producto_%s' % (i,)
-            quantity = 'cantidad_%s' % (i,)
-            netQuantity = 'cantidadNeta_%s' % (i,)
+        self.fields['department'].widget.value_from_datadict = lambda *args: self.instance.department
+        self.fields['motivoIngreso'].widget.value_from_datadict = lambda *args: self.instance.motivoIngreso
+        self.fields['date'].widget.value_from_datadict = lambda *args: self.instance.date
+        self.fields['warehouse'].widget.value_from_datadict = lambda *args: self.instance.warehouse
+        self.fields['receptor'].widget.value_from_datadict = lambda *args: self.instance.receptor
 
+        i = 0
+        for i , product in enumerate(products):
+            #print('product is', product)
+
+            field_name = 'producto_{}'.format(i)
+            quantity = 'cantidad_{}'.format(i)
+            netQuantity = 'cantidadNeta_{}'.format(i)
+            # print('product in form is {}'.format(product))
+
+            # print('product name in form is {}'.format(product.product.name))
+            # print('product cantidad in form is {}'.format(product.cantidad))
+            
             self.fields[field_name] = forms.CharField()
-            self.fields[quantity] = forms.CharField()
+            self.fields[quantity] =  forms.CharField()
             self.fields[netQuantity] = forms.CharField()
 
+            self.fields[field_name].widget.attrs.update({'class':'bg-gray-150 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 flex w-1/2 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500', 'disabled':True }) #    .widget.value_from_datadict = self.instance.issuer
+            self.fields[field_name].widget.value_from_datadict = lambda *args: product.product.name
+
+            self.fields[quantity].widget.attrs.update({'type':'number' , 'class':'bg-gray-150 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 flex w-1/2 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500', 'disabled':True }) #    .widget.value_from_datadict = self.instance.issuer
+            self.fields[quantity].widget.value_from_datadict = lambda *args: int(product.cantidad)
+            
+            # try:
+            #     print('product name in form is', product.product.name)
+            #     print('quantity product in form is', product.cantidad)
+            #     self.initial[field_name] = product.product.name
+            #     self.initial[quantity] = product.cantidad
+                
+    
+            #     #self.initial[field_name] = product.product.name
+            #     #self.initial[quantity] = product.cantidad
+            # except IndexError:
+          ##      print('llega aca')
+             #   self.initial[field_name] = ""
+            
+            # print('self.initial[field_name]', self.fields[field_name])
+            # print('self.initial[quantity]', self.fields[quantity])
+
+            # i+=1
+
+    # def extra_answers(self):
+    #     for name, value in self.cleaned_data.items():
+    #         if name.startswith('producto_'):
+    #             yield (self.fields[name].label, value)
+    # def get_products_fields(self):
+    # #     data_to_render = []
+    # #     i = 0
+    #     for name, value in self.cleaned_data.items():
+    #         print('name is', name)
+    #         print('value is', value)
+    #         if name.startswith('producto_'):
+    #             yield (self.fields[name].label, value)
+    #     for field_name in self.fields:
+    #         #print('field_name is {}'.format(field_name))
+    #         if field_name.startswith('producto_')  :
+    #             print('self[field_name] in get_products_fields', self[field_name])
+    #             #yield self.initial[field_name] 
+    #             product = self.initial[field_name]
+                
+    #         if field_name.startswith('cantidad_'):
+    #             quantity = self.initial[field_name]
+    #             #yield producto
+    #             i +=1
+    #         data_to_render.append(product,quantity)
+    #     return set(data_to_render)
+                
+    #         if field_name.startswith('cantidad_'):
+    #             yield self[field_name]
+
+        # for i in range(int(extra_fields)):
+        #     field_name = 'producto_%s' % (i,)
+        #     quantity = 'cantidad_%s' % (i,)
+        #     netQuantity = 'cantidadNeta_%s' % (i,)
+        #     print('i and product number are {} {}'.format(i,field_name,netQuantity))
+          
         #self.fields['cantidad'] = self.instance.stockmovements_set.values_list('cantidad',flat=True)
         #self.fields['products'] = [self.instance.stockmovements_set.all()[i].product.name for i in range(0,len(numberOfProducts))]
         #self.fields['products'] = self.instance.stockmovements_set.all()
@@ -176,6 +250,9 @@ class InboundReceptionForm(forms.ModelForm):
     def save(self, *args, **kwargs):
       
         meal = super(InboundReceptionForm, self).save(*args, **kwargs)
+
+        print('meal is ', meal)
+
         return meal
 
 ### OutboundOrder Form

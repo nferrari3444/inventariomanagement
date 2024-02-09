@@ -1,0 +1,10 @@
+Nombre,Correo,Contraseña,Deparamento,Rol
+Nicolas Ferrari,nicolas1984,nferrari3444@gmail.com,Taller,Supervisor
+Javier Bonetti,javier1984, jbonetti4050@gmail.com,Administracion,Administrador
+Natalie Pailos,natalie1984, pailosnatalie@gmail.com,Administracion,Administrador
+Juan Lopez,juan1984, jlopez5000@gmail.com,Logística,Operador
+Diego Perez, diego1984, diego.perez55@gmail.com,Ventas,Supervisor
+Federico Garcia, federico1984, federico.gar20@gmail.com,Logística,Operador
+Pablo Alvarez,pablo1984, palvarez40@gmail.com,Taller,Operador
+Martín Cruz, martin1984, mcruz2024@gmail.com,Administracion,Supervisor
+Paula Suarez,paula1984, p_suarez2022@gmail.com,Taller,Operador

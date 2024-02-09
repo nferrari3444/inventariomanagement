@@ -8,11 +8,13 @@ class CustomUser(AbstractUser):
              ('Supervisor','Supervisor')]
     
     DEPARTMENT = [('Ventas','Ventas'),
-                ('Planta Armado', 'Planta Armado'),
-                ('Administración', 'Administraicón'),
-                ('Servicio Técnico', 'Servicio Técnico'),
+                
+                ('Dirección', 'Dirección'),
+                ('Administración', 'Administración'),
+                ('Taller', 'Taller'),
                 ('Logística','Logística')
                 ]
+  
     
     username = models.CharField(max_length=50)
     password = models.CharField(max_length=50)

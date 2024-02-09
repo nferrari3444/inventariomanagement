@@ -207,13 +207,19 @@ def inboundReceptionView(request, requested_id):
 
     pendingTask = get_object_or_None(Tasks, pk=requested_id)
     print('request is:', request.method)
-    print('request product data', request.POST.get('product'))
+    print('request product data', request.POST.get('product_0'))
     product = request.POST.get('product')
     issuer = request.POST.get('issuer')
     productsToReceive = pendingTask.stockmovements_set.all().values()
     #task = Tasks.objects.filter(task_id = requested_id)
     tasks = Tasks.objects.filter(task_id=requested_id).prefetch_related('stockmovements_set')
-    print('tasks', tasks)
+    #tasks_2 = Tasks.objects.filter(task_id=requested_id).select_related('stockmovements_set')
+    # for task in tasks:
+    #     for product in task.stockmovements_set.all():
+    #         print(product.product.name)
+    #         print(product.cantidad)
+    #print('tasks in view', tasks[0])
+    #print('tasks_2 in view', tasks_2[0])
 
     numberOfProducts = request.POST.get('extra_field_count')
      # if this is a POST request we need to process the form data
@@ -222,16 +228,17 @@ def inboundReceptionView(request, requested_id):
         form = InboundReceptionForm(request.POST, instance= pendingTask, extra= request.POST.get('extra_field_count'))
 
         print('form is valid', form.is_valid())
-        #print('form is', form)
+      #  print('form is', form)
+        print('form fields are', form.cleaned_data)
 
         # check whether it's valid:
         if form.is_valid():
             print('el form es valido')
-            product = form.cleaned_data['product']
-            date  =   form.cleaned_data['date']
+           #product = form.cleaned_data['product']
+           # date  =   form.cleaned_data['date']
             
-            print(product)
-            print(date)
+           # print(product)
+           # print(date)
             department = form.cleaned_data['department']
             issuer = form.cleaned_data['issuer']
             receptor = form.cleaned_data['receptor']
@@ -251,17 +258,21 @@ def inboundReceptionView(request, requested_id):
             taskToUpdate.update(status='Confirmed')
             
             
-            for i in range(0,int(numberOfProducts) + 1):
+            task = Tasks.objects.get(task_id=requested_id)
+            for i in range(0,int(numberOfProducts) ):
 
-                product = form.cleaned_data['product_{}'.format(i)]
+                product = form.cleaned_data['producto_{}'.format(i)]
+                print('product is {}'.format(product))
+
                 newproduct = Product.objects.get(name= product)
-                
+                print('new products in view is {}'.format(newproduct))
+
                 # nuevoIngreso.barcode = form.cleaned_data['barcode_{}'.format(i)]
                 # nuevoIngreso.internalCode = form.cleaned_data['internalCode_{}'.format(i)]
                 quantity = form.cleaned_data['cantidad_{}'.format(i)]
                 netQuantity = form.cleaned_data['cantidadNeta_{}'.format(i)]
 
-                diffQuantity = quantity - netQuantity
+                diffQuantity = int(quantity) - int(netQuantity)
                 print('product is:', product)
                 print('quantity is:', quantity)
 
@@ -274,7 +285,7 @@ def inboundReceptionView(request, requested_id):
 
                 newProduct = StockMovements(product = newproduct, 
                              actionType = actionType,
-                                         cantidad= quantity, cantidadNeta=netQuantity, task = taskToUpdate )
+                                         cantidad= quantity, cantidadNeta=netQuantity, task = task )
                 
                 datalist.append(newProduct)
             print('new_product is:', datalist)
