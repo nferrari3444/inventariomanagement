@@ -210,7 +210,7 @@ $("#add-product").click(function(event) {
     
     var newCell = newRow.insertCell();
 
-    $("[name=extra_field_count]").val(form_count);
+    
     newCell.innerHTML=  `<tr><td><input type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" type="text" id="productname_${form_count}" name="product_${form_count}" placeholder="producto" required></td></tr>`;
 
     newCell = newRow.insertCell();
@@ -261,7 +261,7 @@ $("#add-product").click(function(event) {
     }})
 
     form_count ++;
-
+    $("[name=extra_field_count]").val(form_count);
 
 })
 
@@ -274,89 +274,9 @@ $("#remove-product").click(function(event) {
 
     lastRow.remove()
     form_count --;
-
+    $("[name=extra_field_count]").val(form_count);
 
 })
-
-
-//  $(`#productname_${form_count}`).(function(){
-   
-//    product = $(this).val();
-//    console.log('product es', product)
-//    product_ = $(`#productname_${form_count}`).val()
-//    console.log(product_)
-//    console.log('product in front is:', product)
-
-//   var dataLS = JSON.parse(localStorage.getItem('products'))
-
-//   console.log('dataLS', dataLS)
-
-//   console.log('productSelected', dataLS[String(product)])
-
-//   var product = dataLS[product]
-//    request_url = '/product/' + product + '/';
-//        $.ajax({
-//            url: request_url,
-//            success: function(data){
-//                let barcode = data.product[0][0]
-//                let internalCode = data.product[0][1]
-//                console.log(barcode)
-
-//                console.log(internalCode)
-//                console.log('form_count is', form_count)
-//                $(`#barcode_${form_count}`).val(barcode)
-//                $(`#internal-code_${form_count}`).val(internalCode)
-//   //             $('productname').attr('')
-    
-//              }
-//           });
-          
-//       })
-      
-      
-     
-//   // let name = $('<input type="text"/>').attr({id: 'productname', name: 'product' + form_count,
-//   //  class : "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
-// })
-
-    
-// $('#nuevoIngreso').click(function() {
-//     console.log('form_count antes', form_count)
-//      form_count = 0 //Number($("[name=extra_field_count]").val());
-
-//   //   document.getElementById("nuevoIngresoInitNumber").value = "0";
-//     console.log('form_count despues', form_count)
-
-//     })
-
-// .find('input[name^="name"]').
-
-
-
-
-
-// $.ajax({
-//             url: '{% url "products" %}',
-//         type: 'get', 
-//         success: function(data) {
-//             console.log(data.products)
-
-//             var names = 
-//             $('#productname').autocomplete({
-//                source:  data.products,
-//                minLength: 1,
-//                select: function(event, ui) {
-//                     console.log(ui)
-//                 $('#productname').val(ui.item.value)
-
-//                }
-                         
-//               }
-//             )
-//             }
-
-//             })
-        
 
 
 
@@ -380,40 +300,6 @@ $("#remove-product").click(function(event) {
         }
     })
     
-//  $(`#productname_${form_count}`).change(function(){
-   
-//      product = $(this).val();
-//      console.log('product es', product)
-//      product_ = $(`#productname_${form_count}`).val()
-//      console.log(product_)
-//      console.log('product in front is:', product)
-
-//     var dataLS = JSON.parse(localStorage.getItem('products'))
-
-//     console.log('dataLS', dataLS)
-
-//     console.log('productSelected', dataLS[String(product)])
-
-//     var product = dataLS[product]
-//      request_url = '/product/' + product + '/';
-//          $.ajax({
-//              url: request_url,
-//              success: function(data){
-//                  let barcode = data.product[0][0]
-//                  let internalCode = data.product[0][1]
-//                  console.log(barcode)
-
-//                  console.log(internalCode)
-
-//                  $(`#barcode_${form_count}`).val(barcode)
-//                  $(`#internal-code_${form_count}`).val(internalCode)
-//     //             $('productname').attr('')
-      
-//                }
-//             });
-            
-//         })       
-
 
 
 

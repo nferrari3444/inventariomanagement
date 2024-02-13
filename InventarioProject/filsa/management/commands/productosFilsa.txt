@@ -3,7 +3,7 @@ Sal en pastillas,473567588,2386,Insumos,De Salt,Juanico,10000,48000,A1,3,False
 Filtro 10"x2.5" 1 micra,23412325,282,Insumos,Clack Corp.,Crocker 2652,50,316,O1,3,False
 Valvula Aut. WS1,6795679567,1833,Equipos,Clack Corp.,Anaya 2710,5,12,E1,3,False
 Anti incrustante,47845787478,2106,Insumos,AWC,Juanico,5,20,Z1,3,False
-Test peracético,6574568854745,7101,Insumos,RPC,Anaya 2710,50,200,M1,3,False
+Test peracetico,6574568854745,7101,Insumos,RPC,Anaya 2710,50,200,M1,3,False
 Membrana Toray 8"x40",2345234654,1634,Equipos,WPC,Anaya 2710,20,94,H1,3,False
 Lampara UV S36RL,587957890076,1027,Equipos,Luminor,Anaya 2710,15,25,C1,3,False
 Ozono CD10AD,26525624655,1500,Equipos,Clear Water Tech,Anaya 2710,2,5,B1,3,False

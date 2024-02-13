@@ -15,6 +15,7 @@ from django.utils.decorators import method_decorator
 from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
                                   UpdateView)
 import json
+from django.conf import settings
 from datetime import datetime
 from django.core import serializers
 from django.views import generic
@@ -24,7 +25,7 @@ from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
 from .forms import SignUpForm , InboundForm, OutboundOrderForm, OutboundDeliveryForm, InboundReceptionForm
 from .models import CustomUser, StockMovements, DiffProducts, Product, Warehouses, Tasks
 from django.core.cache import cache
-
+from django.core.mail import send_mail
 # Create your views here.
 
 class UserSignUpView(CreateView):
@@ -67,7 +68,7 @@ def getProducts(request):
     
     list_data = list(product_data)
     json_data = dict(list_data)
-    print(json_data)
+    print('json_data porducts is ', json_data)
 
     return JsonResponse({'products': json_data})
 
@@ -104,7 +105,7 @@ def inboundView(request):
     productNames = Product.objects.values_list('name', flat=True)
     print('extra_Field_count', request.POST.get('extra_field_count'))
     numberOfProducts = request.POST.get('extra_field_count')
-
+    print('number of products in Inbound View is {}'.format(numberOfProducts))
     nuevoIngreso = StockMovements()
     # if this is a POST request we need to process the form data
     if request.method == "POST":
@@ -142,9 +143,10 @@ def inboundView(request):
             task = Tasks.objects.create(date= date, receptor= receptor, warehouse= warehouse, issuer=solicitante,
                                         motivoIngreso=motivoIngreso,  actionType=actionType, department=department)
             
-            for i in range(0,int(numberOfProducts) + 1):
+            for i in range(0,int(numberOfProducts)):
 
                 product = form.cleaned_data['product_{}'.format(i)]
+                print('product in inbound view is {}'.format(product))
                 newproduct = Product.objects.get(name= product)
                 
                 # nuevoIngreso.barcode = form.cleaned_data['barcode_{}'.format(i)]
@@ -163,7 +165,17 @@ def inboundView(request):
 
             StockMovements.objects.bulk_create(datalist)
 
-
+            send_mail(
+                subject='Nueva Solicitud de Ingreso de Materiales',
+                message= 'Solicitud de Recepción de {} productos a depósito {} por motivo de {}'.format(numberOfProducts,warehouse,motivoIngreso),
+                from_email = settings.EMAIL_HOST_USER,
+                recipient_list=[receptor],
+                fail_silently=False,
+                auth_user=None,
+                auth_password=None,
+                connection=None,
+                html_message=None
+            )
         #     print('cantidad in view is:', cantidad)
 
         #     StockMovements.objects.create(product = product, date=date, receptor=receptor,
@@ -205,23 +217,17 @@ def inboundView(request):
 
 def inboundReceptionView(request, requested_id):
 
-    pendingTask = get_object_or_None(Tasks, pk=requested_id)
+    pendingTask = get_object_or_None(Tasks, pk=requested_id, status='Pending')
     print('request is:', request.method)
     print('request product data', request.POST.get('product_0'))
     product = request.POST.get('product')
     issuer = request.POST.get('issuer')
     productsToReceive = pendingTask.stockmovements_set.all().values()
     #task = Tasks.objects.filter(task_id = requested_id)
-    tasks = Tasks.objects.filter(task_id=requested_id).prefetch_related('stockmovements_set')
-    #tasks_2 = Tasks.objects.filter(task_id=requested_id).select_related('stockmovements_set')
-    # for task in tasks:
-    #     for product in task.stockmovements_set.all():
-    #         print(product.product.name)
-    #         print(product.cantidad)
-    #print('tasks in view', tasks[0])
-    #print('tasks_2 in view', tasks_2[0])
+    tasks = Tasks.objects.filter(task_id=requested_id, actionType='Nuevo Ingreso').prefetch_related('stockmovements_set')
 
     numberOfProducts = request.POST.get('extra_field_count')
+    print('number Of Produtos in Inbound Reception View is {}'.format(numberOfProducts))
      # if this is a POST request we need to process the form data
     if request.method == "POST":
         
@@ -257,12 +263,13 @@ def inboundReceptionView(request, requested_id):
             taskToUpdate = Tasks.objects.filter(task_id=requested_id)
             taskToUpdate.update(status='Confirmed')
             
-            
+            taskupdated = Tasks.objects.filter(task_id = requested_id).values_list('receptor', 'issuer','status', 'motivoIngreso','motivoEgreso','warehouse','actionType')
+            print('taskupdated in view is ', taskupdated)
             task = Tasks.objects.get(task_id=requested_id)
-            for i in range(0,int(numberOfProducts) ):
+            for i in range(0,int(numberOfProducts) +1 ):
 
                 product = form.cleaned_data['producto_{}'.format(i)]
-                print('product is {}'.format(product))
+                print('product in view is {} with i {}'.format(product,i))
 
                 newproduct = Product.objects.get(name= product)
                 print('new products in view is {}'.format(newproduct))
@@ -309,33 +316,79 @@ def outboundOrderView(request):
     product = request.POST.get('product')
     issuer = request.POST.get('issuer')
     
-    
+    numberOfProducts = request.POST.get('extra_field_count')
+
      # if this is a POST request we need to process the form data
     if request.method == "POST":
         
-        form = OutboundOrderForm(request.POST)
+        form = OutboundOrderForm(request.POST, request.FILES, extra = request.POST.get('extra_field_count'))
 
         print('form is valid', form.is_valid())
         #print('form is', form)
+        date  =   datetime.today().strftime('%Y-%m-%d')
+           # print('form is:', form)
 
-        # check whether it's valid:
-        if form.is_valid():
-            print('el form es valido')
-            product = form.cleaned_data['product']
-            date  =   form.cleaned_data['date']
+        #     print(product)
+        #     print(date)
             
-            print(product)
-            print(date)
-            department = form.cleaned_data['department']
-            issuer = form.cleaned_data['issuer']
-            cantidad = form.cleaned_data['cantidad']
-            actionType = 'Nueva Solicitud'
-            motivoEgreso = form.cleaned_data['motivoEgreso']
+        receptor = form.cleaned_data['receptor']
+        warehouse = form.cleaned_data['warehouse']
+        solicitante = form.cleaned_data['issuer']
+        department = form.cleaned_data['department']
+        #     cantidad = form.cleaned_data['cantidad']
+        #     cantidadNeta = form.cleaned_data['cantidadNeta']
+        #     deltaDiff =  cantidadNeta - cantidad
+        motivoEgreso = form.cleaned_data['motivoEgreso']
+        actionType = 'Nuevo Egreso'
+          #  product = form.cleaned_data['product_23']
+         #   print('product_23 is {}'.format(product))
+
+        print('number of Products in form is {}'.format(numberOfProducts))
+        datalist = []
+        task = Tasks.objects.create(date= date, receptor= receptor, warehouse= warehouse, issuer=solicitante,
+                                        motivoEgreso=motivoEgreso,  actionType=actionType, department=department)
             
-            StockMovements.objects.create(product = product, date=date, department=department,
-                                        issuer=issuer, actionType = actionType, cantidad=cantidad,
-                                        motivoEgreso=motivoEgreso,status='Pending')
-            
+        print('form cleaned data', form.cleaned_data)
+        for i in range(0,int(numberOfProducts) ):
+
+
+            product = form.cleaned_data['producto_{}'.format(i)]
+            newproduct = Product.objects.get(name= product)
+                
+            # nuevoIngreso.barcode = form.cleaned_data['barcode_{}'.format(i)]
+            # nuevoIngreso.internalCode = form.cleaned_data['internalCode_{}'.format(i)]
+            quantity = form.cleaned_data['cantidad_{}'.format(i)]
+
+            print('product is:', product)
+            print('quantity is:', quantity)
+            newProduct = StockMovements()
+            newProduct.product = newproduct
+            newProduct.actionType = actionType
+            newProduct.cantidad = quantity
+            newProduct.task = task
+#            newProduct = StockMovements(product = newproduct, 
+ #                            actionType = actionType,
+   #                                      cantidad= quantity, task = task )
+           
+            datalist.append(newProduct)
+            print('new_product is:', datalist)
+
+        StockMovements.objects.bulk_create(datalist)
+
+        # send_mail(
+        #         subject='Nueva Solicitud de Ingreso de Materiales',
+        #         message= 'Solicitud de Recepción de {} productos a depósito {} por motivo de {}'.format(numberOfProducts,warehouse,motivoEgreso),
+        #         from_email = settings.EMAIL_HOST_USER,
+        #         recipient_list=[receptor],
+        #         fail_silently=False,
+        #         auth_user=None,
+        #         auth_password=None,
+        #         connection=None,
+        #         html_message=None
+        #     )
+        
+        return redirect('/tasks/')
+        
     else:
         form = OutboundOrderForm()
 
@@ -343,10 +396,7 @@ def outboundOrderView(request):
 
 class TaskListView(generic.ListView):
     template_name = 'tasks.html'
-    model = Tasks
-
-    
-    
+    model = Tasks    
 
     def get_queryset(self) -> QuerySet[Any]:
         self.tasks = Tasks.objects.filter(status='Pending') # , actionType='Nueva Solicitud')
@@ -359,10 +409,6 @@ class TaskListView(generic.ListView):
         context['tasks'] = self.tasks
         return context 
     
-    
-
-
-    #return render( "tasks.html")
 
 class StockListView(generic.ListView):
     model = Product
@@ -389,72 +435,154 @@ class StockListView(generic.ListView):
 def outboundDeliveryView(request, requested_id):
    # pendingRequest = get_object_or_None(StockMovements, pk=requested_id)
     #print('pendingRequest product is:', pendingRequest.product)
-    pendingTask = get_object_or_None(Tasks, pk=requested_id)
-    
-    task = Tasks.objects.filter(task_id=requested_id)[0]
-    productsToRecibe = task.stockmovements_set.all()
-    print('pendingTask products', pendingTask.stockmovements_set.all().values())
-    print('requested_id is:', requested_id)
+    pendingTask = get_object_or_None(Tasks, pk=requested_id, status='Pending')
+    if pendingTask:
+        products = pendingTask.stockmovements_set.all()
+    print('pendingTask is ', pendingTask)
+    print('request is:', request.method)
+    print('request product data', request.POST.get('producto_0'))
+  
+   # productsToReceive = pendingTask.stockmovements_set.all().values()
+    #task = Tasks.objects.filter(task_id = requested_id)
+    tasks = Tasks.objects.filter(task_id=requested_id, status='Pending').prefetch_related('stockmovements_set')
+
+    numberOfProducts = request.POST.get('extra_field_count')
+    print('number Of Products in OutboundDeliver view is', numberOfProducts)
      # if this is a POST request we need to process the form data
     if request.method == "POST":
-        #print('request product data', request.POST.get('product'))
         # create a form instance and populate it with data from the request:
-        form = OutboundDeliveryForm(request.POST, instance= pendingTask)
+        form = OutboundDeliveryForm(request.POST, instance= pendingTask, extra= request.POST.get('extra_field_count'))
 
-        print('form is valid:' , form.is_valid)
+        print('form is valid', form.is_valid())
+      #  print('form is', form)
+        print('form fields are', form.cleaned_data)
+
         # check whether it's valid:
         if form.is_valid():
-            product = form.cleaned_data['product']
+            print('el form es valido')
+           #product = form.cleaned_data['product']
+           # date  =   form.cleaned_data['date']
+            
+           # print(product)
+           # print(date)
             department = form.cleaned_data['department']
             issuer = form.cleaned_data['issuer']
-            motivoEgreso = form.cleaned_data['motivoEgreso']
-            cantidad = form.cleaned_data['cantidad']
-            date = form.cleaned_data['date']
             receptor = form.cleaned_data['receptor']
-            cantidadEntregada = form.cleaned_data['cantidadEntregada']
-            deliveryDate = form.cleaned_data['deliveryDate']
             warehouse = form.cleaned_data['warehouse']
-            actionType = 'Confirma Entrega'
-            diffQuantity = cantidad - cantidadEntregada
-
-            StockMovements.objects.create(product = product, date=date, receptor=receptor,
-                                        warehouse=warehouse, actionType = actionType,
-                                        cantidad=cantidad, cantidadEntregada=cantidadEntregada,
-                                        motivoEgreso=motivoEgreso, status='Confirmed')
-
-            productToUpdate= Product.objects.filter(product_id=product.product_id, warehouse=warehouse)
+            actionType = 'Confirma Egreso'
+            motivoEgreso = form.cleaned_data['motivoEgreso']
             
-            print('productToUpdate is:', productToUpdate)
-
-            productToUpdate.update(quantity = F('quantity') - cantidadEntregada, deltaQuantity = F('deltaQuantity') + diffQuantity  )
+            # StockMovements.objects.create(product = product, date=date, department=department,
+            #                             issuer=issuer, actionType = actionType, cantidad=cantidad,
+            #                             motivoEgreso=motivoIngreso,status='Pending')
             
-            # Antes estaba esta linea porque la tarea estaba para un producto y el StockMovement
-            # también.    
-            StockMovements.objects.filter(id=requested_id).update(status='Confirmed')
-            #taskToConfirm = StockMovements.objects.filter(id=requested_id)
-            #print('taskToConfirm is:', taskToConfirm)
-            #taskToConfirm.update(status='Confirmed')
+            datalist = []
+            # task = Tasks.objects.create(date= date, receptor= receptor, warehouse= warehouse, issuer= issuer,
+            #                             motivoIngreso=motivoIngreso,  actionType=actionType, department=department)
+            
+            taskToUpdate = Tasks.objects.filter(task_id=requested_id)
+            taskToUpdate.update(status='Confirmed')
+            
+            
+            task = Tasks.objects.get(task_id=requested_id)
+            
+            for i , product in enumerate(products):
+                form.fields['producto_{}'.format(i)] = product.product.name
+                form.fields['cantidad_{}'.format(i)] = product.cantidad
+                netQuantity = form.cleaned_data['cantidadNeta_{}'.format(i)]
+                
+                quantity = form.fields['cantidad_{}'.format(i)]
+                diffQuantity = int(quantity) - int(netQuantity)
+                newproduct = Product.objects.get(name= product.product.name)
+            
+            # for i in range(0,int(numberOfProducts)):
+            #     print('i is', i)
+            #     product = form.cleaned_data['producto_{}'.format(i)]
+            #     print('product is {}'.format(product))
+                 
+            #     newproduct = Product.objects.get(name= product)
+            #     print('new products in view is {}'.format(newproduct))
 
-            # taskToConfirm.save()
+            #     # nuevoIngreso.barcode = form.cleaned_data['barcode_{}'.format(i)]
+            #     # nuevoIngreso.internalCode = form.cleaned_data['internalCode_{}'.format(i)]
+            #     quantity = form.cleaned_data['cantidad_{}'.format(i)]
+            #     netQuantity = form.cleaned_data['cantidadNeta_{}'.format(i)]
+
+            #     diffQuantity = int(quantity) - int(netQuantity)
+            #     print('product is:', product)
+            #     print('quantity is:', quantity)
+
+                productToUpdate= Product.objects.filter(product_id= newproduct.product_id, warehouse=warehouse)
+            
+                print('productToUpdate is:', productToUpdate)
+
+                productToUpdate.update(quantity = F('quantity') - netQuantity, deltaQuantity = F('deltaQuantity') + diffQuantity  )
+            
+                newProduct = StockMovements()
+
+                newProduct.product = newproduct
+                newProduct.actionType = actionType
+                newProduct.cantidad = quantity
+                newProduct.cantidadNeta = netQuantity
+                newProduct.task = task
+
+                # newProduct = StockMovements(product = newproduct, 
+                #              actionType = actionType,
+                #                          cantidad= quantity, cantidadNeta=netQuantity, task = task )
+                
+                datalist.append(newProduct)
+            #print('new_product is:', datalist)
+            print('form fields in view', form.fields)
+            StockMovements.objects.bulk_create(datalist)     
+
+
+            return redirect('/tasks/')
+            
+        # #print('request product data', request.POST.get('product'))
+        # # create a form instance and populate it with data from the request:
+        # form = OutboundDeliveryForm(request.POST, instance= pendingTask)
+
+        # print('form is valid:' , form.is_valid)
+        # # check whether it's valid:
+        # if form.is_valid():
+        #     product = form.cleaned_data['product']
+        #     department = form.cleaned_data['department']
+        #     issuer = form.cleaned_data['issuer']
+        #     motivoEgreso = form.cleaned_data['motivoEgreso']
+        #     cantidad = form.cleaned_data['cantidad']
+        #     date = form.cleaned_data['date']
+        #     receptor = form.cleaned_data['receptor']
+        #     cantidadEntregada = form.cleaned_data['cantidadEntregada']
+        #     deliveryDate = form.cleaned_data['deliveryDate']
+        #     warehouse = form.cleaned_data['warehouse']
+        #     actionType = 'Confirma Entrega'
+        #     diffQuantity = cantidad - cantidadEntregada
+
+        #     StockMovements.objects.create(product = product, date=date, receptor=receptor,
+        #                                 warehouse=warehouse, actionType = actionType,
+        #                                 cantidad=cantidad, cantidadEntregada=cantidadEntregada,
+        #                                 motivoEgreso=motivoEgreso, status='Confirmed')
+
+        #     productToUpdate= Product.objects.filter(product_id=product.product_id, warehouse=warehouse)
+            
+        #     print('productToUpdate is:', productToUpdate)
+
+        #     productToUpdate.update(quantity = F('quantity') - cantidadEntregada, deltaQuantity = F('deltaQuantity') + diffQuantity  )
+            
+        #     # Antes estaba esta linea porque la tarea estaba para un producto y el StockMovement
+        #     # también.    
+        #     StockMovements.objects.filter(id=requested_id).update(status='Confirmed')
+        
     
             return redirect('/tasks/') # requested_id=requested_id)
            
-#return redirect('finishtask', requested_id)
-            # ['product','department','issuer', 'motivoEgreso', 'cantidad', 'date',
-            #       'receptor', 'cantidadEntregada', 'deliveryDate']
-            # process the data in form.cleaned_data as required
-            # ...
-            # redirect to a new URL:
-#return HttpResponseRedirect("tasks/")
-
-    # if a GET (or any other method) we'll create a blank form
     else:
+
         form = OutboundDeliveryForm(instance= pendingTask ,
-                                    initial={"products": pendingTask.stockmovements_set.all().values() })
+                                    initial={"task_id": requested_id })
+        #form.task.queryset = Tasks.objects.filter(task_id = requested_id) 
         
-
-    return render(request, "outboundDelivery.html", {"form": form , 'task_id': requested_id })
-
+    return render(request, "outboundDelivery.html", {"form": form, 'task_id': requested_id , "tasks": tasks})#, "numberOfProducts": len(productsToReceive)})
 
 def finishTask(request, requested_id):
 

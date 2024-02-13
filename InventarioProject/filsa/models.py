@@ -99,8 +99,8 @@ class Tasks(models.Model):
     date = models.DateField(verbose_name=u"Fecha")
     deliveryDate = models.DateField(verbose_name=u"Fecha", default = '1970-01-01')
 
-    motivoIngreso = models.CharField(max_length=30, choices = MOTIVOSINGRESO, default='Transferencia Depósitos')
-    motivoEgreso = models.CharField(max_length=30, choices = MOTIVOSEGRESO, default='Transferencia Depósitos')
+    motivoIngreso = models.CharField(max_length=30, choices = MOTIVOSINGRESO) # default='Transferencia Depósitos')
+    motivoEgreso = models.CharField(max_length=30, choices = MOTIVOSEGRESO) #default='Transferencia Depósitos')
 
     warehouse = models.ForeignKey(Warehouses, on_delete= models.CASCADE, blank=True, null=True)
     actionType = models.CharField(max_length=20,  default='Inbound')

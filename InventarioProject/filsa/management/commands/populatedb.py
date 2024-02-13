@@ -23,9 +23,9 @@ class Command(BaseCommand):
         for i in range(0,len(warehouses_list)):
             warehouses_model = Warehouses()
             warehouses_model.name = warehouses_list[i]
-         #   warehouse_object.append(warehouses_model)
+            warehouse_object.append(warehouses_model)
 
-       # Warehouses.objects.bulk_create(warehouse_object)
+        Warehouses.objects.bulk_create(warehouse_object)
 
 
         #users_file = './usuariosFilsa.txt' 
@@ -62,10 +62,10 @@ class Command(BaseCommand):
         #         #obj = CustomUser(username= nombre_usuario, password=password, email=correo, departamento=departamento,rol=rol)
         #         #obj.save()
                 
-             #   users_obj.append(user_model)
+                users_obj.append(user_model)
 
 
-           # CustomUser.objects.bulk_create(users_obj)
+            CustomUser.objects.bulk_create(users_obj)
 
 
 
