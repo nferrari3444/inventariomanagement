@@ -206,7 +206,8 @@ def inboundView(request):
             # ...
             # redirect to a new URL:
             #return http.HttpResponseRedirect('')
-            return HttpResponseRedirect("/inbound/")
+            return redirect('/tasks/')
+            #return HttpResponseRedirect("/inbound/")
 
     # if a GET (or any other method) we'll create a blank form
     else:
@@ -217,12 +218,14 @@ def inboundView(request):
 
 def inboundReceptionView(request, requested_id):
 
-    pendingTask = get_object_or_None(Tasks, pk=requested_id, status='Pending')
+    pendingTask = get_object_or_None(Tasks, pk=requested_id)
     print('request is:', request.method)
     print('request product data', request.POST.get('product_0'))
     product = request.POST.get('product')
     issuer = request.POST.get('issuer')
-    productsToReceive = pendingTask.stockmovements_set.all().values()
+    #productsToReceive = pendingTask.stockmovements_set.all().values()
+    if pendingTask:
+        products = pendingTask.stockmovements_set.all()
     #task = Tasks.objects.filter(task_id = requested_id)
     tasks = Tasks.objects.filter(task_id=requested_id, actionType='Nuevo Ingreso').prefetch_related('stockmovements_set')
 
@@ -266,22 +269,32 @@ def inboundReceptionView(request, requested_id):
             taskupdated = Tasks.objects.filter(task_id = requested_id).values_list('receptor', 'issuer','status', 'motivoIngreso','motivoEgreso','warehouse','actionType')
             print('taskupdated in view is ', taskupdated)
             task = Tasks.objects.get(task_id=requested_id)
-            for i in range(0,int(numberOfProducts) +1 ):
+            
+            for i , product in enumerate(products):
+                form.fields['producto_{}'.format(i)] = product.product.name
+                form.fields['cantidad_{}'.format(i)] = product.cantidad
+                netQuantity = form.cleaned_data['cantidadNeta_{}'.format(i)]
+                
+                quantity = form.fields['cantidad_{}'.format(i)]
+                diffQuantity = int(quantity) - int(netQuantity)
+                newproduct = Product.objects.get(name= product.product.name)
+            
+            # for i in range(0,int(numberOfProducts) +1 ):
 
-                product = form.cleaned_data['producto_{}'.format(i)]
-                print('product in view is {} with i {}'.format(product,i))
+            #     product = form.cleaned_data['producto_{}'.format(i)]
+            #     print('product in view is {} with i {}'.format(product,i))
 
-                newproduct = Product.objects.get(name= product)
-                print('new products in view is {}'.format(newproduct))
+            #     newproduct = Product.objects.get(name= product)
+            #     print('new products in view is {}'.format(newproduct))
 
                 # nuevoIngreso.barcode = form.cleaned_data['barcode_{}'.format(i)]
                 # nuevoIngreso.internalCode = form.cleaned_data['internalCode_{}'.format(i)]
-                quantity = form.cleaned_data['cantidad_{}'.format(i)]
-                netQuantity = form.cleaned_data['cantidadNeta_{}'.format(i)]
+                # quantity = form.cleaned_data['cantidad_{}'.format(i)]
+                # netQuantity = form.cleaned_data['cantidadNeta_{}'.format(i)]
 
-                diffQuantity = int(quantity) - int(netQuantity)
-                print('product is:', product)
-                print('quantity is:', quantity)
+                # diffQuantity = int(quantity) - int(netQuantity)
+                # print('product is:', product)
+                # print('quantity is:', quantity)
 
                 productToUpdate= Product.objects.filter(product_id= newproduct.product_id, warehouse=warehouse)
             
@@ -308,7 +321,7 @@ def inboundReceptionView(request, requested_id):
                                     initial={"task_id": requested_id })
         #form.task.queryset = Tasks.objects.filter(task_id = requested_id) 
         
-    return render(request, "inboundReception.html", {"form": form, 'task_id': requested_id , "tasks": tasks, "numberOfProducts": len(productsToReceive)})
+    return render(request, "inboundReception.html", {"form": form, 'task_id': requested_id , "tasks": tasks}) #, "numberOfProducts": len(productsToReceive)})
 
 def outboundOrderView(request):
     print('request is:', request.method)
@@ -399,7 +412,7 @@ class TaskListView(generic.ListView):
     model = Tasks    
 
     def get_queryset(self) -> QuerySet[Any]:
-        self.tasks = Tasks.objects.filter(status='Pending') # , actionType='Nueva Solicitud')
+        self.tasks = Tasks.objects.all() #filter(status='Pending') # , actionType='Nueva Solicitud')
 
         return self.tasks
     def get_context_data(self, **kwargs):
@@ -435,7 +448,7 @@ class StockListView(generic.ListView):
 def outboundDeliveryView(request, requested_id):
    # pendingRequest = get_object_or_None(StockMovements, pk=requested_id)
     #print('pendingRequest product is:', pendingRequest.product)
-    pendingTask = get_object_or_None(Tasks, pk=requested_id, status='Pending')
+    pendingTask = get_object_or_None(Tasks, pk=requested_id)
     if pendingTask:
         products = pendingTask.stockmovements_set.all()
     print('pendingTask is ', pendingTask)
@@ -607,6 +620,9 @@ class StockHistoryView(generic.ListView):
         # Call the base implementation first to get the context
         context = super(StockHistoryView, self).get_context_data(**kwargs)
         # Create any data and add it to the context
+        movements = StockMovements.objects.filter(product=product_id)
         context['movements'] = StockMovements.objects.filter(product=product_id)
+
+        context['product'] = movements[0].product.name
         return context 
     
