@@ -49,7 +49,10 @@ class Product(models.Model):
                   ('Insumos','Insumos')
                   ]
     
-    product_id = models.AutoField(primary_key=True)
+    # class Meta:
+    #     unique_together = (('product_id', 'warehouse'),)
+
+    product_id = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=50)
     barcode = models.BigIntegerField(verbose_name=u"Codigo de Barras")
     internalCode = models.BigIntegerField(verbose_name=u"Codigo Interno")
@@ -62,11 +65,13 @@ class Product(models.Model):
     stockSecurity = models.IntegerField()
     inTransit = models.BooleanField()
     
-
+  
+          
 
     def __str__(self):
         return self.name
 
+   
 class Tasks(models.Model):
     STATUS = [('Pending','Pending'),
               ('Confirmed','Confirmed')]

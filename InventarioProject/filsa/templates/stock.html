@@ -7,13 +7,38 @@
 {% block content %}
 
 <div class="w-1/2 grid grid-cols-4 gap-2 py-8 px-4 mx-auto max-w-2xl lg:py-16">
-    <button id="dropdownCheckboxProductButton" data-dropdown-toggle="dropdownProductCheckbox" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">Productos<svg class="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+    <!-- <button id="dropdownCheckboxProductButton" data-dropdown-toggle="dropdownProductCheckbox" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">Productos<svg class="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
         </svg>
-        </button>
-        
+        </button> -->
+       
+        <button id="dropdownSearchButton" data-dropdown-toggle="dropdownSearch" data-dropdown-placement="bottom" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">Productos <svg class="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
+            </svg>
+            </button>
+
+        <div id="dropdownSearch" class="z-10 hidden bg-white rounded-lg shadow w-60 dark:bg-gray-700">
+            <div class="p-3">
+              <label for="input-group-search" class="sr-only">Search</label>
+              <div class="relative">
+                <div class="absolute inset-y-0 rtl:inset-r-0 start-0 flex items-center ps-3 pointer-events-none">
+                  <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                  </svg>
+                </div>
+                <input type="text" id="input-group-search" class="block w-full p-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search user">
+              </div>
+            </div>
+
         <!-- Dropdown menu -->
-        <div id="dropdownProductCheckbox" class="z-10 hidden w-48 bg-white divide-y divide-gray-100 rounded-lg shadow dark:bg-gray-700 dark:divide-gray-600">
+        <ul class="h-48 px-3 pb-3 overflow-y-auto text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownSearchButton">
+            <li>
+              <div class="flex items-center ps-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600">
+                <input id="checkbox-item-11" type="checkbox" value="" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
+                <label for="checkbox-item-11" class="w-full py-2 ms-2 text-sm font-medium text-gray-900 rounded dark:text-gray-300">Total Productos</label>
+              </div>
+            </li>
+        <!-- <div id="dropdownProductCheckbox" class="z-10 hidden w-48 bg-white divide-y divide-gray-100 rounded-lg shadow dark:bg-gray-700 dark:divide-gray-600">
             <ul class="p-3 space-y-3 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownCheckboxProductButton">
                 {% for product in productList %}
                 <li>
@@ -25,15 +50,11 @@
               {% endfor %}
 
             </ul>
-        </div>
-
-    <button id="dropdownDepositoButton" data-dropdown-toggle="deposito" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">Depósitos<svg class="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
-        </svg>
-        </button>
+        </div> -->
+</div>
         
         <!-- Dropdown menu -->
-        <div id="deposito" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700">
+        <!-- <div id="deposito" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700">
             <ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownDepositoButton">
                 {% for warehouse in warehouseList %}
                 <li>
@@ -42,51 +63,40 @@
              {% endfor %}
 
             </ul>
-        </div>
+        </div> -->
 
-
-
-        <button id="dropdownCategoriasButton" data-dropdown-toggle="categorias" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">Categoria<svg class="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
-            </svg>
-            </button>
-            
-            <!-- Dropdown menu -->
-
-            <div id="categorias" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700">
-                <ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownDefaultButton">
-    
-                    {% for category in categoryList %}
-                    <li>
-                    <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{{category.category}}</a>
-                  </li>
-                  {% endfor %}
-                </ul>
+        <form method='GET' action="{% url 'filterproducts' %}"  id='filters' class="inline-flex">
+            {% csrf_token %}
+            <!-- <label for="deposito" class="py-2 text-sm text-gray-700 dark:text-gray-200">Depositos</label> -->
+            <select  name="deposito" id="deposito" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+              <option selected>Total Depositos</option>
+              {% for warehouse in warehouseList %}
+              <option value="{{warehouse.name}}">{{warehouse.name}}</option>
+              {% endfor %}
+            </select>
+        
+            <!-- <label for="category" class="mb-2 text-sm font-medium text-gray-900 dark:text-white">Categorías</label> -->
+            <select  name="categoria" id="categoria" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+              <option selected>Total Categorias</option>
+              {% for category in categoryList %}
+              <option value="{{category.category}}">{{category.category}}</option>
+              {% endfor %}
+            </select>
+        
+            <!-- <label for="supplier" class="py-2 text-sm text-gray-700 dark:text-gray-200">Proveedor</label> -->
+            <select  name="supplier" id="supplier" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+              <option selected>Total Proveedores</option>
+              {% for supplier in supplierList %}
+              <option value="{{supplier.supplier}}">{{supplier.supplier}}</option>
+              {% endfor %}
+            </select>
             </div>
 
-            <button id="dropdownProveedoresButton" data-dropdown-toggle="proveedores" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">Proveedor<svg class="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
-                </svg>
-                </button>
-                
-                <!-- Dropdown menu -->
-                <div id="proveedores" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700">
-                    <ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownProveedoresButton">
-                        {% for supplier in supplierList %}
-                        <li>
-                        <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{{supplier.supplier}}</a>
-                      </li>
-                    
-                        {% endfor %}
-
-                    </ul>
-                </div>
-
-
+            </form>
 </div>
 <!-- sm:col-span-2 -->
 <div class="w-full px-4 relative overflow-x-auto">
-    <table class="text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+    <table id="productTable" class="text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
         <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
             <tr>
                 <th scope="col" class="px-3 py-2">
@@ -197,9 +207,6 @@
                     {{product.quantity}}
                 
                 </td>
-
-            
-
                 <td class="px-3 py-2">
                     <a href="{% url 'stockhistory' product_id=product.product_id %}"   class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Movimientos</a>
                 </td>
@@ -219,6 +226,107 @@
 
   <script>
 
+$(`#input-group-search`).autocomplete({
+        source: '{% url "autocomplete-name" %}',
+        minLength:1,
+        select: function(event, ui) {
+                    //  console.log(ui)
+                 $(`#input-group-search`).val(ui.item.value)
+
+                let product = ui.item.value
+                console.log('product',product)
+
+                getProductData(product)
+
+        }})
+
+
+//function filterData() {
+    let warehouse_filter = '';
+ let category_filter = '';
+ let supplier_filter= '';
+
+//  $('#filters').change(function(e) {
+
+ // var warehouse_filter =   $('#deposito').val()
+ console.log(this.value)
+
+ $('#deposito').change(function() { 
+    console.log(this.value)
+     warehouse_filter = this.value;
+    
+    getData(warehouse_filter,category_filter,supplier_filter)})
+
+$('#categoria').change(function() { 
+    console.log(this.value)
+ category_filter = this.value;
+ getData(warehouse_filter,category_filter,supplier_filter)})
+
+$('#supplier').change(function() { 
+    console.log(this.value)
+ supplier_filter = this.value;
+
+ getData(warehouse_filter,category_filter,supplier_filter)})
+
+//  var category_filter =   $('#categoria').val()
+    
+//  var supplier_filter =   $('#supplier').val()
+    
+
+// var category_filter =   $('#categoria').change()
+
+// var supplier_filter =   $('#supplier').change()
+
+//  console.log(warehouse_filter)
+//  console.log(category_filter)
+//  console.log(supplier_filter)
+
+
+var checkbox = $('#checkbox-item-11').is(":checked")
+
+console.log('checkbox is', checkbox)
+
+
+function getProductData(product_name) {
+
+request_url = "{% url 'filterproducts' %}"  //+ warehouse_filter + '/' + category_filter + '/' + supplier_filter + '/';
+$.ajax({
+    type: "GET",
+    datatype:'json',
+    data: {
+        'product' : product_name, 
+    },
+    url: request_url,
+    success: function(data){
+
+        
+        console.log('data in hmtl',data.html_table)
+    $('#productTable').html(data.html_table);
+
+}}
+)
+ 
+}
+
+function getData(warehouse_filter,category_filter,supplier_filter) {
+request_url = "{% url 'filterproducts' %}"  //+ warehouse_filter + '/' + category_filter + '/' + supplier_filter + '/';
+$.ajax({
+    type: "GET",
+    datatype:'json',
+    data: {
+        'warehouse' : warehouse_filter,
+         'category' : category_filter,
+         'supplier' : supplier_filter,
+    },
+    url: request_url,
+    success: function(data){
+
+    $('#productTable').html(data.html_table);
+
+}}
+)
+ 
+}
 
     </script>
 

@@ -91,22 +91,7 @@ class Command(BaseCommand):
                 line = line.split(',')
                 print('product line is ', line)
                 warehouse_name = line[5]
-                # nombre=line[0]
-                # barcode = line[1]
-                # internalCode = line[2]
-                # category = line[3]
-                # supplier = line[4]
-                # warehouse_obj = Warehouses.objects.get(name=warehouse_name)
-                # stockSecurity = line[6]
-                # cantidad = line[7]
-                # location = line[8]
-                # deltaQuantity = line[9]
-                # inTransit = line[10]
-
-                # obj = Product(name=nombre, barcode=barcode,internalCode=internalCode,quantity=cantidad,
-                #     category=category,location=location,supplier=supplier,warehouse=warehouse_obj,
-                #     deltaQuantity=deltaQuantity,stockSecurity=stockSecurity,inTransit=inTransit)
-                
+           
                 product_model.name= line[0] 
                 product_model.barcode= line[1]
                 product_model.internalCode= line[2]
@@ -122,7 +107,7 @@ class Command(BaseCommand):
                 
                 objects.append(product_model)
         
-            Product.objects.bulk_create(objects)
+            Product.objects.bulk_create(objects, ignore_conflicts=True)
 
     # Populate the fields of the model based on the record line of your file
 #    obj.field1 = line[0] # The first column
