@@ -6,7 +6,7 @@
 
 {% block content %}
 
-<div class="w-1/2 grid grid-cols-4 gap-2 py-8 px-4 mx-auto max-w-2xl lg:py-16">
+<div class="w-1/2 grid grid-cols-4 gap-2 ml-20 py-2 px-4 max-w-2xl lg:py-16">
     <!-- <button id="dropdownCheckboxProductButton" data-dropdown-toggle="dropdownProductCheckbox" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">Productos<svg class="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
         </svg>
@@ -34,7 +34,7 @@
         <ul class="h-48 px-3 pb-3 overflow-y-auto text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownSearchButton">
             <li>
               <div class="flex items-center ps-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600">
-                <input id="checkbox-item-11" type="checkbox" value="" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
+                <input id="checkbox-item-11" type="checkbox" value="" onclick="checkboxstate()" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
                 <label for="checkbox-item-11" class="w-full py-2 ms-2 text-sm font-medium text-gray-900 rounded dark:text-gray-300">Total Productos</label>
               </div>
             </li>
@@ -65,10 +65,10 @@
             </ul>
         </div> -->
 
-        <form method='GET' action="{% url 'filterproducts' %}"  id='filters' class="inline-flex">
+        <form method='GET' action="{% url 'filterproducts' %}"  id='filters' class="ml-20 sm:block lg:inline-flex">
             {% csrf_token %}
             <!-- <label for="deposito" class="py-2 text-sm text-gray-700 dark:text-gray-200">Depositos</label> -->
-            <select  name="deposito" id="deposito" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+            <select  name="deposito" id="deposito" class="ml-5 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
               <option selected>Total Depositos</option>
               {% for warehouse in warehouseList %}
               <option value="{{warehouse.name}}">{{warehouse.name}}</option>
@@ -76,7 +76,7 @@
             </select>
         
             <!-- <label for="category" class="mb-2 text-sm font-medium text-gray-900 dark:text-white">Categorías</label> -->
-            <select  name="categoria" id="categoria" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+            <select  name="categoria" id="categoria" class="ml-5 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
               <option selected>Total Categorias</option>
               {% for category in categoryList %}
               <option value="{{category.category}}">{{category.category}}</option>
@@ -84,13 +84,13 @@
             </select>
         
             <!-- <label for="supplier" class="py-2 text-sm text-gray-700 dark:text-gray-200">Proveedor</label> -->
-            <select  name="supplier" id="supplier" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+            <select  name="supplier" id="supplier" class="ml-5 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
               <option selected>Total Proveedores</option>
               {% for supplier in supplierList %}
               <option value="{{supplier.supplier}}">{{supplier.supplier}}</option>
               {% endfor %}
             </select>
-            </div>
+            
 
             </form>
 </div>
@@ -226,6 +226,42 @@
 
   <script>
 
+
+var checkbox = $('#checkbox').is(':disabled')
+
+function getAllProducts() {
+request_url = "{% url 'filterproducts' %}"  //+ warehouse_filter + '/' + category_filter + '/' + supplier_filter + '/';
+$.ajax({
+    type: "GET",
+    data: {
+        'checkbox' : true, 
+    },
+    
+    url: request_url,
+    success: function(data){
+
+        
+        console.log('data in hmtl',data.html_table)
+        $('#productTable').html(data.html_table);
+
+}}
+)
+}
+
+
+function checkboxstate(){
+
+    var checkbox = document.getElementById('checkbox-item-11').checked
+console.log('checkbox is', checkbox)
+
+if (checkbox === true) {
+    getAllProducts()
+}
+
+
+}
+
+
 $(`#input-group-search`).autocomplete({
         source: '{% url "autocomplete-name" %}',
         minLength:1,
@@ -282,9 +318,7 @@ $('#supplier').change(function() {
 //  console.log(supplier_filter)
 
 
-var checkbox = $('#checkbox-item-11').is(":checked")
 
-console.log('checkbox is', checkbox)
 
 
 function getProductData(product_name) {

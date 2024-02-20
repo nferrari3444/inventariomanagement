@@ -538,23 +538,6 @@ def inboundReceptionView(request, requested_id):
                 quantity = form.fields['cantidad_{}'.format(i)]
                 diffQuantity = int(quantity) - int(netQuantity)
                 newproduct = Product.objects.get(name= product.product.name)
-            
-            # for i in range(0,int(numberOfProducts) +1 ):
-
-            #     product = form.cleaned_data['producto_{}'.format(i)]
-            #     print('product in view is {} with i {}'.format(product,i))
-
-            #     newproduct = Product.objects.get(name= product)
-            #     print('new products in view is {}'.format(newproduct))
-
-                # nuevoIngreso.barcode = form.cleaned_data['barcode_{}'.format(i)]
-                # nuevoIngreso.internalCode = form.cleaned_data['internalCode_{}'.format(i)]
-                # quantity = form.cleaned_data['cantidad_{}'.format(i)]
-                # netQuantity = form.cleaned_data['cantidadNeta_{}'.format(i)]
-
-                # diffQuantity = int(quantity) - int(netQuantity)
-                # print('product is:', product)
-                # print('quantity is:', quantity)
 
                 productToUpdate= Product.objects.filter(product_id= newproduct.product_id, warehouse=warehouse)
             
@@ -566,6 +549,16 @@ def inboundReceptionView(request, requested_id):
                 newProduct = StockMovements(product = newproduct, 
                              actionType = actionType,
                                          cantidad= quantity, cantidadNeta=netQuantity, task = task )
+                
+
+                if diffQuantity > 0 and motivoIngreso in('Importación','Compra en Plaza'):
+                    if DiffProducts.objects.filter(product=newproduct, warehouse= warehouse).exists():
+                        
+                        DiffProducts.objects.filter(product=newproduct, warehouse=warehouse).update(totalPurchase= F('totalPurchase') + quantity, totalQuantity= F('totalQuantity') + netQuantity, productDiff= F('productDiff') + diffQuantity)
+
+                    else:
+                        
+                        DiffProducts.objects.create(product=newproduct, warehouse=warehouse, totalPurchase=quantity, totalQuantity= netQuantity, productDiff= diffQuantity)
                 
                 datalist.append(newProduct)
             print('new_product is:', datalist)
@@ -648,17 +641,17 @@ def outboundOrderView(request):
 
         StockMovements.objects.bulk_create(datalist)
 
-        # send_mail(
-        #         subject='Nueva Solicitud de Ingreso de Materiales',
-        #         message= 'Solicitud de Recepción de {} productos a depósito {} por motivo de {}'.format(numberOfProducts,warehouse,motivoEgreso),
-        #         from_email = settings.EMAIL_HOST_USER,
-        #         recipient_list=[receptor],
-        #         fail_silently=False,
-        #         auth_user=None,
-        #         auth_password=None,
-        #         connection=None,
-        #         html_message=None
-        #     )
+        send_mail(
+                subject='Nueva Solicitud de Egreso de Materiales',
+                message= 'Solicitud de Egreso por {} productos a depósito {} por motivo de {}. La solicitud fue ingresada por {}'.format(numberOfProducts,warehouse,motivoEgreso,solicitante),
+                from_email = settings.EMAIL_HOST_USER,
+                recipient_list=[receptor],
+                fail_silently=False,
+                auth_user=None,
+                auth_password=None,
+                connection=None,
+                html_message=None
+            )
         
         return redirect('/tasks/')
         
@@ -687,7 +680,7 @@ class StockListView(generic.ListView):
     model = Product
 
     template_name = 'stock.html'
-
+    print('llega aca con el checkbox')
     # def get(self, request, *args, **kwargs):
     #     print('get request stocklistview')
     #    # stuff = self.get_queryset()
@@ -759,8 +752,6 @@ class StockListView(generic.ListView):
         supplier = self.request.GET.get('supplier',None)
         category = self.request.GET.get('category',None)
 
-        
-
         if category:
             category_filter = True
             categoryList = [category]
@@ -782,7 +773,7 @@ class StockListView(generic.ListView):
             warehouseList = Warehouses.objects.all()
             
             #context['products'] = Product.objects.select_related('warehouse').filter(category ='Insumos') #, supplier ='De Salt') 
-        context['products'] = Product.objects.select_related('warehouse').filter(category__in=categoryList, supplier__in=supplierList) 
+        context['products'] = Product.objects.all().select_related('warehouse') #.filter(category__in=categoryList, supplier__in=supplierList) 
         print('categoryList', categoryList)
         print('args', args)
         print('kwargs in get_context_data', kwargs)
@@ -798,7 +789,7 @@ class StockListView(generic.ListView):
         context['warehouseList'] = Warehouses.objects.all().values('name').distinct()
         
         print('context in get_context_data', context)
-        return context
+        return context 
     
     # def get_queryset(self, **kwargs):
     #    qs = super().get_queryset(**kwargs)
@@ -875,6 +866,19 @@ def filterProducts(request):
     
     product = request.GET.get('product',None)
     
+    checkbox= request.GET.get('checkbox',None)
+
+    if checkbox:
+        products = Product.objects.select_related('warehouse')  
+        data = dict() 
+        product_dict  = {'products' : products}
+        data['html_table'] =  render_to_string('inject_table.html',
+                            context = product_dict,
+                        request = request
+                            )
+
+        return JsonResponse(data)
+    
     print('product is',product)
     if product:
         products = Product.objects.filter(name=product)
@@ -886,15 +890,15 @@ def filterProducts(request):
     
         return JsonResponse(data)
 
-    else:
-        products = Product.objects.all()
-        context = {'products' : products}
-        data['html_table'] =  render_to_string('inject_table.html',
-                             context,
-                             request = request
-                             )
+    # else:
+    #     products = Product.objects.all()
+    #     context = {'products' : products}
+    #     data['html_table'] =  render_to_string('inject_table.html',
+    #                          context,
+    #                          request = request
+    #                          )
     
-        return JsonResponse(data)
+    #     return JsonResponse(data)
 
     if category and category != 'Total Categorias':
         category_filter = True
@@ -1110,12 +1114,13 @@ class StockHistoryView(generic.ListView):
     def get_context_data(self, **kwargs):
         print('kwargs', self.kwargs)
         product_id = self.kwargs['product_id']
+        product_name = Product.objects.filter(product_id=product_id)
         # Call the base implementation first to get the context
         context = super(StockHistoryView, self).get_context_data(**kwargs)
         # Create any data and add it to the context
         movements = StockMovements.objects.filter(product=product_id)
         context['movements'] = StockMovements.objects.filter(product=product_id)
 
-        context['product'] = movements[0].product.name
+        context['product'] = product_name[0].name
         return context 
     

@@ -76,14 +76,16 @@ class Tasks(models.Model):
     STATUS = [('Pending','Pending'),
               ('Confirmed','Confirmed')]
 
+
     DEPARTMENT = [('Ventas','Ventas'),
-                ('Planta Armado', 'Planta Armado'),
+                ('Dirección', 'Dirección'),
                 ('Administración', 'Administraicón'),
+                 ('Encargado Servicio Técnico', 'Encargado Servicio Técnico'),
                 ('Servicio Técnico', 'Servicio Técnico'),
                 ('Logística','Logística')
                 ]
 
-    MOTIVOSINGRESO = [('Transferencia Depósitos', 'Transferencia Depósitos'),
+    MOTIVOSINGRESO = [('Devolución Mercadería', 'Devolución Mercadería'),
                 ('Importación', 'Importación'),
                  ('Compra en Plaza', 'Compra en Plaza'),
                  ('Armado Nuevo Producto', 'Armado Nuevo Producto' )]
@@ -137,6 +139,7 @@ class StockMovements(models.Model):
     image = models.ImageField(upload_to='images/', null=True, blank=True)
 #    status = models.CharField(max_length=30, choices= STATUS, default='Pending')
     # warehouse = models.ForeignKey(Warehouses, on_delete= models.CASCADE, blank=True, null=True)
+
 
 
     

@@ -13,8 +13,8 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from pathlib import Path
 import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
-#BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+#BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 import environ
 env = environ.Env()
 environ.Env.read_env()
@@ -25,7 +25,7 @@ environ.Env.read_env()
 SECRET_KEY = 'django-insecure-1t6k3r0)5-(nn@i3mp9_o&t+x*v&q+j8v=#ux!y_j17hqm!hw%'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['127.0.0.1','localhost']
 
@@ -82,6 +82,7 @@ ADMIN_MEDIA_PREFIX = '/static/admin/'
 
 AUTH_USER_MODEL = 'filsa.CustomUser'
 
+COMPRESS_URL = '/static/'
 COMPRESS_ROOT = BASE_DIR / 'static'
 
 COMPRESS_ENABLED = True
@@ -153,11 +154,13 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 
-
+STATIC_ROOT =  os.path.join(BASE_DIR, 'static/')    
 STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'static'
+                                 # BASE_DIR / 'static'
 
-STATICFILES_DIRS = [BASE_DIR / "static",]
+STATICFILES_DIRS = [BASE_DIR / "static/",]
+STATICFILES_LOCATION = '/static/'
+
 
 STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 # Default primary key field type
