@@ -13,8 +13,15 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from pathlib import Path
 import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-#BASE_DIR = Path(__file__).resolve().parent.parent
-BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR_ = os.path.dirname(os.path.dirname(__file__))
+
+BASE_DIR__ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+print('BASE_DIR is {}'.format(BASE_DIR))
+
+print('SECOND BASE_DIR is {}'.format(BASE_DIR_))
+print('THIRD BASE_DIR is {}'.format(BASE_DIR__))
+
 import environ
 env = environ.Env()
 environ.Env.read_env()
@@ -41,7 +48,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'compressor',
     'filsa',
-    'whitenoise',
+     'whitenoise',
 ]
 
 MIDDLEWARE = [
@@ -53,6 +60,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "whitenoise.middleware.WhiteNoiseMiddleware",
 ]
 
 ROOT_URLCONF = 'InventarioProject.urls'
@@ -87,9 +95,11 @@ COMPRESS_ROOT = BASE_DIR / 'static'
 
 COMPRESS_ENABLED = True
 
-STATICFILES_FINDERS = ('compressor.finders.CompressorFinder',)
+STATICFILES_FINDERS = ('compressor.finders.CompressorFinder',
+                       'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder')
 
-MEDIA_ROOT = BASE_DIR/'media'
+MEDIA_ROOT = BASE_DIR / 'media'
 MEDIA_URL = '/media/'
 
 # Database
@@ -154,13 +164,16 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 
-STATIC_ROOT =  os.path.join(BASE_DIR, 'static/')    
-STATIC_URL = '/static/'
+STATIC_ROOT =  os.path.join(BASE_DIR, 'static')    
+print('STATIC_ROOT is {}'.format(STATIC_ROOT))
+
+STATIC_URL = 'static/'
                                  # BASE_DIR / 'static'
 
-STATICFILES_DIRS = [BASE_DIR / "static/",]
+#STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 STATICFILES_LOCATION = '/static/'
 
+#print('STATICFILES_DIRS IS {}'.format(STATICFILES_DIRS))
 
 STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 # Default primary key field type
