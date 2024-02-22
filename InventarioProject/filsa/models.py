@@ -118,6 +118,11 @@ class Tasks(models.Model):
 
 
 class StockMovements(models.Model):
+    
+    class Meta:
+      verbose_name = 'Detalle Movimiento Producto'
+      verbose_name_plural = 'Detalle Movimientos Productos'
+
     MOVEMENT = [('Inbound','Inbound'),
                 ('Outbound', 'Outbound')]
     
@@ -144,6 +149,11 @@ class StockMovements(models.Model):
 
     
 class DiffProducts(models.Model):
+    
+    class Meta:
+      verbose_name = 'Faltante Producto Total'
+      verbose_name_plural = 'Faltante Productos Total'
+     
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     warehouse = models.ForeignKey(Warehouses, on_delete= models.CASCADE, blank=True, null=True)
     totalPurchase = models.FloatField()
