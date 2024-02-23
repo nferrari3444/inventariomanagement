@@ -619,7 +619,7 @@ def outboundOrderView(request):
 
 
             product = form.cleaned_data['producto_{}'.format(i)]
-            newproduct = Product.objects.get(name= product)
+            newproduct = Product.objects.get(name= product, warehouse=warehouse)
                 
             # nuevoIngreso.barcode = form.cleaned_data['barcode_{}'.format(i)]
             # nuevoIngreso.internalCode = form.cleaned_data['internalCode_{}'.format(i)]

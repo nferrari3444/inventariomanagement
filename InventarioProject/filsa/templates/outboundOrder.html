@@ -8,6 +8,7 @@
 {% block content %}
 <!-- sm:col-span-2 -->
 <section class="bg-white dark:bg-gray-900">
+    
     <div class="py-8 px-4 mx-auto max-w-2xl lg:py-16">
         <h2 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">Solicitud Egreso de Productos</h2>
         <form action="{% url 'outboundorder' %}" method="POST">
@@ -32,7 +33,7 @@
                 <label for="departamento" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Departamento</label>
                     
                 {{form.department}}
-        
+          
                 </div>
 
                 <div>
@@ -70,7 +71,7 @@
 
                 <div class="max-w-4xl mt-10">
                     <table id="productTable" class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                        <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                        <thead class="text-xs text-gray-700 uppercase bg-green-100 dark:bg-gray-700 dark:text-gray-400">
                             <tr>
                                 <th scope="col-span-2" class="px-6 py-3">
                                     Producto
