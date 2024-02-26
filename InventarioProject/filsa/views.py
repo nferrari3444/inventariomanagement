@@ -3,12 +3,13 @@ from django.db.models.query import QuerySet
 from django.shortcuts import render
 
 from django.contrib import messages
-from django.contrib.auth import login
+from django.contrib.auth import login, authenticate, logout
+from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.db.models import Avg, Count
 from django.forms import inlineformset_factory
-from django.db.models import Count, F, Value
+from django.db.models import Count, F, Value, Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
@@ -22,7 +23,8 @@ from django.core import serializers
 from django.views import generic
 from annoying.functions import get_object_or_None
 from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
-
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError, PermissionDenied
 from .forms import SignUpForm , InboundForm, OutboundOrderForm, OutboundDeliveryForm, InboundReceptionForm, TransferForm, TransferReceptionForm
 from .models import CustomUser, StockMovements, DiffProducts, Product, Warehouses, Tasks
 from django.core.cache import cache
@@ -43,10 +45,83 @@ class UserSignUpView(CreateView):
         login(self.request, user)
         return redirect('/')
 
+@login_required
 def index(request):
     return render(request, 'index.html')
 
+def Register(request):
 
+    if request.method == 'POST':
+        username = request.POST.get('username','username')
+        email = request.POST.get('email','email')
+
+        try:
+            validate_email(email)
+        except ValidationError as e:
+            messages.error(request, "Se debe agregar usuario y contraseña para Loguearse", extra_tags='login')
+
+
+        password = request.POST.get('password', 'password')
+
+        newUser = CustomUser.objects.create_user(username=username, email=email, password=password)
+
+        newUser.save()
+
+        return render(request, 'registration/login.html')
+    
+    else:
+        return render(request, 'registration/register.html')
+    
+
+def Login(request):
+    
+    page ='login'
+    print('login view')
+    if request.method == 'POST':
+        email = request.POST.get('email','email')
+
+        print('email is {}'.format(email))
+        
+        try:
+            validate_email(email)
+        except ValidationError as e:
+            messages.error(request, 'El correo debe tener @', extra_tags='login')
+            return render(request, 'registration/login.html')
+        
+        #username = CustomUser.objects.get(email=email)
+        username = CustomUser.objects.filter(email=email).values_list('username', flat=True)
+      #  print('username get is', username)
+        print('username values_list is', username)
+
+        print('request user is ', request.user)    
+        password = request.POST.get('password','password')
+
+        if len(username) == 0 | len(password) == 0:
+            messages.error(request, "Se debe agregar usuario y contraseña para Loguearse", extra_tags='login')
+            return render(request, 'registration/login.html')
+        
+        user = authenticate(request, email=  email , password=password)
+
+        print('request user after auth is ', request.user)  
+        print('user auth is ', user)  
+        if user is not None:
+            login(request, user)
+            return redirect('/')
+        
+        else:
+            messages.info(request, 'Usuario no existe. Se necesita dar de alta nuevo usuario')
+            return render(request, 'registration/login.html')
+
+    else:
+        context = {'page' : page}
+        return render(request, 'registration/login.html', context)
+    
+
+def Logout(request):
+
+    logout(request)
+
+    return redirect('/')
 
 
 def getProducts(request):
@@ -69,49 +144,65 @@ def getProducts(request):
 
 
     product = Product.objects.filter()
-    product_data = Product.objects.values_list('name','product_id')
+    product_data = Product.objects.values_list('name','product_id','internalCode')
   #  data = serializers.serialize('json', product_data, fields=('name','barcode', 'internalCode'))
+    internalCodeJson = {product[2]: product[1] for product in product_data}
 
+    productJson = {product[0]: product[1] for product in product_data}
   #  print('product_data', product_data)
   #  print('data',data)
     
-    list_data = list(product_data)
-    json_data = dict(list_data)
+    #list_data = list(product_data)
+    #json_data = dict(list_data)
     
-    warehouses_list_data = list(warehouses)
+   # warehouses_list_data = list(warehouses)
    # warehouses_json_data = dict(warehouses_list_data)
-    print(warehouses_list_data)
-    suppliers_list_data = list(suppliers)
+   # print(warehouses_list_data)
+   # suppliers_list_data = list(suppliers)
    # suppliers_json_data = dict(suppliers_list_data)
 
-    categories_list_data = list(categories)
+   # categories_list_data = list(categories)
    # categories_json_data = dict(categories_list_data)
 
 
-    print('json_data porducts is ', json_data)
+   # print('json_data porducts is ', json_data)
 
-    return JsonResponse({'products': json_data}) #, 'warehouses': warehouses_json_data,'categories':  categories_json_data, 'supplier': suppliers_json_data})
+    return JsonResponse({'products': productJson, 'codes':internalCodeJson}) #, 'warehouses': warehouses_json_data,'categories':  categories_json_data, 'supplier': suppliers_json_data})
 
 
 def getProductsNames(request):
     
     print('autocomplete', request.GET.get('term'))
     if 'term' in request.GET:
-        qs = Product.objects.filter(name__istartswith=request.GET.get('term'))
-        titles = []
+        searchvalue = request.GET.get('term')
+        if searchvalue.isdigit() == False:
+
+            qs = Product.objects.filter(name__istartswith=searchvalue)
+            titles = []
         
-        for product in qs:
-            titles.append(product.name)
+            for product in qs:
+                titles.append(product.name)
          
-        print(titles)        
-        return JsonResponse(titles, safe=False)
+            print(titles)        
+            return JsonResponse(titles, safe=False)
+        
+        else:
+            qs = Product.objects.filter(internalCode__istartswith= searchvalue)
+            codes = []
+        
+            for product in qs:
+                print('product in autocomplete is',product)
+                print('internal code in autocomplete is', product.internalCode)
+                codes.append(str(product.internalCode))
+         
+            print(codes)        
+            return JsonResponse(codes,safe=False)
+            
 
 
 def getProduct(request, productId):
 
-   
-
-    product = Product.objects.filter(product_id=productId).values_list('barcode','internalCode','warehouse','location','category','supplier','quantity')
+    product = Product.objects.filter(product_id=productId).values_list('barcode','internalCode', 'name','warehouse','location','category','supplier','quantity')
 
     product_data = Product.objects.values_list('name','barcode', 'internalCode')
     #data = serializers.serialize('json', product_data, fields=('name','barcode', 'internalCode'))
@@ -362,6 +453,7 @@ def transferReceptionView(request, requested_id):
 
 def inboundView(request):
 
+    print(request.user.role)
     productNames = Product.objects.values_list('name', flat=True)
     print('extra_Field_count', request.POST.get('extra_field_count'))
     numberOfProducts = request.POST.get('extra_field_count')
@@ -407,20 +499,44 @@ def inboundView(request):
 
                 product = form.cleaned_data['product_{}'.format(i)]
                 print('product in inbound view is {}'.format(product))
-                newproduct = Product.objects.get(name= product)
                 
-                # nuevoIngreso.barcode = form.cleaned_data['barcode_{}'.format(i)]
-                # nuevoIngreso.internalCode = form.cleaned_data['internalCode_{}'.format(i)]
-                quantity = form.cleaned_data['cantidad_{}'.format(i)]
+                if Product.objects.filter(name=product, warehouse=warehouse).exists():
+                    print('warehouse in line 430 is', warehouse)
+                    print('product in line 431 is', product)
 
-                print('product is:', product)
-                print('quantity is:', quantity)
+                    newproduct = Product.objects.get(name= product, warehouse=warehouse)
+                    
+                    # nuevoIngreso.barcode = form.cleaned_data['barcode_{}'.format(i)]
+                    # nuevoIngreso.internalCode = form.cleaned_data['internalCode_{}'.format(i)]
+                    quantity = form.cleaned_data['cantidad_{}'.format(i)]
 
-                newProduct = StockMovements(product = newproduct, 
+                    print('product is:', product)
+                    print('quantity is:', quantity)
+
+                    newProduct = StockMovements(product = newproduct, 
                              actionType = actionType,
                                          cantidad= quantity, task = task )
                 
-                datalist.append(newProduct)
+                    datalist.append(newProduct)
+                
+                else:
+                    warehouse_obj = Warehouses.objects.get(name=warehouse)
+                    barcode = form.cleaned_data['barcode_{}'.format(i)]
+                    internalCode = form.cleaned_data['internalCode_{}'.format(i)]
+                    cantidad = form.cleaned_data['cantidad_{}'.format(i)]
+                    newproduct_db = Product.objects.create(name=product, barcode=barcode,internalCode=internalCode,quantity=cantidad, 
+                                           warehouse= warehouse_obj, deltaQuantity=0, stockSecurity=0, inTransit=False)
+
+                    newproduct_db.save()
+
+                    newProduct = StockMovements(product = newproduct_db, 
+                             actionType = actionType,
+                                         cantidad= cantidad, task = task )
+                    
+                    
+
+                    datalist.append(newProduct)
+               
             print('new_product is:', datalist)
 
             StockMovements.objects.bulk_create(datalist)
@@ -537,7 +653,7 @@ def inboundReceptionView(request, requested_id):
                 
                 quantity = form.fields['cantidad_{}'.format(i)]
                 diffQuantity = int(quantity) - int(netQuantity)
-                newproduct = Product.objects.get(name= product.product.name)
+                newproduct = Product.objects.get(name= product.product.name, warehouse=warehouse)
 
                 productToUpdate= Product.objects.filter(product_id= newproduct.product_id, warehouse=warehouse)
             
@@ -1003,7 +1119,7 @@ def outboundDeliveryView(request, requested_id):
                 
                 quantity = form.fields['cantidad_{}'.format(i)]
                 diffQuantity = int(quantity) - int(netQuantity)
-                newproduct = Product.objects.get(name= product.product.name)
+                newproduct = Product.objects.get(name= product.product.name, warehouse=warehouse)
             
             # for i in range(0,int(numberOfProducts)):
             #     print('i is', i)
@@ -1093,6 +1209,7 @@ def outboundDeliveryView(request, requested_id):
         #form.task.queryset = Tasks.objects.filter(task_id = requested_id) 
         
     return render(request, "outboundDelivery.html", {"form": form, 'task_id': requested_id , "tasks": tasks})#, "numberOfProducts": len(productsToReceive)})
+
 
 def finishTask(request, requested_id):
 

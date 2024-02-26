@@ -17,10 +17,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 BASE_DIR_ = os.path.dirname(os.path.dirname(__file__))
 
 BASE_DIR__ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-print('BASE_DIR is {}'.format(BASE_DIR))
-
-print('SECOND BASE_DIR is {}'.format(BASE_DIR_))
-print('THIRD BASE_DIR is {}'.format(BASE_DIR__))
 
 import environ
 env = environ.Env()
@@ -68,7 +64,7 @@ ROOT_URLCONF = 'InventarioProject.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS':  [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -77,8 +73,17 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
+
+             'libraries':{
+            'custom_templatetag': 'filsa.templatetags.grouptag',
+
+            }
         },
-    },
+    
+   
+    }
+    
+    ,
 ]
 
 import mimetypes
@@ -140,12 +145,15 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
+# Redirect to home URL after login (Default redirects to /accounts/profile/)
+LOGIN_REDIRECT_URL = '/'
+
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST = 'mail.filsa.com.uy'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
-EMAIL_HOST_USER = 'ferrarinicolas927@gmail.com'
+EMAIL_HOST_USER = 'ologistica@filsa.com.uy'
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
 
 # Internationalization

@@ -1,17 +1,17 @@
 Nombre,Contraseña,Correo,Deparamento,Rol
-Javier Bonetti,alfabeta1984,javier.bonetti@filsa.com.uy,Dirección,Administrador
-Fernando Crego,alfabeta1984,Fernando.crego@filsa.com.uy,Dirección,Administrador
-Natalie Pailos,alfabeta1984,natalie.pailos@filsa.com.uy,Administración,Administrador
-Ignacio Cardoso,alfabeta1984,ignacio.cardoso@filsa.com.uy,Administración,Administrador
-Victoria Bonetti,alfabeta1984,victoria.bonetti@filsa.com.uy,Administración,Administrador
-Silvia Sanguinetti,alfabeta1984,silvia.sanguinetti@filsa.com.uy,Administración,Administrador
+Javier Bonetti,alfabeta1984,javier.bonetti@filsa.com.uy,Direccion,Administrador
+Fernando Crego,alfabeta1984,Fernando.crego@filsa.com.uy,Direccion,Administrador
+Natalie Pailos,alfabeta1984,natalie.pailos@filsa.com.uy,Administracion,Administrador
+Ignacio Cardoso,alfabeta1984,ignacio.cardoso@filsa.com.uy,Administracion,Administrador
+Victoria Bonetti,alfabeta1984,victoria.bonetti@filsa.com.uy,Administracion,Administrador
+Silvia Sanguinetti,alfabeta1984,silvia.sanguinetti@filsa.com.uy,Administracion,Administrador
 Sergio Ballestrino,alfabeta1984,sergio.ballestrino@filsa.com.uy,Ventas,Comercial
-Rodrigo Fregueiro,alfabeta1984,rodrigofregueiro@filsa.com.uy,Encargado Servicio Técnico,Supervisor
-Gonzalo Fregueiro,alfabeta1984,gonzalo.fregueiro@filsa.com.uy,Encargado Servicio Técnico,Supervisor
-Raul Ricci,alfabeta1984,raul.ricci@filsa.com.uy,Servicio técnico,Técnico
-Carlos Echeverria,alfabeta1984,carlos.echeverria@filsa.com.uy,Servicio técnico,Técnico
-Fernando Elías,alfabeta1984,fernando.elias@filsa.com.uy,Servicio técnico,Técnico
-Cristian Lopez,alfabeta1984,cristian.lopez@filsa.com.uy,Servicio técnico,Técnico
-Joel Villar,alfabeta1984,logistica@filsa.com.uy,Logística,Logística
-Gerardo Braga,alfabeta1984,gerardo.braga@ciame.com.uy,Logística,Logística
-Nicolas Ferrari,alfabeta1984,nferrari3444@gmail.com,Administración,Administrador
+Rodrigo Fregueiro,alfabeta1984,rodrigofregueiro@filsa.com.uy,Encargado Servicio Tecnico,Supervisor
+Gonzalo Fregueiro,alfabeta1984,gonzalo.fregueiro@filsa.com.uy,Encargado Servicio Tecnico,Supervisor
+Raul Ricci,alfabeta1984,raul.ricci@filsa.com.uy,Servicio tecnico,Técnico
+Carlos Echeverria,alfabeta1984,carlos.echeverria@filsa.com.uy,Servicio tecnico,Técnico
+Fernando Elías,alfabeta1984,fernando.elias@filsa.com.uy,Servicio tecnico,Técnico
+Cristian Lopez,alfabeta1984,cristian.lopez@filsa.com.uy,Servicio tecnico,Técnico
+Joel Villar,alfabeta1984,logistica@filsa.com.uy,Logistica,Logística
+Gerardo Braga,alfabeta1984,gerardo.braga@ciame.com.uy,Logistica,Logística
+Nicolas Ferrari,alfabeta1984,nferrari3444@gmail.com,Administracion,Administrador

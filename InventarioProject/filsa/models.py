@@ -1,8 +1,38 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, AbstractBaseUser, BaseUserManager
+
+from django.contrib.auth.models import PermissionsMixin
+from django.contrib.auth.models import UserManager
 
 
-class CustomUser(AbstractUser):
+
+class CustomUserManager(BaseUserManager):
+    def create_user(self, email, password, **kwargs):
+        if not email or not password:
+            raise ValueError('User must have a username and password')
+
+        user = self.model(
+            email=CustomUserManager.normalize_email(email),
+            **kwargs
+        )
+
+        user.set_password(password)
+        user.save(using=self._db)
+
+        return user
+
+    def create_superuser(self, email, password, **kwargs):
+        user = self.create_user(email, password, **kwargs)
+
+        user.is_superuser = True
+        user.is_admin = True
+        user.is_staff = True
+        user.save(using=self._db)
+
+        return user
+
+class CustomUser(PermissionsMixin , AbstractBaseUser ):
+    
     ROLES = [('Operator', 'Operator'),
              ('Logistic','Logistic'),
              ('Supervisor','Supervisor')]
@@ -24,10 +54,16 @@ class CustomUser(AbstractUser):
                   'unique': 'An account with this email exist'},)
     
     departamento = models.CharField(max_length=30, choices = DEPARTMENT, default='Sales')
+    role = models.CharField(max_length=40, choices=ROLES, blank=True, null=True)
     
+    is_staff = models.BooleanField(default=False)
+    is_superuser = models.BooleanField(default=False)
+
+    objects = CustomUserManager()
+
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
-    role = models.CharField(max_length=40, choices=ROLES, blank=True, null=True)
+   
     # isAdmin = models.BooleanField()
 
 # Create your models here.
@@ -52,14 +88,14 @@ class Product(models.Model):
     # class Meta:
     #     unique_together = (('product_id', 'warehouse'),)
 
-    product_id = models.IntegerField(primary_key=True)
+    product_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
     barcode = models.BigIntegerField(verbose_name=u"Codigo de Barras")
     internalCode = models.BigIntegerField(verbose_name=u"Codigo Interno")
     quantity = models.FloatField()
-    category = models.CharField(max_length=20, choices=CATEGORIES, default='Tubos')
-    location = models.CharField(max_length=20)
-    supplier = models.CharField(max_length=20)
+    category = models.CharField(max_length=20, choices=CATEGORIES, default='Insumos')
+    location = models.CharField(max_length=20, default='')
+    supplier = models.CharField(max_length=20, default='')
     warehouse = models.ForeignKey(Warehouses, on_delete=models.CASCADE, related_name='warehouse_name')
     deltaQuantity = models.FloatField()
     stockSecurity = models.IntegerField()

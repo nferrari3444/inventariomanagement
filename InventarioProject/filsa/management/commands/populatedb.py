@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 from filsa.models import CustomUser, StockMovements, DiffProducts, Product, Warehouses, Tasks
-
+from django.contrib.auth.models import Group
 
 class Command(BaseCommand):
     help = 'import data'
@@ -40,32 +40,40 @@ class Command(BaseCommand):
         #     #print(file.readlines())
             users_lines = file.readlines()
         # # Archivo: Nombre,Correo,Contraseña, Deparamento,Rol
+            
             users_obj = []
+         
+           
+
+
+            superuser = CustomUser.objects.create_superuser(username = 'filsacompany' , email='operaciones@filsa.com.uy', password='sitioweb_2024')
             for line in users_lines[1:]:
                 
                 user_model = CustomUser()
-                print('user line is ', line)
+                # print('user line is ', line)
                 line = line.split(',')
                 print(line)
-        #         #nombre_usuario = line[0]
-        #         #correo = line[1]
-        #         #password = line[2]
-        #         #departamento = line[3]
-        #         #rol = line[4]
-                print('username', line[0])
-                user_model.username = line[0]
-                print('email', line[2])
-                user_model.email = line[2]
-                user_model.password = line[1]
-                user_model.departamento = line[3]
-                user_model.role = line[4]
-        #         #obj = CustomUser(username= nombre_usuario, password=password, email=correo, departamento=departamento,rol=rol)
-        #         #obj.save()
+                nombre_usuario = line[0]
+                correo = line[2]
+                password = line[1]
+                departamento = line[3]
+                rol = line[4]
+                # print('username', line[0])
+                # user_model.username = line[0]
+                # print('email', line[2])
+                # user_model.email = line[2]
+                # user_model.password = line[1]
+                # user_model.departamento = line[3]
+                # user_model.role = line[4]
+                userobj = CustomUser.objects.create_user(username= nombre_usuario, password=password, email=correo, departamento=departamento,role=rol)
+                # userobj.save()
+                user_group ,  created = Group.objects.get_or_create(name=rol) 
+                user_group.user_set.add(userobj)
                 
-                users_obj.append(user_model)
+            #    users_obj.append(user_model)
 
 
-            CustomUser.objects.bulk_create(users_obj)
+           # CustomUser.objects.bulk_create(users_obj)
 
 
 
