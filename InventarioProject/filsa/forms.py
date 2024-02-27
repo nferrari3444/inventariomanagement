@@ -61,12 +61,12 @@ class TransferForm(forms.ModelForm):
         
         extra_fields = kwargs.pop('extra',0)
         print('extra_fields line 64', extra_fields)
-
+        user = kwargs.pop('user')
         super(TransferForm, self).__init__(*args, **kwargs)
         self.fields['extra_field_count'].initial = extra_fields
         self.fields['department'].widget.attrs.update({'class':'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500'})
         self.fields['date'].widget.attrs.update({'class':'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500'})
-
+        self.fields['issuer'].initial = user
        # self.fields['extra_field_count'] = 
 
         for index in range(0, int(extra_fields) ):
@@ -100,7 +100,7 @@ class TransferReceptionForm(forms.ModelForm):
 
         self.fields['extra_field_count'].initial = extra_fields
         print('kwargs is :', kwargs)
-    
+        user = kwargs.pop('user')
         products = self.instance.stockmovements_set.all()
         print('products in Inbound Reception form are', products)
         for product in products:
@@ -118,8 +118,8 @@ class TransferReceptionForm(forms.ModelForm):
         self.fields['date'].widget.value_from_datadict = lambda *args: self.instance.date
         # self.fields['warehouse'].widget.value_from_datadict = lambda *args: self.instance.warehouse
         self.fields['receptor'].widget.value_from_datadict = lambda *args: self.instance.receptor
-        self.fields['issuer'].widget.value_from_datadict = lambda *args: self.instance.issuer
-
+        # self.fields['issuer'].widget.value_from_datadict = lambda *args: self.instance.issuer
+        self.fields['issuer'].initial = user
         for i , product in enumerate(products):
             print('product in form loop is {} for i {}'.format(product.product.name,i))
 
@@ -146,11 +146,11 @@ class InboundForm(forms.ModelForm):
     #original_field = forms.CharField()
     extra_field_count = forms.CharField(widget=forms.HiddenInput())
 
-    issuer = forms.ModelChoiceField(queryset=CustomUser.objects.all()
-                                      ,widget=forms.Select(attrs={
-                                         'class': "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500",
-                                         'style': 'max-width: auto;',
-                                     }), empty_label='-------------', to_field_name='username')
+    # issuer = forms.ModelChoiceField(queryset=CustomUser.objects.all()
+    #                                   ,widget=forms.Select(attrs={
+    #                                      'class': "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500",
+    #                                      'style': 'max-width: auto;',
+    #                                  }), empty_label='-------------', to_field_name='username')
     
     receptor = forms.ModelChoiceField(queryset=CustomUser.objects.all()
                                       ,widget=forms.Select(attrs={
@@ -179,14 +179,15 @@ class InboundForm(forms.ModelForm):
         
         extra_fields = kwargs.pop('extra',0)
         print('extra_fields line 64', extra_fields)
-
+        user = kwargs.pop('user')
         super(InboundForm, self).__init__(*args, **kwargs)
         self.fields['extra_field_count'].initial = extra_fields
         self.fields['department'].widget.attrs.update({'class':'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500'})
         self.fields['motivoIngreso'].widget.attrs.update({'class':'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500'})
         self.fields['date'].widget.attrs.update({'class':'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500'})
        # self.fields['extra_field_count'] = 
-
+        self.fields['issuer'].initial = user
+        self.fields['issuer'].widget.attrs.update({'class':'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500', 'disabled': True})
         for index in range(0, int(extra_fields) ):
             print('index in line 73 is {}'.format(index))
             self.fields['product_{index}'.format(index=index)] =   forms.CharField()
@@ -328,11 +329,11 @@ class OutboundOrderForm(forms.ModelForm):
     
     extra_field_count = forms.CharField(widget=forms.HiddenInput())
     # .values_list('username',flat=True)
-    issuer = ModelChoiceField(queryset=CustomUser.objects.all()
-                                       ,widget=forms.Select(attrs={
-                                          'class': "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500",
-                                          'style': 'max-width: auto;',
-                                      }), empty_label='-------------', to_field_name=  'username')
+    # issuer = ModelChoiceField(queryset=CustomUser.objects.all()
+    #                                    ,widget=forms.Select(attrs={
+    #                                       'class': "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500",
+    #                                       'style': 'max-width: auto;',
+    #                                   }), empty_label='-------------', to_field_name=  'username')
     # # .values_list('name',flat=True)
     # product= ModelChoiceField(queryset=Product.objects.all()
     #                                   ,widget=forms.Select(attrs={
@@ -359,17 +360,27 @@ class OutboundOrderForm(forms.ModelForm):
         model = Tasks
         # fields = ['product','department','issuer', 'motivoEgreso', 'cantidad', 'date']
         #fields = ['department','issuer', 'motivoEgreso', 'warehouse','date', 'receptor' ]
-        fields = ['warehouse','motivoEgreso','issuer', 'receptor', 'department' , 'date']
+        fields = ['warehouse','motivoEgreso', 'issuer', 'receptor', 'department' , 'date']
    
     def __init__(self, *args, **kwargs):
         
         extra_fields = kwargs.pop('extra',0)
+        user = kwargs.pop('user')
+        print('*args ', *args)
+        print('args ', args)
         print('extra_fields', extra_fields)
-
+     
         super(OutboundOrderForm, self).__init__(*args, **kwargs)
         self.fields['extra_field_count'].initial = extra_fields
+        self.fields['issuer'].initial = user
+        print('args is' , args)
+        print('kwargs is', kwargs)
+        print('user is', user)
         self.fields['department'].widget.attrs.update({'class':'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500'})
         self.fields['motivoEgreso'].widget.attrs.update({'class':'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500'})
+        
+        self.fields['issuer'].widget.attrs.update({'class':'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500', 'disabled': True})
+        #self.fields['issuer'].widget.value_from_datadict = lambda *args: self.instance.user
        # self.fields['extra_field_count'] = 
 
         for index in range(0, int(extra_fields) ):

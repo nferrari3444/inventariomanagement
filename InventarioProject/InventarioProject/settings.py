@@ -36,6 +36,7 @@ ALLOWED_HOSTS = ['127.0.0.1','localhost']
 # Application definition
 
 INSTALLED_APPS = [
+    'filsa',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -43,7 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'compressor',
-    'filsa',
+    
      'whitenoise',
 ]
 
@@ -155,6 +156,7 @@ EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
 EMAIL_HOST_USER = 'ologistica@filsa.com.uy'
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
+DEFAULT_FROM_EMAIL  = 'ologistica@filsa.com.uy'
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/

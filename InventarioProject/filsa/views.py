@@ -29,6 +29,8 @@ from .forms import SignUpForm , InboundForm, OutboundOrderForm, OutboundDelivery
 from .models import CustomUser, StockMovements, DiffProducts, Product, Warehouses, Tasks
 from django.core.cache import cache
 from django.core.mail import send_mail
+from django.contrib.auth.views import PasswordResetView
+from django.contrib.messages.views import SuccessMessageMixin
 # Create your views here.
 
 class UserSignUpView(CreateView):
@@ -44,6 +46,17 @@ class UserSignUpView(CreateView):
         user = form.save()
         login(self.request, user)
         return redirect('/')
+
+
+# class ResetPasswordView(SuccessMessageMixin, PasswordResetView):
+#     template_name = 'registration/password_reset_form.html'
+#     email_template_name = 'registration/password_reset_email.html'
+#     subject_template_name = 'registration/password_reset_subject'
+#     success_message = "We've emailed you instructions for setting your password, " \
+#                       "if an account exists with the email you entered. You should receive them shortly." \
+#                       " If you don't receive an email, " \
+#                       "please make sure you've entered the address you registered with, and check your spam folder."
+#     success_url = reverse_lazy('filsa-home')
 
 @login_required
 def index(request):
@@ -311,7 +324,7 @@ def transferView(request):
     # if a GET (or any other method) we'll create a blank form
     else:
         
-        form = TransferForm()
+        form = TransferForm(user=request.user)
 
     return render(request, "transfer.html", {"form": form}) #, "products" :productNames})
 
@@ -588,7 +601,7 @@ def inboundView(request):
     # if a GET (or any other method) we'll create a blank form
     else:
         
-        form = InboundForm()
+        form = InboundForm(user=request.user)
 
     return render(request, "inbound.html", {"form": form}) #, "products" :productNames})
 
@@ -630,6 +643,7 @@ def inboundReceptionView(request, requested_id):
             warehouse = form.cleaned_data['warehouse']
             actionType = 'Recepcion Solicitud'
             motivoIngreso = form.cleaned_data['motivoIngreso']
+            
             
             # StockMovements.objects.create(product = product, date=date, department=department,
             #                             issuer=issuer, actionType = actionType, cantidad=cantidad,
@@ -696,14 +710,16 @@ def outboundOrderView(request):
     print('request is:', request.method)
     print('request product data', request.POST.get('product'))
     product = request.POST.get('product')
-    issuer = request.POST.get('issuer')
+    #issuer = request.POST.get('issuer')
+
+    print('request user is ', request.user)
     
     numberOfProducts = request.POST.get('extra_field_count')
 
      # if this is a POST request we need to process the form data
     if request.method == "POST":
         
-        form = OutboundOrderForm(request.POST, request.FILES, extra = request.POST.get('extra_field_count'))
+        form = OutboundOrderForm(request.POST, user = request.user, extra = request.POST.get('extra_field_count'))
 
         print('form is valid', form.is_valid())
         #print('form is', form)
@@ -715,13 +731,15 @@ def outboundOrderView(request):
             
         receptor = form.cleaned_data['receptor']
         warehouse = form.cleaned_data['warehouse']
-        solicitante = form.cleaned_data['issuer']
+       # solicitante = form.cleaned_data['issuer']
         department = form.cleaned_data['department']
         #     cantidad = form.cleaned_data['cantidad']
         #     cantidadNeta = form.cleaned_data['cantidadNeta']
         #     deltaDiff =  cantidadNeta - cantidad
         motivoEgreso = form.cleaned_data['motivoEgreso']
         actionType = 'Nuevo Egreso'
+        #form.fields['issuer'] = request.user
+        solicitante = request.user
           #  product = form.cleaned_data['product_23']
          #   print('product_23 is {}'.format(product))
 
@@ -772,7 +790,7 @@ def outboundOrderView(request):
         return redirect('/tasks/')
         
     else:
-        form = OutboundOrderForm()
+        form = OutboundOrderForm(user = request.user)
 
     return render(request, "outboundOrder.html", {"form": form})
 
