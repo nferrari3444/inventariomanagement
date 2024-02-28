@@ -965,6 +965,10 @@ input[type="range"]::-ms-fill-lower {
   margin-right: auto;
 }
 
+.mb-1 {
+  margin-bottom: 0.25rem;
+}
+
 .mb-2 {
   margin-bottom: 0.5rem;
 }
@@ -999,6 +1003,10 @@ input[type="range"]::-ms-fill-lower {
 
 .ml-5 {
   margin-left: 1.25rem;
+}
+
+.mr-2 {
+  margin-right: 0.5rem;
 }
 
 .ms-1 {
@@ -1333,6 +1341,11 @@ input[type="range"]::-ms-fill-lower {
   background-color: rgb(222 247 236 / var(--tw-bg-opacity));
 }
 
+.bg-green-700 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(4 108 78 / var(--tw-bg-opacity));
+}
+
 .bg-primary-600 {
   --tw-bg-opacity: 1;
   background-color: rgb(37 99 235 / var(--tw-bg-opacity));
@@ -1351,6 +1364,11 @@ input[type="range"]::-ms-fill-lower {
 .bg-yellow-100 {
   --tw-bg-opacity: 1;
   background-color: rgb(253 246 178 / var(--tw-bg-opacity));
+}
+
+.bg-red-50 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(253 242 242 / var(--tw-bg-opacity));
 }
 
 .fill-green-500 {
@@ -1603,6 +1621,11 @@ input[type="range"]::-ms-fill-lower {
   color: rgb(114 59 19 / var(--tw-text-opacity));
 }
 
+.text-red-800 {
+  --tw-text-opacity: 1;
+  color: rgb(155 28 28 / var(--tw-text-opacity));
+}
+
 .shadow {
   --tw-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
   --tw-shadow-colored: 0 1px 3px 0 var(--tw-shadow-color), 0 1px 2px -1px var(--tw-shadow-color);
@@ -1832,6 +1855,11 @@ input[type="range"]::-ms-fill-lower {
   color: rgb(250 202 21 / var(--tw-text-opacity));
 }
 
+:is(.dark .dark\:text-red-400) {
+  --tw-text-opacity: 1;
+  color: rgb(249 128 128 / var(--tw-text-opacity));
+}
+
 :is(.dark .dark\:placeholder-gray-400)::-moz-placeholder {
   --tw-placeholder-opacity: 1;
   color: rgb(156 163 175 / var(--tw-placeholder-opacity));
@@ -1934,12 +1962,20 @@ input[type="range"]::-ms-fill-lower {
     grid-column: span 2 / span 2;
   }
 
+  .sm\:ml-3 {
+    margin-left: 0.75rem;
+  }
+
   .sm\:mr-0 {
     margin-right: 0px;
   }
 
   .sm\:mt-6 {
     margin-top: 1.5rem;
+  }
+
+  .sm\:ml-20 {
+    margin-left: 5rem;
   }
 
   .sm\:block {
@@ -2008,6 +2044,12 @@ input[type="range"]::-ms-fill-lower {
     margin-left: calc(2rem * calc(1 - var(--tw-space-x-reverse)));
   }
 
+  .md\:space-y-5 > :not([hidden]) ~ :not([hidden]) {
+    --tw-space-y-reverse: 0;
+    margin-top: calc(1.25rem * calc(1 - var(--tw-space-y-reverse)));
+    margin-bottom: calc(1.25rem * var(--tw-space-y-reverse));
+  }
+
   .md\:space-y-6 > :not([hidden]) ~ :not([hidden]) {
     --tw-space-y-reverse: 0;
     margin-top: calc(1.5rem * calc(1 - var(--tw-space-y-reverse)));
@@ -2055,6 +2097,10 @@ input[type="range"]::-ms-fill-lower {
 @media (min-width: 1024px) {
   .lg\:mr-20 {
     margin-right: 5rem;
+  }
+
+  .lg\:mt-5 {
+    margin-top: 1.25rem;
   }
 
   .lg\:inline-flex {

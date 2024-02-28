@@ -47,7 +47,7 @@
               <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 1h15M1 7h15M1 13h15"/>
           </svg>
       </button>
-{{request.user.has_group}}
+
       {% if user.is_authenticated %}
 
 
@@ -56,11 +56,11 @@
         Usuario: {{ user.get_username }}
       
       </div>
-      <a href="{% url 'logout' %}?next={{ request.path }}" class="py-4 px-2 text-gray-500 hover:text-green-500 transition duration-300">Logout</a>
+      <a href="{% url 'logout' %}" class="py-4 px-2 text-gray-500 hover:text-green-500 transition duration-300">Logout</a>
 
       {% else %}
 
-      <a href="{% url 'login' %}?next={{ request.path }}" class="py-4 px-2 text-gray-500 hover:text-green-500 transition duration-300">Login</a>
+      <a href="{% url 'login' %}" class="py-4 px-2 text-gray-500 hover:text-green-500 transition duration-300">Login</a>
 
       {% endif %}
       

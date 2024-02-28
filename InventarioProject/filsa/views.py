@@ -1,13 +1,13 @@
 from typing import Any
 from django.db.models.query import QuerySet
 from django.shortcuts import render
-
 from django.contrib import messages
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
-from django.db.models import Avg, Count
+from django.db.models import Avg, Count, Exists, OuterRef
 from django.forms import inlineformset_factory
 from django.db.models import Count, F, Value, Q
 from django.shortcuts import get_object_or_404, redirect, render
@@ -31,6 +31,8 @@ from django.core.cache import cache
 from django.core.mail import send_mail
 from django.contrib.auth.views import PasswordResetView
 from django.contrib.messages.views import SuccessMessageMixin
+import openpyxl
+
 # Create your views here.
 
 class UserSignUpView(CreateView):
@@ -131,7 +133,7 @@ def Login(request):
     
 
 def Logout(request):
-
+  
     logout(request)
 
     return redirect('/')
@@ -225,6 +227,7 @@ def getProduct(request, productId):
 
     return JsonResponse({'product': list(product)})
 
+@login_required
 def transferView(request):
 
     productNames = Product.objects.values_list('name', flat=True)
@@ -235,7 +238,7 @@ def transferView(request):
     # if this is a POST request we need to process the form data
     if request.method == "POST":
         # # create a form instance and populate it with data from the request:
-        form = TransferForm(request.POST, request.FILES, extra = request.POST.get('extra_field_count'))
+        form = TransferForm(request.POST, user = request.user, extra = request.POST.get('extra_field_count'))
         # # check whether it's valid:
         print('form is valid', form.is_valid())
        
@@ -254,6 +257,27 @@ def transferView(request):
 
             print('number of Products in form is {}'.format(numberOfProducts))
             datalist = []
+            
+            products_list = [form.cleaned_data['product_{}'.format(i)] for i in range(0,int(numberOfProducts))]
+            print('products_list is {}'.format(products_list))
+            print('products_list exists:')
+            
+            print('Product that not exist in database are:')    
+           # not_exists_products = Product.objects(~Exists(Product.objects.filter(name__in= products_list)))
+           # print(not_exists_products)
+            print('product  in list')
+            print(list(Product.objects.filter(name__in=[products_list], warehouse=warehouse_out)))
+
+            products_in_db = list(Product.objects.filter(name__in=[products_list], warehouse=warehouse_out)) 
+            
+            products_not_in_db = set(products_list).difference(products_in_db)
+
+            print('products not in db are {}'.format(products_not_in_db))
+            if len(list(products_not_in_db)) > 0:
+                messages.error(request, '\
+                Los siguientes productos {} no se encuentra en el deposito {}. Dar de alta el producto en el deposito para continuar'.format(', '.join(list(products_not_in_db)),warehouse_out), extra_tags='transfer')
+                return redirect('/transfer/')
+
             task = Tasks.objects.create(date= date, receptor= receptor, warehouse= warehouse_out, issuer=solicitante,
                                         motivoIngreso=motivoIngreso,  actionType=actionType, department=department)
             
@@ -261,7 +285,12 @@ def transferView(request):
 
                 product = form.cleaned_data['product_{}'.format(i)]
                 print('product in inbound view is {}'.format(product))
-                productdb = Product.objects.get(name= product)
+                
+                if Product.objects.filter(name__in=product, warehouse=warehouse_out).exists() != True:
+                    messages.error(request, 'El producto seleccionado {} no se encuentra en el deposito {}. Dar de alta el producto en el deposito para continuar'.format(product,warehouse_out), extra_tags='transfer')
+                    return redirect('/transfer/')
+                    
+                productdb = Product.objects.get(name= product, warehouse= warehouse_out)
                 
               
                 quantity = form.cleaned_data['cantidad_{}'.format(i)]
@@ -272,16 +301,16 @@ def transferView(request):
                 #productdb = Product.objects.get(name= newproduct.product.name)
 
                 productToUpdate= Product.objects.filter(product_id= productdb.product_id, warehouse=warehouse_out)
-            
+        
                 print('productToUpdate is:', productToUpdate)
 
                 productToUpdate.update(quantity = F('quantity') - quantity  )
-            
+        
 
                 newProduct = StockMovements(product = productdb, 
-                             actionType = actionType,
-                                         cantidad= quantity, task = task )
-                
+                            actionType = actionType,
+                                        cantidad= quantity, task = task )
+            
 
                 barcode = productdb.barcode
                 internalCode = productdb.internalCode
@@ -292,16 +321,17 @@ def transferView(request):
                 deltaQuantity = 0
                 stockSecurity = 0
                 inTransit = True
-
-                
                 productInTransit = Product.objects.create(name= product, warehouse= warehouse,
-                                barcode= barcode, quantity = quantity, internalCode= internalCode, category= category,
-                                location = location, supplier = supplier , deltaQuantity= deltaQuantity,
-                                stockSecurity = stockSecurity, inTransit=inTransit)
-                
+                            barcode= barcode, quantity = quantity, internalCode= internalCode, category= category,
+                            location = location, supplier = supplier , deltaQuantity= deltaQuantity,
+                            stockSecurity = stockSecurity, inTransit=inTransit)
+            
 
                 datalist.append(newProduct)
 
+            else:
+                messages.error(request, 'El producto seleccionado {} no se encuentra en el deposito {}. Dar de alta el producto en el deposito para continuar'.format(product,warehouse_out), extra_tags='transfer')
+                return redirect('/transfer/')
             print('new_product is:', datalist)
 
             StockMovements.objects.bulk_create(datalist)     
@@ -328,6 +358,7 @@ def transferView(request):
 
     return render(request, "transfer.html", {"form": form}) #, "products" :productNames})
 
+@login_required
 def transferReceptionView(request, requested_id):
 
     pendingTask = get_object_or_None(Tasks, pk=requested_id)
@@ -464,6 +495,7 @@ def transferReceptionView(request, requested_id):
         
     return render(request, "transferReception.html", {"form": form, 'task_id': requested_id , "tasks": tasks}) #, "numberOfProducts": len(productsToReceive)})
 
+@login_required
 def inboundView(request):
 
     print(request.user.role)
@@ -605,6 +637,7 @@ def inboundView(request):
 
     return render(request, "inbound.html", {"form": form}) #, "products" :productNames})
 
+@login_required
 def inboundReceptionView(request, requested_id):
 
     pendingTask = get_object_or_None(Tasks, pk=requested_id)
@@ -706,6 +739,7 @@ def inboundReceptionView(request, requested_id):
         
     return render(request, "inboundReception.html", {"form": form, 'task_id': requested_id , "tasks": tasks}) #, "numberOfProducts": len(productsToReceive)})
 
+@login_required
 def outboundOrderView(request):
     print('request is:', request.method)
     print('request product data', request.POST.get('product'))
@@ -794,7 +828,7 @@ def outboundOrderView(request):
 
     return render(request, "outboundOrder.html", {"form": form})
 
-class TaskListView(generic.ListView):
+class TaskListView(LoginRequiredMixin, generic.ListView):
     template_name = 'tasks.html'
     model = Tasks    
 
@@ -809,8 +843,7 @@ class TaskListView(generic.ListView):
         context['tasks'] = self.tasks
         return context 
     
-
-class StockListView(generic.ListView):
+class StockListView(LoginRequiredMixin, generic.ListView):
     model = Product
 
     template_name = 'stock.html'
@@ -1076,6 +1109,7 @@ def filterProducts(request):
     #data = serializers.serialize('json', filter_data)
     #return HttpResponse(data, content_type="application/json")
 
+@login_required
 def outboundDeliveryView(request, requested_id):
    # pendingRequest = get_object_or_None(StockMovements, pk=requested_id)
     #print('pendingRequest product is:', pendingRequest.product)
@@ -1241,7 +1275,7 @@ def finishTask(request, requested_id):
     return redirect('/tasks/')
 
 
-class StockHistoryView(generic.ListView):
+class StockHistoryView(LoginRequiredMixin, generic.ListView):
     model = StockMovements
 
     template_name = 'stockhistory.html'
@@ -1258,4 +1292,33 @@ class StockHistoryView(generic.ListView):
 
         context['product'] = product_name[0].name
         return context 
-    
+
+
+def export_excel(request):
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename="mydata.xlsx"'
+
+    workbook = openpyxl.Workbook()
+    worksheet = workbook.active
+    worksheet.title = 'My Data'
+
+    # Write header row
+    header = ['Nombre', 'Codigo','Cantidad','Deposito','Categoria','Proveedor','Ubicacion','Stock de Seguridad']
+    for col_num, column_title in enumerate(header, 1):
+        cell = worksheet.cell(row=1, column=col_num)
+        cell.value = column_title
+
+    # Write data rows
+    firstquery = Product.objects.all().select_related('warehouse')
+    queryset = firstquery.values_list('name', 'internalCode','quantity','warehouse__name','category','supplier','location','stockSecurity')
+ 
+    #list(Product.objects.all().values('name', 'internalCode','quantity','warehouse__name','category','supplier','location','stockSecurity'))
+
+    for row_num, row in enumerate(queryset, 1):
+        for col_num, cell_value in enumerate(row, 1):
+            cell = worksheet.cell(row=row_num+1, column=col_num)
+            cell.value = cell_value
+
+    workbook.save(response)
+
+    return response

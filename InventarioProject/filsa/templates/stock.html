@@ -64,8 +64,8 @@
 
             </ul>
         </div> -->
-
-        <form method='GET' action="{% url 'filterproducts' %}"  id='filters' class="ml-20 sm:block lg:inline-flex">
+        <div class="ml-20 sm:block lg:inline-flex">
+        <form method='GET' action="{% url 'filterproducts' %}"  id='filters' class="ml-20 sm:ml-3 sm:block lg:inline-flex">
             {% csrf_token %}
             <!-- <label for="deposito" class="py-2 text-sm text-gray-700 dark:text-gray-200">Depositos</label> -->
             <select  name="deposito" id="deposito" class="ml-5 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
@@ -90,10 +90,14 @@
               <option value="{{supplier.supplier}}">{{supplier.supplier}}</option>
               {% endfor %}
             </select>
-            
-
             </form>
-</div>
+
+            <a href="{% url 'excel-export' %}" >
+            <button type="button" class="ml-20 sm:ml-20 px-5 text-white bg-green-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Exportar a Excel</button>
+        </a>
+    </div>
+        </div>
+
 <!-- sm:col-span-2 -->
 <div class="w-full px-4 relative overflow-x-auto">
     <table id="productTable" class="py-8 px-4 mx-auto max-w-2xl lg:py-16 text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
