@@ -265,18 +265,18 @@ def transferView(request):
             print('Product that not exist in database are:')    
            # not_exists_products = Product.objects(~Exists(Product.objects.filter(name__in= products_list)))
            # print(not_exists_products)
-            print('product  in list')
-            print(list(Product.objects.filter(name__in=[products_list], warehouse=warehouse_out)))
+            # print('product  in list')
+            # print(list(Product.objects.filter(name__in=[products_list], warehouse=warehouse_out)))
 
-            products_in_db = list(Product.objects.filter(name__in=[products_list], warehouse=warehouse_out)) 
+            # products_in_db = list(Product.objects.filter(name__in=[products_list], warehouse=warehouse_out)) 
             
-            products_not_in_db = set(products_list).difference(products_in_db)
+            # products_not_in_db = set(products_list).difference(products_in_db)
 
-            print('products not in db are {}'.format(products_not_in_db))
-            if len(list(products_not_in_db)) > 0:
-                messages.error(request, '\
-                Los siguientes productos {} no se encuentra en el deposito {}. Dar de alta el producto en el deposito para continuar'.format(', '.join(list(products_not_in_db)),warehouse_out), extra_tags='transfer')
-                return redirect('/transfer/')
+            # print('products not in db are {}'.format(products_not_in_db))
+            # if len(list(products_not_in_db)) > 0:
+            #     messages.error(request, '\
+            #     Los siguientes productos {} no se encuentra en el deposito {}. Dar de alta el producto en el deposito para continuar'.format(', '.join(list(products_not_in_db)),warehouse_out), extra_tags='transfer')
+            #     return redirect('/transfer/')
 
             task = Tasks.objects.create(date= date, receptor= receptor, warehouse= warehouse_out, issuer=solicitante,
                                         motivoIngreso=motivoIngreso,  actionType=actionType, department=department)
@@ -333,7 +333,8 @@ def transferView(request):
                 messages.error(request, 'El producto seleccionado {} no se encuentra en el deposito {}. Dar de alta el producto en el deposito para continuar'.format(product,warehouse_out), extra_tags='transfer')
                 return redirect('/transfer/')
             print('new_product is:', datalist)
-
+            
+          
             StockMovements.objects.bulk_create(datalist)     
 
             send_mail(
@@ -489,7 +490,7 @@ def transferReceptionView(request, requested_id):
             
     else:
        # form = OutboundOrderForm()
-        form = TransferReceptionForm(instance= pendingTask ,
+        form = TransferReceptionForm(instance= pendingTask , 
                                     initial={"task_id": requested_id })
         #form.task.queryset = Tasks.objects.filter(task_id = requested_id) 
         
@@ -755,61 +756,62 @@ def outboundOrderView(request):
         
         form = OutboundOrderForm(request.POST, user = request.user, extra = request.POST.get('extra_field_count'))
 
-        print('form is valid', form.is_valid())
-        #print('form is', form)
-        date  =   datetime.today().strftime('%Y-%m-%d')
+        if form.is_valid():
+            print('form is valid', form.is_valid())
+            #print('form is', form)
+            date  =   datetime.today().strftime('%Y-%m-%d')
            # print('form is:', form)
 
         #     print(product)
         #     print(date)
             
-        receptor = form.cleaned_data['receptor']
-        warehouse = form.cleaned_data['warehouse']
-       # solicitante = form.cleaned_data['issuer']
-        department = form.cleaned_data['department']
-        #     cantidad = form.cleaned_data['cantidad']
-        #     cantidadNeta = form.cleaned_data['cantidadNeta']
-        #     deltaDiff =  cantidadNeta - cantidad
-        motivoEgreso = form.cleaned_data['motivoEgreso']
-        actionType = 'Nuevo Egreso'
-        #form.fields['issuer'] = request.user
-        solicitante = request.user
-          #  product = form.cleaned_data['product_23']
-         #   print('product_23 is {}'.format(product))
+            receptor = form.cleaned_data['receptor']
+            warehouse = form.cleaned_data['warehouse']
+            # solicitante = form.cleaned_data['issuer']
+            department = form.cleaned_data['department']
+            #     cantidad = form.cleaned_data['cantidad']
+            #     cantidadNeta = form.cleaned_data['cantidadNeta']
+            #     deltaDiff =  cantidadNeta - cantidad
+            motivoEgreso = form.cleaned_data['motivoEgreso']
+            actionType = 'Nuevo Egreso'
+            #form.fields['issuer'] = request.user
+            solicitante = request.user
+            #  product = form.cleaned_data['product_23']
+            #   print('product_23 is {}'.format(product))
 
-        print('number of Products in form is {}'.format(numberOfProducts))
-        datalist = []
-        task = Tasks.objects.create(date= date, receptor= receptor, warehouse= warehouse, issuer=solicitante,
+            print('number of Products in form is {}'.format(numberOfProducts))
+            datalist = []
+            task = Tasks.objects.create(date= date, receptor= receptor, warehouse= warehouse, issuer=solicitante,
                                         motivoEgreso=motivoEgreso,  actionType=actionType, department=department)
             
-        print('form cleaned data', form.cleaned_data)
-        for i in range(0,int(numberOfProducts) ):
+            print('form cleaned data', form.cleaned_data)
+            for i in range(0,int(numberOfProducts) ):
 
 
-            product = form.cleaned_data['producto_{}'.format(i)]
-            newproduct = Product.objects.get(name= product, warehouse=warehouse)
+                product = form.cleaned_data['producto_{}'.format(i)]
+                newproduct = Product.objects.get(name= product, warehouse=warehouse)
                 
-            # nuevoIngreso.barcode = form.cleaned_data['barcode_{}'.format(i)]
-            # nuevoIngreso.internalCode = form.cleaned_data['internalCode_{}'.format(i)]
-            quantity = form.cleaned_data['cantidad_{}'.format(i)]
+                # nuevoIngreso.barcode = form.cleaned_data['barcode_{}'.format(i)]
+                # nuevoIngreso.internalCode = form.cleaned_data['internalCode_{}'.format(i)]
+                quantity = form.cleaned_data['cantidad_{}'.format(i)]
 
-            print('product is:', product)
-            print('quantity is:', quantity)
-            newProduct = StockMovements()
-            newProduct.product = newproduct
-            newProduct.actionType = actionType
-            newProduct.cantidad = quantity
-            newProduct.task = task
-#            newProduct = StockMovements(product = newproduct, 
+                print('product is:', product)
+                print('quantity is:', quantity)
+                newProduct = StockMovements()
+                newProduct.product = newproduct
+                newProduct.actionType = actionType
+                newProduct.cantidad = quantity
+                newProduct.task = task
+#               newProduct = StockMovements(product = newproduct, 
  #                            actionType = actionType,
    #                                      cantidad= quantity, task = task )
            
-            datalist.append(newProduct)
-            print('new_product is:', datalist)
+                datalist.append(newProduct)
+                print('new_product is:', datalist)
 
-        StockMovements.objects.bulk_create(datalist)
+            StockMovements.objects.bulk_create(datalist)
 
-        send_mail(
+            send_mail(
                 subject='Nueva Solicitud de Egreso de Materiales',
                 message= 'Solicitud de Egreso por {} productos a depósito {} por motivo de {}. La solicitud fue ingresada por {}'.format(numberOfProducts,warehouse,motivoEgreso,solicitante),
                 from_email = settings.EMAIL_HOST_USER,
@@ -821,7 +823,7 @@ def outboundOrderView(request):
                 html_message=None
             )
         
-        return redirect('/tasks/')
+            return redirect('/tasks/')
         
     else:
         form = OutboundOrderForm(user = request.user)

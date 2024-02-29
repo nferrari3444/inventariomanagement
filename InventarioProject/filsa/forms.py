@@ -25,11 +25,11 @@ class DateInput(forms.DateInput):
 class TransferForm(forms.ModelForm):
     extra_field_count = forms.CharField(widget=forms.HiddenInput())
 
-    issuer = forms.ModelChoiceField(queryset=CustomUser.objects.all()
-                                      ,widget=forms.Select(attrs={
-                                         'class': "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500",
-                                         'style': 'max-width: auto;',
-                                     }), empty_label='-------------', to_field_name='username')
+    # issuer = forms.ModelChoiceField(queryset=CustomUser.objects.all()
+    #                                   ,widget=forms.Select(attrs={
+    #                                      'class': "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500",
+    #                                      'style': 'max-width: auto;',
+    #                                  }), empty_label='-------------', to_field_name='username')
     
 
 #     BirdFormSet = modelformset_factory(
@@ -67,6 +67,8 @@ class TransferForm(forms.ModelForm):
         self.fields['department'].widget.attrs.update({'class':'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500'})
         self.fields['date'].widget.attrs.update({'class':'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500'})
         self.fields['issuer'].initial = user
+        self.fields['issuer'].widget.attrs.update({'class':'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500', 'disabled': True})
+
        # self.fields['extra_field_count'] = 
 
         for index in range(0, int(extra_fields) ):
@@ -77,7 +79,32 @@ class TransferForm(forms.ModelForm):
             self.fields['internalCode_{index}'.format(index=index)] = forms.CharField()
             self.fields['cantidad_{index}'.format(index=index)] = forms.IntegerField()
 
+    def clean(self):
+        extra_fields = self.cleaned_data['extra_field_count']
+        warehouse = self.cleaned_data['warehouse']
 
+        for index in range(0, int(extra_fields)):
+            
+            product = self.cleaned_data['product_{index}'.format(index=index)]
+            if  Product.objects.filter(name = product, warehouse=warehouse).exists():
+
+                product_db = Product.objects.get(name = product, warehouse=warehouse )
+                product_stock = product_db.quantity
+                stockSecurity = product_db.stockSecurity
+                print('product in method is {}'.format(product))
+                print('product in stock is {}'.format(product_stock))
+                print('product stockSecurity is {}'.format(stockSecurity))
+                print('product_db in clean method is {}'.format(product_db))
+
+                quantity = self.cleaned_data['cantidad_{index}'.format(index=index)]
+                if product_stock - quantity < stockSecurity:
+                    raise ValidationError("La cantidad ingresada por {} del producto {} genera stock por debajo del Stock de Seguridad que es {}".format(quantity, product , stockSecurity))
+            else:
+                raise ValidationError('Product {} is not in the warehouse {}'.format(product,warehouse))
+            
+            #if(quantity > item.inventory):
+                
+           #     
 class TransferReceptionForm(forms.ModelForm):
     extra_field_count = forms.CharField(widget=forms.HiddenInput())
 
@@ -100,7 +127,7 @@ class TransferReceptionForm(forms.ModelForm):
 
         self.fields['extra_field_count'].initial = extra_fields
         print('kwargs is :', kwargs)
-        user = kwargs.pop('user')
+        
         products = self.instance.stockmovements_set.all()
         print('products in Inbound Reception form are', products)
         for product in products:
@@ -119,7 +146,7 @@ class TransferReceptionForm(forms.ModelForm):
         # self.fields['warehouse'].widget.value_from_datadict = lambda *args: self.instance.warehouse
         self.fields['receptor'].widget.value_from_datadict = lambda *args: self.instance.receptor
         # self.fields['issuer'].widget.value_from_datadict = lambda *args: self.instance.issuer
-        self.fields['issuer'].initial = user
+        #self.fields['issuer'].initial = user
         for i , product in enumerate(products):
             print('product in form loop is {} for i {}'.format(product.product.name,i))
 
@@ -355,7 +382,6 @@ class OutboundOrderForm(forms.ModelForm):
                                           'style': 'max-width: auto;',
                                       }), empty_label='-------------', to_field_name=  'username')
     
-    
     class Meta:
         model = Tasks
         # fields = ['product','department','issuer', 'motivoEgreso', 'cantidad', 'date']
@@ -390,7 +416,18 @@ class OutboundOrderForm(forms.ModelForm):
             self.fields['internalCode_{index}'.format(index=index)] = forms.CharField()
             self.fields['cantidad_{index}'.format(index=index)] = forms.IntegerField()
 
- 
+    def clean(self):
+        extra_fields = self.cleaned_data['extra_field_count']
+        warehouse = self.cleaned_data['warehouse']
+
+        for index in range(0, int(extra_fields)):
+            product = self.cleaned_data['producto_{index}'.format(index=index)]
+            print('product warehouse is ')
+            print(Product.objects.filter(name = product, warehouse=warehouse).exists())
+
+            if  Product.objects.filter(name = product, warehouse=warehouse).exists() == False:
+                raise ValidationError('El Producto {} no se encuentra en el deposito {}'.format(product,warehouse))
+               
         #CustomPK._meta.pk.name
        # self.fields['cantidad'].widget.attrs.update({'class':'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 flex w-1/2 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500'})
       #  self.fields['department'].widget.attrs.update({'class':'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 flex w-1/2 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500'})
