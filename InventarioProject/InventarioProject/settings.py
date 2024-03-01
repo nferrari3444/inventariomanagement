@@ -12,6 +12,11 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 import os
+from django.core.management.utils import get_random_secret_key
+import sys
+import dj_database_url
+import psycopg2
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 BASE_DIR_ = os.path.dirname(os.path.dirname(__file__))
@@ -25,15 +30,19 @@ environ.Env.read_env()
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-1t6k3r0)5-(nn@i3mp9_o&t+x*v&q+j8v=#ux!y_j17hqm!hw%'
-
+#SECRET_KEY = 'django-insecure-1t6k3r0)5-(nn@i3mp9_o&t+x*v&q+j8v=#ux!y_j17hqm!hw%'
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", get_random_secret_key())
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+#DEBUG = True
+DEBUG = os.getenv("DEBUG", "False") == "True"
+#ALLOWED_HOSTS = ['127.0.0.1','localhost']
 
-ALLOWED_HOSTS = ['127.0.0.1','localhost']
 
-
+ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
 # Application definition
+
+
+
 
 INSTALLED_APPS = [
     'filsa',
@@ -86,8 +95,24 @@ TEMPLATES = [
     ,
 ]
 
-import mimetypes
-mimetypes.add_type("text/css", ".css", True)
+# import mimetypes
+# mimetypes.add_type("text/css", ".css", True)
+
+DEVELOPMENT_MODE = os.getenv("DEVELOPMENT_MODE", "True") == "True"
+
+if DEVELOPMENT_MODE is True:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": os.path.join(BASE_DIR, "db.sqlite3"),
+        }
+    }
+elif len(sys.argv) > 0 and sys.argv[1] != 'collectstatic':
+    if os.getenv("DATABASE_URL", None) is None:
+        raise Exception("DATABASE_URL environment variable not defined")
+    DATABASES = {
+        "default": dj_database_url.parse(os.environ.get("DATABASE_URL")),
+    }
 
 WSGI_APPLICATION = 'InventarioProject.wsgi.application'
 
@@ -110,12 +135,12 @@ MEDIA_URL = '/media/'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
 
 # CACHES = {
 #     "default": {
