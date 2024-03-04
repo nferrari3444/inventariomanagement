@@ -1,14 +1,12 @@
 from typing import Any
 from django.db.models.query import QuerySet
-from django.shortcuts import render
 from django.contrib import messages
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db import transaction
+from django.views.generic.edit import FormView
 from django.db.models import Avg, Count, Exists, OuterRef
-from django.forms import inlineformset_factory
 from django.db.models import Count, F, Value, Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
@@ -25,11 +23,15 @@ from annoying.functions import get_object_or_None
 from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError, PermissionDenied
-from .forms import SignUpForm , InboundForm, OutboundOrderForm, OutboundDeliveryForm, InboundReceptionForm, TransferForm, TransferReceptionForm
+from .forms import SignUpForm , InboundForm, OutboundOrderForm, OutboundDeliveryForm, InboundReceptionForm, TransferForm, TransferReceptionForm, CustomSetPasswordForm
 from .models import CustomUser, StockMovements, DiffProducts, Product, Warehouses, Tasks
 from django.core.cache import cache
-from django.core.mail import send_mail
-from django.contrib.auth.views import PasswordResetView
+from django.utils.http import urlsafe_base64_encode
+from django.core.mail import send_mail, BadHeaderError
+from django.contrib.auth.views import PasswordResetView, PasswordContextMixin
+from django.contrib.auth.forms import PasswordResetForm
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.encoding import force_bytes
 from django.contrib.messages.views import SuccessMessageMixin
 import openpyxl
 
@@ -49,16 +51,6 @@ class UserSignUpView(CreateView):
         login(self.request, user)
         return redirect('/')
 
-
-# class ResetPasswordView(SuccessMessageMixin, PasswordResetView):
-#     template_name = 'registration/password_reset_form.html'
-#     email_template_name = 'registration/password_reset_email.html'
-#     subject_template_name = 'registration/password_reset_subject'
-#     success_message = "We've emailed you instructions for setting your password, " \
-#                       "if an account exists with the email you entered. You should receive them shortly." \
-#                       " If you don't receive an email, " \
-#                       "please make sure you've entered the address you registered with, and check your spam folder."
-#     success_url = reverse_lazy('filsa-home')
 
 @login_required
 def index(request):
@@ -87,6 +79,8 @@ def Register(request):
     else:
         return render(request, 'registration/register.html')
     
+class PasswordResetConfirmView(PasswordContextMixin, FormView):
+    form_class= CustomSetPasswordForm
 
 def Login(request):
     
@@ -164,23 +158,7 @@ def getProducts(request):
     internalCodeJson = {product[2]: product[1] for product in product_data}
 
     productJson = {product[0]: product[1] for product in product_data}
-  #  print('product_data', product_data)
-  #  print('data',data)
-    
-    #list_data = list(product_data)
-    #json_data = dict(list_data)
-    
-   # warehouses_list_data = list(warehouses)
-   # warehouses_json_data = dict(warehouses_list_data)
-   # print(warehouses_list_data)
-   # suppliers_list_data = list(suppliers)
-   # suppliers_json_data = dict(suppliers_list_data)
 
-   # categories_list_data = list(categories)
-   # categories_json_data = dict(categories_list_data)
-
-
-   # print('json_data porducts is ', json_data)
 
     return JsonResponse({'products': productJson, 'codes':internalCodeJson}) #, 'warehouses': warehouses_json_data,'categories':  categories_json_data, 'supplier': suppliers_json_data})
 
@@ -248,7 +226,7 @@ def transferView(request):
         
             receptor = form.cleaned_data['receptor']
             warehouse_out = form.cleaned_data['warehouse']
-            solicitante = form.cleaned_data['issuer']
+            solicitante = request.user
             department = form.cleaned_data['department']
             motivoIngreso = 'Transferencia'
             # motivoIngreso = form.cleaned_data['motivoIngreso']
@@ -263,20 +241,6 @@ def transferView(request):
             print('products_list exists:')
             
             print('Product that not exist in database are:')    
-           # not_exists_products = Product.objects(~Exists(Product.objects.filter(name__in= products_list)))
-           # print(not_exists_products)
-            # print('product  in list')
-            # print(list(Product.objects.filter(name__in=[products_list], warehouse=warehouse_out)))
-
-            # products_in_db = list(Product.objects.filter(name__in=[products_list], warehouse=warehouse_out)) 
-            
-            # products_not_in_db = set(products_list).difference(products_in_db)
-
-            # print('products not in db are {}'.format(products_not_in_db))
-            # if len(list(products_not_in_db)) > 0:
-            #     messages.error(request, '\
-            #     Los siguientes productos {} no se encuentra en el deposito {}. Dar de alta el producto en el deposito para continuar'.format(', '.join(list(products_not_in_db)),warehouse_out), extra_tags='transfer')
-            #     return redirect('/transfer/')
 
             task = Tasks.objects.create(date= date, receptor= receptor, warehouse= warehouse_out, issuer=solicitante,
                                         motivoIngreso=motivoIngreso,  actionType=actionType, department=department)
@@ -286,9 +250,9 @@ def transferView(request):
                 product = form.cleaned_data['product_{}'.format(i)]
                 print('product in inbound view is {}'.format(product))
                 
-                if Product.objects.filter(name__in=product, warehouse=warehouse_out).exists() != True:
-                    messages.error(request, 'El producto seleccionado {} no se encuentra en el deposito {}. Dar de alta el producto en el deposito para continuar'.format(product,warehouse_out), extra_tags='transfer')
-                    return redirect('/transfer/')
+                # if Product.objects.filter(name__in=product, warehouse=warehouse_out).exists() != True:
+                #     messages.error(request, 'El producto seleccionado {} no se encuentra en el deposito {}. Dar de alta el producto en el deposito para continuar'.format(product,warehouse_out), extra_tags='transfer')
+                #     return redirect('/transfer/')
                     
                 productdb = Product.objects.get(name= product, warehouse= warehouse_out)
                 
@@ -329,10 +293,7 @@ def transferView(request):
 
                 datalist.append(newProduct)
 
-            else:
-                messages.error(request, 'El producto seleccionado {} no se encuentra en el deposito {}. Dar de alta el producto en el deposito para continuar'.format(product,warehouse_out), extra_tags='transfer')
-                return redirect('/transfer/')
-            print('new_product is:', datalist)
+           
             
           
             StockMovements.objects.bulk_create(datalist)     
@@ -396,19 +357,15 @@ def transferReceptionView(request, requested_id):
             issuer = form.cleaned_data['issuer']
             receptor = form.cleaned_data['receptor']
             warehouse = form.cleaned_data['warehouse']
-            actionType = 'Recepcion Transferencia'
-            # motivoIngreso = form.cleaned_data['motivoIngreso']
-            
-            # StockMovements.objects.create(product = product, date=date, department=department,
-            #                             issuer=issuer, actionType = actionType, cantidad=cantidad,
-            #                             motivoEgreso=motivoIngreso,status='Pending')
-            
+            actionType = 'Confirma Transferencia'
+            observations = form.cleaned_data['observations']
+
             datalist = []
             # task = Tasks.objects.create(date= date, receptor= receptor, warehouse= warehouse, issuer= issuer,
             #                             motivoIngreso=motivoIngreso,  actionType=actionType, department=department)
             
             taskToUpdate = Tasks.objects.filter(task_id=requested_id)
-            taskToUpdate.update(status='Confirmed')
+            taskToUpdate.update(status='Confirmed', observations=observations)
             
             taskupdated = Tasks.objects.filter(task_id = requested_id).values_list('receptor', 'issuer','status', 'motivoIngreso','motivoEgreso','warehouse','actionType')
             print('taskupdated in view is ', taskupdated)
@@ -462,10 +419,7 @@ def transferReceptionView(request, requested_id):
                 
                     datalist.append(newProductMovement)
                     
-                    # productInTransit = Product.objects.create(name= product, warehouse= warehouse,
-                    #             barcode= barcode, quantity = quantity, internalCode= internalCode, category= category,
-                    #             location = location, supplier = supplier , deltaQuantity= deltaQuantity,
-                    #             stockSecurity = stockSecurity, inTransit=inTransit)
+                 
                 
                 # productToDelete = Product.objects.filter(product_id= newproduct.product_id, warehouse='InTransit')
                 productToDelete = Product.objects.filter(name= product.product.name, warehouse= warehouseInTransit)
@@ -508,13 +462,10 @@ def inboundView(request):
     # if this is a POST request we need to process the form data
     if request.method == "POST":
         # # create a form instance and populate it with data from the request:
-        form = InboundForm(request.POST, request.FILES, extra = request.POST.get('extra_field_count'))
+        form = InboundForm(request.POST, user = request.user, extra = request.POST.get('extra_field_count'))
         # # check whether it's valid:
         print('form is valid', form.is_valid())
-       # print('form is', form)
-        # product = request.POST.get('product')
-        # print('product in view is', product)
-        # # print(form.cleaned_data['product'])
+       
         if form.is_valid():
         #     # process the data in form.cleaned_data as 
         #     product = form.cleaned_data['product']
@@ -526,7 +477,7 @@ def inboundView(request):
             
             receptor = form.cleaned_data['receptor']
             warehouse = form.cleaned_data['warehouse']
-            solicitante = form.cleaned_data['issuer']
+            solicitante =  request.user
             department = form.cleaned_data['department']
         #     cantidad = form.cleaned_data['cantidad']
         #     cantidadNeta = form.cleaned_data['cantidadNeta']
@@ -598,36 +549,6 @@ def inboundView(request):
                 connection=None,
                 html_message=None
             )
-        #     print('cantidad in view is:', cantidad)
-
-        #     StockMovements.objects.create(product = product, date=date, receptor=receptor,
-        #                                 warehouse=warehouse, actionType = actionType,
-        #                                 cantidad=cantidad, cantidadNeta=cantidadNeta,
-        #                                 motivoIngreso=motivoIngreso)
-
-        #     productToUpdate= Product.objects.filter(product_id=product.product_id, warehouse=warehouse)
-            
-        #     print('productToUpdate is:', productToUpdate)
-
-        #     productToUpdate.update(quantity = F('quantity') + cantidadNeta)
-
-        #     # Product.objects.update(name=product.name, warehouse=warehouse, quantity = F('quantity') + cantidadNeta,
-        #     #                     deltaQuantity = F('deltaQuantity') + deltaDiff)
-            
-        #     productInWH = DiffProducts.objects.filter(warehouse=warehouse,product=product)
-
-        #     if productInWH.exists():
-        #         productInWH.update(totalPurchase= F('totalPurchase') + cantidad, 
-        #                                 totalQuantity= F('totalQuantity') + cantidadNeta,
-        #                                 productDiff=F('productDiff') + deltaDiff )
-        #     else:
-                
-        #         DiffProducts.objects.create(product = product, warehouse=warehouse, totalPurchase=cantidad, 
-        #                                 totalQuantity=cantidadNeta, productDiff= deltaDiff)
-
-            # ...
-            # redirect to a new URL:
-            #return http.HttpResponseRedirect('')
             return redirect('/tasks/')
             #return HttpResponseRedirect("/inbound/")
 
@@ -675,8 +596,9 @@ def inboundReceptionView(request, requested_id):
             issuer = form.cleaned_data['issuer']
             receptor = form.cleaned_data['receptor']
             warehouse = form.cleaned_data['warehouse']
-            actionType = 'Recepcion Solicitud'
+            actionType = 'Confirma Ingreso'
             motivoIngreso = form.cleaned_data['motivoIngreso']
+            observations = form.cleaned_data['observations']
             
             
             # StockMovements.objects.create(product = product, date=date, department=department,
@@ -688,7 +610,7 @@ def inboundReceptionView(request, requested_id):
             #                             motivoIngreso=motivoIngreso,  actionType=actionType, department=department)
             
             taskToUpdate = Tasks.objects.filter(task_id=requested_id)
-            taskToUpdate.update(status='Confirmed')
+            taskToUpdate.update(status='Confirmed', observations=observations)
             
             taskupdated = Tasks.objects.filter(task_id = requested_id).values_list('receptor', 'issuer','status', 'motivoIngreso','motivoEgreso','warehouse','actionType')
             print('taskupdated in view is ', taskupdated)
@@ -739,6 +661,26 @@ def inboundReceptionView(request, requested_id):
         #form.task.queryset = Tasks.objects.filter(task_id = requested_id) 
         
     return render(request, "inboundReception.html", {"form": form, 'task_id': requested_id , "tasks": tasks}) #, "numberOfProducts": len(productsToReceive)})
+
+
+@login_required
+def inboundConfirmedView(request, requested_id):
+   # pendingRequest = get_object_or_None(StockMovements, pk=requested_id)
+    #print('pendingRequest product is:', pendingRequest.product)
+    # confirmedTask = get_object_or_None(Tasks, pk=requested_id)
+    confirmedTask = Tasks.objects.filter(task_id=requested_id, status='Confirmed')
+
+    return render(request, 'inboundConfirmed.html', { 'task': confirmedTask[0] })
+
+@login_required
+def transferConfirmedView(request, requested_id):
+   # pendingRequest = get_object_or_None(StockMovements, pk=requested_id)
+    #print('pendingRequest product is:', pendingRequest.product)
+    # confirmedTask = get_object_or_None(Tasks, pk=requested_id)
+    confirmedTask = Tasks.objects.filter(task_id=requested_id, status='Confirmed')
+
+    return render(request, 'transferConfirmed.html', { 'task': confirmedTask[0] })
+
 
 @login_required
 def outboundOrderView(request):
@@ -850,65 +792,6 @@ class StockListView(LoginRequiredMixin, generic.ListView):
 
     template_name = 'stock.html'
     print('llega aca con el checkbox')
-    # def get(self, request, *args, **kwargs):
-    #     print('get request stocklistview')
-    #    # stuff = self.get_queryset()
-    #     warehouse = request.POST.get('warehouse',None)
-    #     category = request.POST.get('category',None)
-    #     supplier = request.POST.get('supplier',None)
-
-    #     context = super(StockListView, self).get_context_data(**kwargs)
-
-    #     context['productList'] = Product.objects.all().values('name').distinct()
-    #     context['categoryList'] = Product.objects.all().values('category').distinct()
-    #     context['supplierList'] = Product.objects.all().values('supplier').distinct()
-    #     context['warehouseList'] = Warehouses.objects.all().values('name').distinct()
-
-
-    #     if category:
-    #         category_filter = True
-    #         categoryList = [category]
-    #     else:
-    #         categoryList = Product.objects.all().values('category').distinct()
-
-    #     if supplier:
-    #         supplier_filter = True
-    #         supplierList = [supplier]
-        
-    #     else:
-    #         supplierList = Product.objects.all().values('supplier').distinct()
-
-    #     if warehouse:
-    #         warehouseList = list(Warehouses.objects.get(name=warehouse))
-    #     else:
-    #         warehouseList = Warehouses.objects.all()
-
-    #     print('warehouse is', warehouse)
-    #     print('category is', categoryList)
-    #     print('supplier is', supplierList)
-    #     #player__name__in
-    #     filter_data = Product.objects.select_related('warehouse').filter(warehouse__name__in=[war for war in warehouseList], category__in =categoryList, supplier__in=supplierList) 
-    #     # data = serializers.serialize("json", Product.objects.filter(warehouse=warehouse, category=category, supplier=supplier).select_related('warehouse') )
-    #     print(filter_data)
-
-    #     return    render(request, self.template_name, {'products': filter_data}) 
-
-    # def post(self, request, *args, **kwargs):
-    #     context = super().post(request, *args, **kwargs)
-    #     foos = self.get_context_data().get('foos')
-    #     # do stuff here
-    #     return context
-    
-  
-        #data = serializers.serialize('json', context)
-        
-    
-        # context['products'] = filter_data
-        #return context
-       # render_to_response()
-       # return render(request, 'stock.html', {'products': filter_data}) 
-
-        #return HttpResponse(data, content_type="application/json")
    
 
     def get_context_data(self, *args, **kwargs):
@@ -959,72 +842,7 @@ class StockListView(LoginRequiredMixin, generic.ListView):
         
         print('context in get_context_data', context)
         return context 
-    
-    # def get_queryset(self, **kwargs):
-    #    qs = super().get_queryset(**kwargs)
-    #    print('qs in get_query_set is', qs)
-    #    return qs.filter(category='Insumos') #id=self.kwargs['pk'])
-    #    return qs.filter(brand_id=self.kwargs['pk'])
-    
-    # def post(self, request, *args, **kwargs):
-    #     print('post request view')
-
-    #    # self.object_list = self.get_queryset() 
-
-    #     warehouse = request.POST.get('warehouse',None)
-    #     category = request.POST.get('category',None)
-    #     supplier = request.POST.get('supplier',None)
-        
-    #    # context = super(StockListView, self).get_context_data(**kwargs)
-
-    #     # context['productList'] = Product.objects.all().values('name').distinct()
-    #     # context['categoryList'] = Product.objects.all().values('category').distinct()
-    #     # context['supplierList'] = Product.objects.all().values('supplier').distinct()
-    #     # context['warehouseList'] = Warehouses.objects.all().values('name').distinct()
-
-    #     #context = super(StockListView, self).post(request, *args, **kwargs)
-        
-    #     if category:
-    #         category_filter = True
-    #         categoryList = [category]
-    #     else:
-    #         categoryList = Product.objects.all().values('category').distinct()
-
-    #     if supplier:
-    #         supplier_filter = True
-    #         supplierList = [supplier]
-        
-    #     else:
-    #         supplierList = Product.objects.all().values('supplier').distinct()
-
-    #     if warehouse:
-    #          warehouseList = Warehouses.objects.get(name=warehouse)
-    #     # else:
-    #     #     warehouseList = Warehouses.objects.all()
-    #    # context = {}
-    #     warehouse = Warehouses.objects.get(name='Anaya 2710')
-    #     print('warehouse is', warehouse)
-    #     print('category is', categoryList)
-    #     print('supplier is', supplierList)
-    #     #player__name__in
-    #     #filter_data = Product.objects.select_related('warehouse').filter(warehouse=warehouse, category ='Insumos') #, supplier ='De Salt') 
-    #     # data = serializers.serialize("json", Product.objects.filter(warehouse=warehouse, category=category, supplier=supplier).select_related('warehouse') )
-    #     #print(filter_data)
-    #     self.object_list = self.get_queryset()
-        
-    #     context = super(StockListView, self).get_context_data(**kwargs)
-    #     #context = super().post(request, *args, **kwargs)
-    #     self.get_queryset = self.get_context_data().get('products').filter(warehouse=warehouse, category ='Insumos')
-    #    # context.update({'products': products})
-    #     self.object_list = self.get_queryset
-    #     print('context in post request is', self.object_list)
-
-    #     context.update({'products': self.object_list})
-    #     # do stuff here
-    #     return render(request,'stock.html', context) 
-    
-  
-
+       
 def filterProducts(request):
 
     data = dict()
@@ -1058,16 +876,6 @@ def filterProducts(request):
                              )
     
         return JsonResponse(data)
-
-    # else:
-    #     products = Product.objects.all()
-    #     context = {'products' : products}
-    #     data['html_table'] =  render_to_string('inject_table.html',
-    #                          context,
-    #                          request = request
-    #                          )
-    
-    #     return JsonResponse(data)
 
     if category and category != 'Total Categorias':
         category_filter = True
@@ -1151,7 +959,7 @@ def outboundDeliveryView(request, requested_id):
             warehouse = form.cleaned_data['warehouse']
             actionType = 'Confirma Egreso'
             motivoEgreso = form.cleaned_data['motivoEgreso']
-            
+            observations = form.cleaned_data['observations']
             # StockMovements.objects.create(product = product, date=date, department=department,
             #                             issuer=issuer, actionType = actionType, cantidad=cantidad,
             #                             motivoEgreso=motivoIngreso,status='Pending')
@@ -1161,7 +969,7 @@ def outboundDeliveryView(request, requested_id):
             #                             motivoIngreso=motivoIngreso,  actionType=actionType, department=department)
             
             taskToUpdate = Tasks.objects.filter(task_id=requested_id)
-            taskToUpdate.update(status='Confirmed')
+            taskToUpdate.update(status='Confirmed', observations=observations)
             
             
             task = Tasks.objects.get(task_id=requested_id)
@@ -1174,23 +982,6 @@ def outboundDeliveryView(request, requested_id):
                 quantity = form.fields['cantidad_{}'.format(i)]
                 diffQuantity = int(quantity) - int(netQuantity)
                 newproduct = Product.objects.get(name= product.product.name, warehouse=warehouse)
-            
-            # for i in range(0,int(numberOfProducts)):
-            #     print('i is', i)
-            #     product = form.cleaned_data['producto_{}'.format(i)]
-            #     print('product is {}'.format(product))
-                 
-            #     newproduct = Product.objects.get(name= product)
-            #     print('new products in view is {}'.format(newproduct))
-
-            #     # nuevoIngreso.barcode = form.cleaned_data['barcode_{}'.format(i)]
-            #     # nuevoIngreso.internalCode = form.cleaned_data['internalCode_{}'.format(i)]
-            #     quantity = form.cleaned_data['cantidad_{}'.format(i)]
-            #     netQuantity = form.cleaned_data['cantidadNeta_{}'.format(i)]
-
-            #     diffQuantity = int(quantity) - int(netQuantity)
-            #     print('product is:', product)
-            #     print('quantity is:', quantity)
 
                 productToUpdate= Product.objects.filter(product_id= newproduct.product_id, warehouse=warehouse)
             
@@ -1217,44 +1008,6 @@ def outboundDeliveryView(request, requested_id):
 
 
             return redirect('/tasks/')
-            
-        # #print('request product data', request.POST.get('product'))
-        # # create a form instance and populate it with data from the request:
-        # form = OutboundDeliveryForm(request.POST, instance= pendingTask)
-
-        # print('form is valid:' , form.is_valid)
-        # # check whether it's valid:
-        # if form.is_valid():
-        #     product = form.cleaned_data['product']
-        #     department = form.cleaned_data['department']
-        #     issuer = form.cleaned_data['issuer']
-        #     motivoEgreso = form.cleaned_data['motivoEgreso']
-        #     cantidad = form.cleaned_data['cantidad']
-        #     date = form.cleaned_data['date']
-        #     receptor = form.cleaned_data['receptor']
-        #     cantidadEntregada = form.cleaned_data['cantidadEntregada']
-        #     deliveryDate = form.cleaned_data['deliveryDate']
-        #     warehouse = form.cleaned_data['warehouse']
-        #     actionType = 'Confirma Entrega'
-        #     diffQuantity = cantidad - cantidadEntregada
-
-        #     StockMovements.objects.create(product = product, date=date, receptor=receptor,
-        #                                 warehouse=warehouse, actionType = actionType,
-        #                                 cantidad=cantidad, cantidadEntregada=cantidadEntregada,
-        #                                 motivoEgreso=motivoEgreso, status='Confirmed')
-
-        #     productToUpdate= Product.objects.filter(product_id=product.product_id, warehouse=warehouse)
-            
-        #     print('productToUpdate is:', productToUpdate)
-
-        #     productToUpdate.update(quantity = F('quantity') - cantidadEntregada, deltaQuantity = F('deltaQuantity') + diffQuantity  )
-            
-        #     # Antes estaba esta linea porque la tarea estaba para un producto y el StockMovement
-        #     # también.    
-        #     StockMovements.objects.filter(id=requested_id).update(status='Confirmed')
-        
-    
-            return redirect('/tasks/') # requested_id=requested_id)
            
     else:
 
@@ -1264,6 +1017,16 @@ def outboundDeliveryView(request, requested_id):
         
     return render(request, "outboundDelivery.html", {"form": form, 'task_id': requested_id , "tasks": tasks})#, "numberOfProducts": len(productsToReceive)})
 
+@login_required
+def outboundConfirmedView(request, requested_id):
+   # pendingRequest = get_object_or_None(StockMovements, pk=requested_id)
+    #print('pendingRequest product is:', pendingRequest.product)
+    # confirmedTask = get_object_or_None(Tasks, pk=requested_id)
+    confirmedTask = Tasks.objects.filter(task_id=requested_id, status='Confirmed')
+    print('confirmedTask is', confirmedTask)
+
+
+    return render(request, 'outboundConfirmed.html', { 'task': confirmedTask[0]})
 
 def finishTask(request, requested_id):
 
@@ -1324,3 +1087,39 @@ def export_excel(request):
     workbook.save(response)
 
     return response
+
+# def password_reset_request(request):
+#     if request.method == 'POST':
+#         password_form = PasswordResetForm(request.POST)
+#         if password_form.is_valid():
+
+#             data = password_form.cleaned_data['email']
+
+#             user_email = CustomUser.objects.filter(Q(email =data))
+#             if user_email.exists():
+#                 for user in user_email:
+#                     subject = 'Password Request'
+#                     email_template_name = 'registration/password_message.txt'
+#                     parameters = {
+#                         'email': user.email,
+#                         'domain': '127.0.0.1:8000',
+#                         'site_name': 'Filsa',
+#                         'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+#                         'token': default_token_generator.make_token(user),
+#                         'protocol':'http',
+#                     }
+
+#                     email = render_to_string(email_template_name, parameters)
+#                     try:
+#                         send_mail(subject, email, '',  [user.email] , fail_silently=False)
+#                     except:
+#                         return HttpResponse('Invalid Header')
+                    
+#                     return redirect('password_reset_done')
+#     else:
+#         password_form = PasswordResetForm()
+
+#     context = {
+#         'password_form': password_form,
+#     }
+#     return render(request, 'registration/password_reset.html' ,context)

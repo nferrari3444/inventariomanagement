@@ -100,24 +100,34 @@
                 
                 {% endif %}   
 
-
                 
-                {% if task.actionType == 'Nuevo Egreso' %}
-
-                
-
+                {% if task.actionType == 'Nuevo Egreso' and task.status == 'Pending' %}
                 <td class="px-6 py-4 text-right">
                     <a href="{% url 'outbounddelivery' requested_id=task.task_id %}"  class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit</a>
                 </td>
+                {% elif task.actionType == 'Nuevo Egreso' and task.status == 'Confirmed' %}
+                <td class="px-6 py-4 text-right">
+                    <a href="{% url 'outboundconfirmed' requested_id=task.task_id %}"  class="font-medium text-blue-600 dark:text-blue-500 hover:underline">View</a>
+                </td>
 
-                {% elif task.actionType == 'Nuevo Ingreso' %}
+                {% elif task.actionType == 'Nuevo Ingreso' and task.status == 'Pending' %}
                 <td class="px-6 py-4 text-right">
                     <a href="{% url 'inboundreception' requested_id=task.task_id %}"  class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit</a>
                 </td>
 
-                {% elif task.actionType == 'Transferencia' %}
+                {% elif task.actionType == 'Nuevo Ingreso' and task.status == 'Confirmed' %}
+                <td class="px-6 py-4 text-right">
+                    <a href="{% url 'inboundconfirmed' requested_id=task.task_id %}"  class="font-medium text-blue-600 dark:text-blue-500 hover:underline">View</a>
+                </td>
+
+                {% elif task.actionType == 'Transferencia' and task.status == 'Pending' %}
                 <td class="px-6 py-4 text-right">
                     <a href="{% url 'transferreception' requested_id=task.task_id %}"  class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit</a>
+                </td>
+
+                {% elif task.actionType == 'Transferencia' and task.status == 'Confirmed' %}
+                <td class="px-6 py-4 text-right">
+                    <a href="{% url 'transferconfirmed' requested_id=task.task_id %}"  class="font-medium text-blue-600 dark:text-blue-500 hover:underline">View</a>
                 </td>
 
                  {% endif %}   

@@ -129,7 +129,7 @@ class Tasks(models.Model):
 
     warehouse = models.ForeignKey(Warehouses, on_delete= models.CASCADE, blank=True, null=True)
     actionType = models.CharField(max_length=20,  default='Inbound')
-
+    observations = models.CharField(max_length=500, null=True, blank= True)
    # date = models.DateField(verbose_name=u"Fecha")
 #deliveryDate = models.DateField(verbose_name=u"Fecha", default = '1970-01-01')
 #actionType = models.CharField(max_length=20,  default='Inbound')

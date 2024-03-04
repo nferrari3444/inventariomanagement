@@ -11,6 +11,7 @@
 {% if form.errors %}
 <div class="mb-4 text-center text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400" role="alert">
     <span class="font-medium">{{form.non_field_errors}} </span>
+    <button class="inline-flex items-center px-2 py-1 mt-2 sm:mt-3 text-sm font-medium text-center text-white bg-red-700 hover:bg-red-800 rounded-lg focus:ring-4 focus:ring-primary-200 dark:focus:ring-primary-900"><a href="{% url 'outboundorder' %}">Presione Ok para Continuar</a></button>
 {% endif %}
 
 <section class="bg-white dark:bg-gray-900">
