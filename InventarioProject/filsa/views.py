@@ -176,7 +176,8 @@ def getProductsNames(request):
             for product in qs:
                 titles.append(product.name)
          
-            print(titles)        
+            print(titles)       
+            titles = list(set(titles)) 
             return JsonResponse(titles, safe=False)
         
         else:
@@ -188,7 +189,8 @@ def getProductsNames(request):
                 print('internal code in autocomplete is', product.internalCode)
                 codes.append(str(product.internalCode))
          
-            print(codes)        
+            print(codes)      
+            codes = list(set(codes))  
             return JsonResponse(codes,safe=False)
             
 
@@ -359,13 +361,13 @@ def transferReceptionView(request, requested_id):
             warehouse = form.cleaned_data['warehouse']
             actionType = 'Confirma Transferencia'
             observations = form.cleaned_data['observations']
-
+            deliveryDate = datetime.datetime.now().date()
             datalist = []
             # task = Tasks.objects.create(date= date, receptor= receptor, warehouse= warehouse, issuer= issuer,
             #                             motivoIngreso=motivoIngreso,  actionType=actionType, department=department)
             
             taskToUpdate = Tasks.objects.filter(task_id=requested_id)
-            taskToUpdate.update(status='Confirmed', observations=observations)
+            taskToUpdate.update(status='Confirmed', observations=observations, deliveryDate=deliveryDate)
             
             taskupdated = Tasks.objects.filter(task_id = requested_id).values_list('receptor', 'issuer','status', 'motivoIngreso','motivoEgreso','warehouse','actionType')
             print('taskupdated in view is ', taskupdated)
@@ -599,7 +601,7 @@ def inboundReceptionView(request, requested_id):
             actionType = 'Confirma Ingreso'
             motivoIngreso = form.cleaned_data['motivoIngreso']
             observations = form.cleaned_data['observations']
-            
+            deliveryDate = datetime.datetime.now().date()
             
             # StockMovements.objects.create(product = product, date=date, department=department,
             #                             issuer=issuer, actionType = actionType, cantidad=cantidad,
@@ -610,7 +612,7 @@ def inboundReceptionView(request, requested_id):
             #                             motivoIngreso=motivoIngreso,  actionType=actionType, department=department)
             
             taskToUpdate = Tasks.objects.filter(task_id=requested_id)
-            taskToUpdate.update(status='Confirmed', observations=observations)
+            taskToUpdate.update(status='Confirmed', observations=observations, deliveryDate=deliveryDate)
             
             taskupdated = Tasks.objects.filter(task_id = requested_id).values_list('receptor', 'issuer','status', 'motivoIngreso','motivoEgreso','warehouse','actionType')
             print('taskupdated in view is ', taskupdated)
@@ -902,9 +904,15 @@ def filterProducts(request):
         filter_data = Product.objects.select_related('warehouse').filter(category__in =categoryList, supplier__in=supplierList) 
 
    # data = serializers.serialize("json", Product.objects.filter(warehouse=warehouse, category=category, supplier=supplier).select_related('warehouse') )
-    print(filter_data)
+    
 
     context = {'products' : filter_data}
+    print('filter data is \n')
+    print(filter_data)
+    print('some product in filter data')
+    print(filter_data[0])
+    print('stock security in some product in filter data')
+    print(filter_data[0].stockSecurity)
     context['productList'] = Product.objects.all().values('name').distinct()
     context['categoryList'] = Product.objects.all().values('category').distinct()
     context['supplierList'] = Product.objects.all().values('supplier').distinct()
@@ -960,6 +968,7 @@ def outboundDeliveryView(request, requested_id):
             actionType = 'Confirma Egreso'
             motivoEgreso = form.cleaned_data['motivoEgreso']
             observations = form.cleaned_data['observations']
+            deliveryDate = datetime.datetime.now().date()
             # StockMovements.objects.create(product = product, date=date, department=department,
             #                             issuer=issuer, actionType = actionType, cantidad=cantidad,
             #                             motivoEgreso=motivoIngreso,status='Pending')
@@ -969,7 +978,7 @@ def outboundDeliveryView(request, requested_id):
             #                             motivoIngreso=motivoIngreso,  actionType=actionType, department=department)
             
             taskToUpdate = Tasks.objects.filter(task_id=requested_id)
-            taskToUpdate.update(status='Confirmed', observations=observations)
+            taskToUpdate.update(status='Confirmed', observations=observations, deliveryDate= deliveryDate)
             
             
             task = Tasks.objects.get(task_id=requested_id)

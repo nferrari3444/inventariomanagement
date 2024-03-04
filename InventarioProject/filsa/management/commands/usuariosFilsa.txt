@@ -8,10 +8,10 @@ Silvia Sanguinetti,alfabeta1984,silvia.sanguinetti@filsa.com.uy,Administracion,A
 Sergio Ballestrino,alfabeta1984,sergio.ballestrino@filsa.com.uy,Ventas,Comercial
 Rodrigo Fregueiro,alfabeta1984,rodrigofregueiro@filsa.com.uy,Encargado Servicio Tecnico,Supervisor
 Gonzalo Fregueiro,alfabeta1984,gonzalo.fregueiro@filsa.com.uy,Encargado Servicio Tecnico,Supervisor
-Raul Ricci,alfabeta1984,raul.ricci@filsa.com.uy,Servicio tecnico,Técnico
-Carlos Echeverria,alfabeta1984,carlos.echeverria@filsa.com.uy,Servicio tecnico,Técnico
-Fernando Elías,alfabeta1984,fernando.elias@filsa.com.uy,Servicio tecnico,Técnico
-Cristian Lopez,alfabeta1984,cristian.lopez@filsa.com.uy,Servicio tecnico,Técnico
-Joel Villar,alfabeta1984,logistica@filsa.com.uy,Logistica,Logística
-Gerardo Braga,alfabeta1984,gerardo.braga@ciame.com.uy,Logistica,Logística
+Raul Ricci,alfabeta1984,raul.ricci@filsa.com.uy,Servicio tecnico,Tecnico
+Carlos Echeverria,alfabeta1984,carlos.echeverria@filsa.com.uy,Servicio tecnico,Tecnico
+Fernando Elías,alfabeta1984,fernando.elias@filsa.com.uy,Servicio tecnico,Tecnico
+Cristian Lopez,alfabeta1984,cristian.lopez@filsa.com.uy,Servicio tecnico,Tecnico
+Joel Villar,alfabeta1984,logistica@filsa.com.uy,Logistica,Logistica
+Gerardo Braga,alfabeta1984,gerardo.braga@ciame.com.uy,Logistica,Logistica
 Nicolas Ferrari,alfabeta1984,nferrari3444@gmail.com,Administracion,Administrador

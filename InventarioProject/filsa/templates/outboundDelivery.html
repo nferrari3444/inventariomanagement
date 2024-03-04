@@ -10,7 +10,7 @@
 <section class="bg-white dark:bg-gray-900">
     <div class="py-8 px-4 mx-auto max-w-2xl lg:py-16">
         <h1 class="flex mb-4 text-2xl sm:px-16 font-extrabold leading-none tracking-tight text-gray-900 md:text-3xl lg:text-4xl dark:text-white">Entrega de Productos</h1>
-        <form id ='productsreception' action="{% url 'outbounddelivery' task_id  %}" method="POST">
+        <form id ='productsreception' action="{% url 'outbounddelivery' task_id  %}" method="POST" onsubmit="openLoader()">
             {% csrf_token %}
             {{form.extra_field_count}}
             <div class="grid gap-4 sm:grid-cols-2 sm:gap-6">
@@ -155,7 +155,10 @@
         $("[name=extra_field_count]").val(form_count);
     })
         
-    
+    function openLoader() {
+    document.getElementById("loader").style.display = "block";
+
+}
         
     
         </script>

@@ -76,7 +76,9 @@
             <a href="{% url 'tasks' %}" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Tareas</a>
           </li>
           <li>
+            {% if user.groups.all.0.name.strip == "Administrador"  or user.groups.all.0.name.strip == "Supervisor"  or user.groups.all.0.name.strip == "Técnico"   or user.groups.all.0.name.strip == "Logística" %}
             <a href="{% url 'transfer' %}" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Transferencia</a>
+            {% endif %}
           </li>
           <li>
 
@@ -87,7 +89,10 @@
            {% endif %}
           </li>
           <li>
+            {% if user.groups.all.0.name.strip == "Administrador"  or user.groups.all.0.name.strip == "Supervisor" or user.groups.all.0.name.strip == "Comercial" %}
             <a href="{% url 'outboundorder' %}" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Nuevo Egreso</a>
+            {% endif %}
+
           </li>
         </ul>
       </div>
