@@ -1,6 +1,6 @@
 from .base import *
 
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 USE_X_FORWARDED_HOST=True
 
@@ -35,6 +35,7 @@ USE_X_FORWARDED_HOST=True
 #STATICFILES_STORAGE= 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 
+# STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 #STATICFILES_STORAGE='custom_storages.StaticStorage'
 
 #STATIC_URL= "https://%s/%s/" % (AWS_S3_CUSTOM_DOMAIN, STATICFILES_LOCATION)
@@ -42,9 +43,21 @@ USE_X_FORWARDED_HOST=True
 
 # AWS_S3_SECURE_URLS= True
 
+
+STATIC_URL = '/static/'
+#STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles', 'static')
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS =  os.path.join(BASE_DIR, "static"),
-STATIC_URL = 'static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles', 'static')
+
+
+STORAGES = {
+    # ...
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
+
+
 MEDIA_URLS ='/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
