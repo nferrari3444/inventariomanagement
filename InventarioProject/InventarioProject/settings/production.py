@@ -1,6 +1,6 @@
 from .base import *
 
-BASE_DIR = Path(__file__).resolve().parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 USE_X_FORWARDED_HOST=True
 
