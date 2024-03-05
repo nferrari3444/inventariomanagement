@@ -30,8 +30,8 @@ class Command(BaseCommand):
 
         #users_file = './usuariosFilsa.txt' 
         #products_file = './productosFilsa.txt' 
-        users_file = './usuariosFilsa.txt'
-        products_file = './productosFilsa.txt'
+        users_file = "https://filsa.s3.amazonaws.com/usuariosFilsa.txt"
+        products_file = "https://filsa.s3.amazonaws.com/productosFilsa.txt"
         #f = open(users_file, "r")
         #reader = f.read()
         #users_lines = list(reader)
