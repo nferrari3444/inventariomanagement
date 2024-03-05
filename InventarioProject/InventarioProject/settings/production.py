@@ -55,13 +55,13 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT=  BASE_DIR
 
 
-COMPRESS_URL =   STATIC_URL      #'/static/'
-COMPRESS_ROOT =  '/static/'              #STATIC_URL               #BASE_DIR / 'static'
+# COMPRESS_URL =   STATIC_URL      #'/static/'
+# COMPRESS_ROOT =  '/static/'              #STATIC_URL               #BASE_DIR / 'static'
 
-COMPRESS_ENABLED = True
+# COMPRESS_ENABLED = True
 
 
-STATICFILES_FINDERS = ('compressor.finders.CompressorFinder',)
+#STATICFILES_FINDERS = ('compressor.finders.CompressorFinder',)
 
 DATABASES = {
     'default': {
