@@ -48,10 +48,11 @@ USE_X_FORWARDED_HOST=True
 # AWS_S3_SECURE_URLS= True
 
 
-STATIC_URL = '/static/'
+#STATIC_URL = '/static/'
 #STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles', 'static')
-STATIC_ROOT = BASE_DIR / 'staticfiles/'
-STATICFILES_DIRS =  os.path.join(BASE_DIR, "static"),
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+STATICFILES_DIRS =  [os.path.join(BASE_DIR, "static")]
 
 print('STATICFILES_DIRS is ', STATICFILES_DIRS )
 
@@ -85,7 +86,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # COMPRESS_ENABLED = True
 
 
-STATICFILES_FINDERS = ('compressor.finders.CompressorFinder',)
+#STATICFILES_FINDERS = ('compressor.finders.CompressorFinder',)
 
 DATABASES = {
     'default': {
