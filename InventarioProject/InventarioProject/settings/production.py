@@ -1,12 +1,14 @@
 from .base import *
 
-
+BASE_DIR = Path(__file__).resolve().parent
 
 USE_X_FORWARDED_HOST=True
 
+
 STATICFILES_STORAGE= 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-STATICFILES_DIRS =  'static',
-STATIC_ROOT =  'staticfiles_build'
+STATICFILES_DIRS =  [os.path.join(BASE_DIR, "static")]
+
+STATIC_ROOT =  os.path.join(BASE_DIR, "staticfiles_build")
 
 
 DATABASES = {
