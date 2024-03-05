@@ -25,7 +25,7 @@ urlpatterns = [
     path('', include('filsa.urls')),
     path('', include('django.contrib.auth.urls'))
     
-] + static(settings.production.STATIC_URL, document_root=settings.production.STATIC_ROOT)
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 urlpatterns += static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)
 
