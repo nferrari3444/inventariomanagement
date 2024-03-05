@@ -23,7 +23,7 @@ USE_X_FORWARDED_HOST=True
 # you run `collectstatic`).
 #STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
-# STATICFILES_DIRS =  [os.path.join(BASE_DIR, "static")]
+
 
 # STATICFILES_LOCATION = 'static'
 # STATICFILES_STORAGE = 'custom_storages.StaticStorage'
@@ -42,6 +42,7 @@ USE_X_FORWARDED_HOST=True
 
 # AWS_S3_SECURE_URLS= True
 
+STATICFILES_DIRS =  os.path.join(BASE_DIR, "static"),
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build', 'static')
 MEDIA_URLS ='/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
