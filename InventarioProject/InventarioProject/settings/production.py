@@ -1,7 +1,11 @@
 from .base import *
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+#BASE_DIR = Path(__file__).resolve().parent.parent
 
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+
+print('BASE_DIR is', BASE_DIR)
+#print('BASE_DIR_ is', BASE_DIR_)
 USE_X_FORWARDED_HOST=True
 
 
@@ -46,9 +50,10 @@ USE_X_FORWARDED_HOST=True
 
 STATIC_URL = '/static/'
 #STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles', 'static')
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATIC_ROOT = BASE_DIR / 'staticfiles/'
 STATICFILES_DIRS =  os.path.join(BASE_DIR, "static"),
 
+print('STATICFILES_DIRS is ', STATICFILES_DIRS )
 
 STORAGES = {
     # ...
