@@ -5,8 +5,9 @@ from .base import *
 
 
 STATICFILES_STORAGE= 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-STATICFILES_DIRS = os.path.join(BASE_DIR, 'static'),
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build', 'static')
+STATICFILES_DIRS = os.path.join(BASE_DIR, 'static')
+STATIC_URL = "static/"
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 
 DATABASES = {
@@ -17,6 +18,6 @@ DATABASES = {
         'USER': 'postgres',
         'PASSWORD': os.getenv('PGPASSWORD'),
         'HOST': os.getenv('PGHOST'),
-        'PORT': 36295,
+        'PORT':  39239
     }
 }
