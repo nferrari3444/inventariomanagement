@@ -2,7 +2,7 @@ from .base import *
 
 
 
-
+USE_X_FORWARDED_HOST=True
 
 STATICFILES_STORAGE= 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 STATICFILES_DIRS =  'static',
