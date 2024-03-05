@@ -19,9 +19,7 @@ import psycopg2
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-BASE_DIR_ = os.path.dirname(os.path.dirname(__file__))
 
-BASE_DIR__ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 import environ
 env = environ.Env()
@@ -33,7 +31,7 @@ environ.Env.read_env()
 SECRET_KEY = 'django-insecure-1t6k3r0)5-(nn@i3mp9_o&t+x*v&q+j8v=#ux!y_j17hqm!hw%'
 #SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", get_random_secret_key())
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 #DEBUG = os.getenv("DEBUG", "True") == "True"
 ALLOWED_HOSTS = ['127.0.0.1','localhost','inventariomanagement.vercel.app', '*.vercel.app', '.now.sh']
 
@@ -217,31 +215,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 #if os.environ.get('VERCEL'):
     #STATIC_ROOT= os.path.join(BASE_DIR, "staticfiles")
-STATICFILES_STORAGE= 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-STATICFILES_DIRS = os.path.join(BASE_DIR, 'static'),
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build', 'static')
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'URL': os.getenv('DATABASE_URL'),
-        'NAME': os.getenv('PGDATABASE'),
-        'USER': 'postgres',
-        'PASSWORD': os.getenv('PGPASSWORD'),
-        'HOST': os.getenv('PGHOST'),
-        'PORT': 36295,
-    }
-}
 
-#     DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'URL': 'DATABASE_URL',
-#         'NAME': 'PGDATABASE',
-#         'USER': 'PGUSER',
-#         'PASSWORD': 'PGPASSWORD',
-#         'HOST': 'PGHOST',
-#         'PORT': PGPORT,
-#     }
-# }
