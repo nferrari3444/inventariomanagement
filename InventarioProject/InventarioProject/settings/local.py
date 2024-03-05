@@ -4,6 +4,16 @@ from .base import *
 STATIC_ROOT =  os.path.join(BASE_DIR, 'static/')    
 #print('STATIC_ROOT is {}'.format(STATIC_ROOT))
 
+COMPRESS_URL = '/static/'
+COMPRESS_ROOT = BASE_DIR / 'static'
+
+COMPRESS_ENABLED = True
+
+STATICFILES_FINDERS = ('compressor.finders.CompressorFinder',
+                       'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder')
+
+
 STATIC_URL = 'static/'
                                  # BASE_DIR / 'static'
 

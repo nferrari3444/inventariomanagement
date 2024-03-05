@@ -119,14 +119,7 @@ ADMIN_MEDIA_PREFIX = '/static/admin/'
 
 AUTH_USER_MODEL = 'filsa.CustomUser'
 
-COMPRESS_URL = '/static/'
-COMPRESS_ROOT = BASE_DIR / 'static'
 
-COMPRESS_ENABLED = True
-
-STATICFILES_FINDERS = ('compressor.finders.CompressorFinder',
-                       'django.contrib.staticfiles.finders.FileSystemFinder',
-    'django.contrib.staticfiles.finders.AppDirectoriesFinder')
 
 MEDIA_ROOT = BASE_DIR / 'media'
 MEDIA_URL = '/media/'
