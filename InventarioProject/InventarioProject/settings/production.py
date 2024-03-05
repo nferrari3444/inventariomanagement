@@ -46,7 +46,7 @@ USE_X_FORWARDED_HOST=True
 
 
 # AWS_S3_SECURE_URLS= True
-
+STATICFILES_FINDERS = ('compressor.finders.CompressorFinder',)
 
 #STATIC_URL = '/static/'
 #STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles', 'static')
@@ -86,7 +86,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # COMPRESS_ENABLED = True
 
 
-#STATICFILES_FINDERS = ('compressor.finders.CompressorFinder',)
+
 
 DATABASES = {
     'default': {
