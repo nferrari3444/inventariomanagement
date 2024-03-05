@@ -61,7 +61,7 @@ MEDIA_ROOT=  BASE_DIR
 # COMPRESS_ENABLED = True
 
 
-#STATICFILES_FINDERS = ('compressor.finders.CompressorFinder',)
+STATICFILES_FINDERS = ('compressor.finders.CompressorFinder',)
 
 DATABASES = {
     'default': {
