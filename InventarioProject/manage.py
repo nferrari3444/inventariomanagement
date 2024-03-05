@@ -2,11 +2,18 @@
 """Django's command-line utility for administrative tasks."""
 import os
 import sys
+from InventarioProject.settings import base
 
 
 def main():
     """Run administrative tasks."""
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'InventarioProject.settings')
+
+    if base.DEBUG == True:
+        os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'InventarioProject.settings.local')
+    
+    else:
+        os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'InventarioProject.settings.production')
+    #os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'InventarioProject.settings')
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
