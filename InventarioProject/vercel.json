@@ -25,5 +25,7 @@
         "dest": "InventarioProject/wsgi.py"
       }
   
-    ]
+    ],
+
+    "outputDirectory": "InventarioProject/staticfiles"
   }
