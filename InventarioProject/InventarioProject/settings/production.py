@@ -42,9 +42,9 @@ USE_X_FORWARDED_HOST=True
 
 # AWS_S3_SECURE_URLS= True
 
-STATICFILES_DIRS =  os.path.join(BASE_DIR, "InventarioProject/static"),
+STATICFILES_DIRS =  os.path.join(BASE_DIR, "static/"),
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'InventarioProject/staticfiles')
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 MEDIA_URLS ='/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
