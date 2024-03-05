@@ -10,7 +10,7 @@
       {
         "src": "build_files.sh",
         "use": "@vercel/static-build",
-        "config": { "distDir": "staticfiles" }
+        "config": { "distDir": "InventarioProject/staticfiles" }
     }],
 
     "routes": [
@@ -25,5 +25,7 @@
         "dest": "InventarioProject/wsgi.py"
       }
   
-    ]
+    ],
+
+    "outputDirectory": "./InventarioProject/InventarioProject/staticfiles"
   }
