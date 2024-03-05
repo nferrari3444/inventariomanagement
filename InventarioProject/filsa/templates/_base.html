@@ -22,17 +22,15 @@
     <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
 
     <!-- Autocomplete JS -->
+   <!-- Autocomplete CSS -->
+   <script src="{% static 'js/autocomplete.js' %}"></script>
+   <link rel="stylesheet" href="{% static 'css/autocomplete.min.css' %}">
 
-
-
-   
-    <link rel="stylesheet" href="{% static 'src/output.css' %}">
-    <!-- Autocomplete CSS -->
-    <script src="{% static 'js/autocomplete.js' %}"></script>
-
-    <link rel="stylesheet" href="{% static 'css/autocomplete.min.css' %}">
+    {% compress css %}
     
-
+ <link rel="stylesheet" href="{% static 'src/output.css' %}">  
+    
+    {% endcompress %}
 </head>
 
 <nav class="bg-cyan-200 border-gray-200 dark:bg-gray-900">

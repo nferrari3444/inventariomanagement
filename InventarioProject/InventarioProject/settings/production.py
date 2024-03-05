@@ -4,14 +4,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 USE_X_FORWARDED_HOST=True
 
-# COMPRESS_URL = '/static/'
-# COMPRESS_ROOT = BASE_DIR / 'static'
+COMPRESS_URL = '/static/'
+COMPRESS_ROOT = BASE_DIR / 'static'
 
-# COMPRESS_ENABLED = True
+COMPRESS_ENABLED = True
 
 
-# STATICFILES_FINDERS = ('compressor.finders.CompressorFinder',
-#                        )
+STATICFILES_FINDERS = ('compressor.finders.CompressorFinder',)
 
 AWS_S3_OBJECT_PARAMETERS = {
     'Expires': 'Thu, 31 Dec 2099 20:00:00 GMT',
@@ -49,11 +48,12 @@ DEFAULT_FILE_STORAGE = 'custom_storages.MediaStorage'
 
 
 AWS_S3_SECURE_URLS= True
+STATIC_URL= "https://%s/%s/" % (AWS_S3_CUSTOM_DOMAIN, STATICFILES_LOCATION)
 
-#STATIC_ROOT= os.path.join(BASE_DIR,'static')
+STATIC_ROOT= os.path.join(BASE_DIR,'static')
 
-#MEIDA_URL = '/media/'
-#MEDIA_ROOT=  BASE_DIR
+MEDIA_URL = '/media/'
+MEDIA_ROOT=  BASE_DIR
 
 DATABASES = {
     'default': {
