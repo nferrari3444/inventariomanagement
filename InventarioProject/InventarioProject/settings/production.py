@@ -56,7 +56,7 @@ MEDIA_ROOT=  BASE_DIR
 
 
 COMPRESS_URL =   STATIC_URL      #'/static/'
-COMPRESS_ROOT =  STATIC_URL               #BASE_DIR / 'static'
+COMPRESS_ROOT =  '/static'              #STATIC_URL               #BASE_DIR / 'static'
 
 COMPRESS_ENABLED = True
 
