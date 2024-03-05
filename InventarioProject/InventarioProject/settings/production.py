@@ -4,14 +4,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 USE_X_FORWARDED_HOST=True
 
-COMPRESS_URL = '/static/'
-COMPRESS_ROOT = BASE_DIR / 'static'
+# COMPRESS_URL = '/static/'
+# COMPRESS_ROOT = BASE_DIR / 'static'
 
-COMPRESS_ENABLED = True
+# COMPRESS_ENABLED = True
 
 
-STATICFILES_FINDERS = ('compressor.finders.CompressorFinder',
-                       )
+# STATICFILES_FINDERS = ('compressor.finders.CompressorFinder',
+#                        )
 
 AWS_S3_OBJECT_PARAMETERS = {
     'Expires': 'Thu, 31 Dec 2099 20:00:00 GMT',
