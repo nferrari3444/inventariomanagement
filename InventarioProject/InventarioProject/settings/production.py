@@ -4,10 +4,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 USE_X_FORWARDED_HOST=True
 
-COMPRESS_URL = '/static/'
-COMPRESS_ROOT = BASE_DIR / 'static'
+# COMPRESS_URL = '/static/'
+# COMPRESS_ROOT = BASE_DIR / 'static'
 
-COMPRESS_ENABLED = True
+# COMPRESS_ENABLED = True
 
 
 AWS_S3_OBJECT_PARAMETERS = {
