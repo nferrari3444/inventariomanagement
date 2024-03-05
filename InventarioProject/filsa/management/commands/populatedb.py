@@ -30,8 +30,8 @@ class Command(BaseCommand):
 
         #users_file = './usuariosFilsa.txt' 
         #products_file = './productosFilsa.txt' 
-        users_file = 'C:/Users/nicol/Inventario/InventarioProject/filsa/management/commands/usuariosFilsa.txt'
-        products_file = 'C:/Users/nicol/Inventario/InventarioProject/filsa/management/commands/productosFilsa.txt'
+        users_file = './usuariosFilsa.txt'
+        products_file = './productosFilsa.txt'
         #f = open(users_file, "r")
         #reader = f.read()
         #users_lines = list(reader)
