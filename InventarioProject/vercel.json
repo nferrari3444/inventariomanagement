@@ -27,5 +27,5 @@
   
     ],
 
-    "outputDirectory": "./InventarioProject/InventarioProject/staticfiles"
+    "outputDirectory": "InventarioProject/InventarioProject/staticfiles"
   }
