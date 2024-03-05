@@ -18,8 +18,7 @@ STATIC_ROOT =  os.path.join(BASE_DIR, "staticfiles_build","static")
 STATICFILES_STORAGE= 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 STATICFILES_FINDERS = ('compressor.finders.CompressorFinder',
-                        "django.contrib.staticfiles.finders.FileSystemFinder",
-    "django.contrib.staticfiles.finders.AppDirectoriesFinder")
+                       )
 
 
 DATABASES = {
