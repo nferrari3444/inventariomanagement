@@ -23,7 +23,10 @@
         "src": "/(.*)",
         "dest": "InventarioProject/wsgi.py"
       }
-    ]
+    ],
+
+
+    "outputDirectory": "staticfiles_build"
 
   
    
