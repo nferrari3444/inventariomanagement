@@ -13,7 +13,6 @@ STATICFILES_FINDERS = ('compressor.finders.CompressorFinder',
                        'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder')
 
-
 STATIC_URL = 'static/'
                                  # BASE_DIR / 'static'
 
