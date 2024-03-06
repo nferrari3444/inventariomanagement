@@ -18,7 +18,7 @@ import dj_database_url
 import psycopg2
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 
 import environ
@@ -197,7 +197,7 @@ STATIC_URL = 'static/'
                                  # BASE_DIR / 'static'
 
 #STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
-STATICFILES_LOCATION = '/static/'
+#STATICFILES_LOCATION = '/static/'
 
 #print('STATICFILES_DIRS IS {}'.format(STATICFILES_DIRS))
 

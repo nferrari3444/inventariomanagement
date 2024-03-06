@@ -19,9 +19,9 @@ class CustomUser( AbstractBaseUser , PermissionsMixin ):
                 ]
   
     
-    username = models.CharField(max_length=50)
-    password = models.CharField(max_length=50)
-    email = models.EmailField(max_length=50, blank=False, unique=True, 
+    username = models.CharField(max_length=40)
+    password = models.CharField(max_length=100)
+    email = models.EmailField(max_length=40, blank=False, unique=True, 
                               default='', error_messages =
                                 {'required': 'Please provide your email address.',
                   'unique': 'An account with this email exist'},)
@@ -50,7 +50,7 @@ class CustomUser( AbstractBaseUser , PermissionsMixin ):
 
 # Create your models here.
 class Warehouses(models.Model):
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=40)
 
     def __str__(self):
         return self.name
@@ -71,7 +71,7 @@ class Product(models.Model):
     #     unique_together = (('product_id', 'warehouse'),)
 
     product_id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=40)
     barcode = models.BigIntegerField(verbose_name=u"Codigo de Barras")
     internalCode = models.BigIntegerField(verbose_name=u"Codigo Interno")
     quantity = models.FloatField()
@@ -149,7 +149,7 @@ class StockMovements(models.Model):
     task = models.ForeignKey(Tasks, on_delete=models.CASCADE,  blank=True, null=True )
 #date = models.DateField(verbose_name=u"Fecha")
   #  deliveryDate = models.DateField(verbose_name=u"Fecha", default = '1970-01-01')
-    actionType = models.CharField(max_length=20,  default='Inbound')
+    actionType = models.CharField(max_length=25,  default='Inbound')
     
   #  receptor = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='receptor',  blank=True, null=True)
     # department = models.CharField(max_length=30, choices = DEPARTMENT, default='Sales')
