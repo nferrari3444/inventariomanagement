@@ -361,7 +361,7 @@ def transferReceptionView(request, requested_id):
             warehouse = form.cleaned_data['warehouse']
             actionType = 'Confirma Transferencia'
             observations = form.cleaned_data['observations']
-            deliveryDate = datetime.datetime.now().date()
+            deliveryDate = datetime.now().date()
             datalist = []
             # task = Tasks.objects.create(date= date, receptor= receptor, warehouse= warehouse, issuer= issuer,
             #                             motivoIngreso=motivoIngreso,  actionType=actionType, department=department)
@@ -601,7 +601,7 @@ def inboundReceptionView(request, requested_id):
             actionType = 'Confirma Ingreso'
             motivoIngreso = form.cleaned_data['motivoIngreso']
             observations = form.cleaned_data['observations']
-            deliveryDate = datetime.datetime.now().date()
+            deliveryDate = datetime.now().date()
             
             # StockMovements.objects.create(product = product, date=date, department=department,
             #                             issuer=issuer, actionType = actionType, cantidad=cantidad,
@@ -968,7 +968,7 @@ def outboundDeliveryView(request, requested_id):
             actionType = 'Confirma Egreso'
             motivoEgreso = form.cleaned_data['motivoEgreso']
             observations = form.cleaned_data['observations']
-            deliveryDate = datetime.datetime.now().date()
+            deliveryDate = datetime.now().date()
             # StockMovements.objects.create(product = product, date=date, department=department,
             #                             issuer=issuer, actionType = actionType, cantidad=cantidad,
             #                             motivoEgreso=motivoIngreso,status='Pending')
@@ -1070,7 +1070,7 @@ class StockHistoryView(LoginRequiredMixin, generic.ListView):
 
 def export_excel(request):
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response['Content-Disposition'] = 'attachment; filename="mydata.xlsx"'
+    response['Content-Disposition'] = 'attachment; filename="Inventario.xlsx"'
 
     workbook = openpyxl.Workbook()
     worksheet = workbook.active
