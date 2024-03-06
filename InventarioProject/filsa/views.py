@@ -551,6 +551,8 @@ def inboundView(request):
                 connection=None,
                 html_message=None
             )
+        
+        
             return redirect('/tasks/')
             #return HttpResponseRedirect("/inbound/")
 

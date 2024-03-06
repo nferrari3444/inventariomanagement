@@ -19,9 +19,9 @@ class FaltanteFilter(SimpleListFilter):
 
     def queryset(self, request, queryset):
         if self.value() == "yes":
-            return queryset.filter(cantidad__gt = F('cantidadNeta')).filter(actionType='Recepcion Solicitud')
+            return queryset.filter(cantidad__gt = F('cantidadNeta')).filter(actionType='Confirma Ingreso')
         elif self.value() == "no":
-            return queryset.exclude(cantidad__gt = F('cantidadNeta')).filter(actionType='Recepcion Solicitud')
+            return queryset.exclude(cantidad__gt = F('cantidadNeta')).filter(actionType='Confirma Ingreso')
         else:
             return queryset.all()
         
@@ -32,11 +32,11 @@ class AdminStockMovements(admin.ModelAdmin):
 
     search_fields = ["product__name"]
     def diferencia(self, obj):
-        if obj.actionType == "Recepcion Solicitud":
+        if obj.actionType == "Confirma Ingreso":
             return obj.cantidad - obj.cantidadNeta  
 
     def faltante(self,obj):
-        if obj.actionType == 'Recepcion Solicitud':
+        if obj.actionType == 'Confirma Ingreso':
             return obj.cantidad > obj.cantidadNeta
             
         
