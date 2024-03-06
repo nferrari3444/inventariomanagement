@@ -51,7 +51,7 @@
 
       <div class="flex text-black-400 items-center lg:mr-20 sm:mr-0 lm:mr-0">
 
-        Usuario: {{ user.get_username }}
+        Usuario: <i><strong>{{user.get_username}}</strong></i>
       
       </div>
       <a href="{% url 'logout' %}" class="py-4 px-2 text-gray-500 hover:text-green-500 transition duration-300">Logout</a>
