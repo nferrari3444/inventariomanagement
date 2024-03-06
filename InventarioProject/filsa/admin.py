@@ -23,12 +23,31 @@ class FaltanteFilter(SimpleListFilter):
         elif self.value() == "no":
             return queryset.exclude(cantidad__gt = F('cantidadNeta')).filter(actionType='Confirma Ingreso')
         else:
-            return queryset.all()
+            return queryset.filter(actionType='Confirma Ingreso')
         
 class AdminStockMovements(admin.ModelAdmin):
-    list_display = ["product","actionType","cantidad","cantidadNeta", "diferencia", "faltante"]
+    list_display = ["date", "product","actionType", "Ingreso", "warehouse", "cantidad","cantidadNeta", "diferencia", "faltante"]
     list_select_related = ["product"]
     list_filter = ["product", FaltanteFilter]
+
+    @admin.display(ordering='task__motivoIngreso', description='Motivo Ingreso')
+    def Ingreso(self, obj):
+        return obj.task.motivoIngreso
+    
+    @admin.display(ordering='task__deliveryDate', description='Fecha de Entrega')
+    def date(self, obj):
+        return obj.task.deliveryDate
+    
+    
+    @admin.display(description='Deposito')
+    def warehouse(self, obj):
+        return obj.task.warehouse.name
+    
+    
+    # def motivoIngreso(self, obj):
+    #     return obj.task.name
+    # get_name.admin_order_field  = 'author'  #Allows column order sorting
+    # get_name.short_description = 'Author Name'  #Renames column head
 
     search_fields = ["product__name"]
     def diferencia(self, obj):

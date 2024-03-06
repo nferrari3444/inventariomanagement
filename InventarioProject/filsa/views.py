@@ -523,7 +523,7 @@ def inboundView(request):
                     barcode = form.cleaned_data['barcode_{}'.format(i)]
                     internalCode = form.cleaned_data['internalCode_{}'.format(i)]
                     cantidad = form.cleaned_data['cantidad_{}'.format(i)]
-                    newproduct_db = Product.objects.create(name=product, barcode=barcode,internalCode=internalCode,quantity=cantidad, 
+                    newproduct_db = Product.objects.create(name=product, barcode=barcode,internalCode=internalCode,quantity=0, 
                                            warehouse= warehouse_obj, deltaQuantity=0, stockSecurity=0, inTransit=False)
 
                     newproduct_db.save()
