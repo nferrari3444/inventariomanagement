@@ -862,7 +862,7 @@ def filterProducts(request):
     checkbox= request.GET.get('checkbox',None)
 
     if checkbox:
-        products = Product.objects.select_related('warehouse')  
+        products = Product.objects.select_related('warehouse').filter(inTransit=False)  
         data = dict() 
         product_dict  = {'products' : products}
         data['html_table'] =  render_to_string('inject_table.html',
@@ -874,7 +874,7 @@ def filterProducts(request):
     
     print('product is',product)
     if product:
-        products = Product.objects.filter(name=product)
+        products = Product.objects.filter(name=product, inTransit=False)
         context = {'products' : products}
         data['html_table'] =  render_to_string('inject_table.html',
                              context,
@@ -903,9 +903,9 @@ def filterProducts(request):
 
     if warehouse and warehouse != 'Total Depositos':
         warehouse = Warehouses.objects.get(name=warehouse)
-        filter_data = Product.objects.select_related('warehouse').filter(warehouse=warehouse, category__in =categoryList, supplier__in=supplierList) 
+        filter_data = Product.objects.select_related('warehouse').filter(warehouse=warehouse, category__in =categoryList, supplier__in=supplierList, inTransit=False) 
     else:
-        filter_data = Product.objects.select_related('warehouse').filter(category__in =categoryList, supplier__in=supplierList) 
+        filter_data = Product.objects.select_related('warehouse').filter(category__in =categoryList, supplier__in=supplierList, inTransit=False) 
 
    # data = serializers.serialize("json", Product.objects.filter(warehouse=warehouse, category=category, supplier=supplier).select_related('warehouse') )
     
