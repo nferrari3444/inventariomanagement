@@ -287,7 +287,7 @@ def transferView(request):
                 warehouse = Warehouses.objects.get(name='En Transito') 
                 deltaQuantity = 0
                 stockSecurity = 0
-                inTransit = True
+                inTransit = False
                 productInTransit = Product.objects.create(name= product, warehouse= warehouse,
                             barcode= barcode, quantity = quantity, internalCode= internalCode, category= category,
                             location = location, supplier = supplier , deltaQuantity= deltaQuantity,
@@ -509,7 +509,7 @@ def inboundView(request):
                     # nuevoIngreso.barcode = form.cleaned_data['barcode_{}'.format(i)]
                     # nuevoIngreso.internalCode = form.cleaned_data['internalCode_{}'.format(i)]
                     
-                    
+
                     print('product is:', product)
                     print('quantity is:', quantity)
 
