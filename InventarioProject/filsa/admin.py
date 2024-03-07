@@ -26,7 +26,7 @@ class FaltanteFilter(SimpleListFilter):
             return queryset.filter(actionType='Confirma Ingreso')
         
 class AdminStockMovements(admin.ModelAdmin):
-    list_display = ["date", "product","actionType", "Ingreso", "warehouse", "cantidad","cantidadNeta", "diferencia", "faltante"]
+    list_display = ["date", "product","actionType","faltante", "Ingreso", "warehouse", "cantidad","cantidadNeta", "diferencia"]
     list_select_related = ["product"]
     list_filter = ["product", FaltanteFilter]
 

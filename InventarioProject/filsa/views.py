@@ -1,6 +1,7 @@
 from typing import Any
 from django.db.models.query import QuerySet
 from django.contrib import messages
+import numpy as np
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
@@ -519,12 +520,13 @@ def inboundView(request):
                     datalist.append(newProduct)
                 
                 else:
+                    stockSecurity = np.ceil(quantity * 0.3)
                     warehouse_obj = Warehouses.objects.get(name=warehouse)
                     barcode = form.cleaned_data['barcode_{}'.format(i)]
                     internalCode = form.cleaned_data['internalCode_{}'.format(i)]
                     cantidad = form.cleaned_data['cantidad_{}'.format(i)]
                     newproduct_db = Product.objects.create(name=product, barcode=barcode,internalCode=internalCode,quantity=0, 
-                                           warehouse= warehouse_obj, deltaQuantity=0, stockSecurity=0, inTransit=False)
+                                           warehouse= warehouse_obj, deltaQuantity=0, stockSecurity= stockSecurity, inTransit=True)
 
                     newproduct_db.save()
 
@@ -800,7 +802,7 @@ class StockListView(LoginRequiredMixin, generic.ListView):
 
     def get_context_data(self, *args, **kwargs):
         # Call the base implementation first to get the context
-        products_obj = Product.objects.all().values()
+        #products_obj = Product.objects.all().values()
         context = super(StockListView, self).get_context_data(*args, **kwargs)
 
         warehouse = self.request.GET.get('warehouse',None)
@@ -824,12 +826,12 @@ class StockListView(LoginRequiredMixin, generic.ListView):
         if warehouse:
             warehouse = Warehouses.objects.get(name=warehouse)
             warehouseList = Warehouses.objects.get(name=warehouse)
-            context.update({'products' : Product.objects.select_related('warehouse').filter(warehouse=warehouse, category ='Insumos')}) #, supplier ='De Salt') 
+            context.update({'products' : Product.objects.select_related('warehouse').filter(warehouse=warehouse, category ='Insumos', inTransit=False)}) #, supplier ='De Salt') 
         else:
             warehouseList = Warehouses.objects.all()
             
             #context['products'] = Product.objects.select_related('warehouse').filter(category ='Insumos') #, supplier ='De Salt') 
-        context['products'] = Product.objects.all().select_related('warehouse') #.filter(category__in=categoryList, supplier__in=supplierList) 
+        context['products'] = Product.objects.all().select_related('warehouse').filter(inTransit=False) #.filter(category__in=categoryList, supplier__in=supplierList) 
         print('categoryList', categoryList)
         print('args', args)
         print('kwargs in get_context_data', kwargs)
