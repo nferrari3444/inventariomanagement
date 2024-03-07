@@ -37,7 +37,7 @@ DEBUG = False
 
 ALLOWED_HOSTS= ["*"]
 
-SITE_ID=1
+SITE_ID = 1
 #ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
 # Application definition
 
@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'compressor',
      'whitenoise',
      'django.contrib.admin',
+     'django.contrib.sites'
 ]
 
 MIDDLEWARE = [

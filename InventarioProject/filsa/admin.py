@@ -56,7 +56,7 @@ class AdminStockMovements(admin.ModelAdmin):
 
     def faltante(self,obj):
         if obj.actionType == 'Confirma Ingreso':
-            return obj.cantidad > obj.cantidadNeta
+            return obj.cantidad == obj.cantidadNeta
             
         
     diferencia.short_description = "Diferencia"
