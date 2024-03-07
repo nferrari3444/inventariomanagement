@@ -407,7 +407,7 @@ def transferReceptionView(request, requested_id):
                     supplier = productdb.supplier
                     warehouse = Warehouses.objects.get(name=warehouse) 
                     deltaQuantity = 0
-                    stockSecurity = productdb.stockSecurity
+                    stockSecurity =  np.ceil(quantity * 0.3) #   productdb.stockSecurity
                     inTransit = False
                     newProductInDeposit = Product.objects.create(name=product.product.name, warehouse=warehouse,
                                 barcode= barcode, quantity = quantity, internalCode= internalCode, category= category,
@@ -635,7 +635,7 @@ def inboundReceptionView(request, requested_id):
             
                 print('productToUpdate is:', productToUpdate)
 
-                productToUpdate.update(quantity = F('quantity') + netQuantity, deltaQuantity = F('deltaQuantity') - diffQuantity  )
+                productToUpdate.update(quantity = F('quantity') + netQuantity, deltaQuantity = F('deltaQuantity') - diffQuantity , inTransit=False )
             
 
                 newProduct = StockMovements(product = newproduct, 

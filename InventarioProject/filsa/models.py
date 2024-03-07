@@ -97,7 +97,7 @@ class Tasks(models.Model):
 
     DEPARTMENT = [('Ventas','Ventas'),
                 ('Dirección', 'Dirección'),
-                ('Administración', 'Administraicón'),
+                ('Administración', 'Administración'),
                  ('Encargado Servicio Técnico', 'Encargado Servicio Técnico'),
                 ('Servicio Técnico', 'Servicio Técnico'),
                 ('Logística','Logística')
