@@ -499,7 +499,7 @@ def inboundView(request):
 
                 product = form.cleaned_data['product_{}'.format(i)]
                 print('product in inbound view is {}'.format(product))
-                
+                quantity = form.cleaned_data['cantidad_{}'.format(i)]
                 if Product.objects.filter(name=product, warehouse=warehouse).exists():
                     print('warehouse in line 430 is', warehouse)
                     print('product in line 431 is', product)
@@ -508,7 +508,7 @@ def inboundView(request):
                     
                     # nuevoIngreso.barcode = form.cleaned_data['barcode_{}'.format(i)]
                     # nuevoIngreso.internalCode = form.cleaned_data['internalCode_{}'.format(i)]
-                    quantity = form.cleaned_data['cantidad_{}'.format(i)]
+                    
 
                     print('product is:', product)
                     print('quantity is:', quantity)
