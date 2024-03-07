@@ -81,7 +81,7 @@ class Product(models.Model):
     warehouse = models.ForeignKey(Warehouses, on_delete=models.CASCADE, related_name='warehouse_name')
     deltaQuantity = models.FloatField()
     stockSecurity = models.IntegerField()
-    inTransit = models.BooleanField()
+    inTransit = models.BooleanField(default=False)
     
   
           

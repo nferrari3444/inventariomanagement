@@ -392,7 +392,7 @@ def transferReceptionView(request, requested_id):
                     product_data = Product.objects.get(name= product.product.name, warehouse=warehouse)
                     # print('product line 273 is:', product)
                     productToUpdate= Product.objects.filter(name= product.product.name, warehouse=warehouse)
-                    productToUpdate.update(quantity = F('quantity') + netQuantity, deltaQuantity = F('deltaQuantity') - diffQuantity  )
+                    productToUpdate.update(quantity = F('quantity') + netQuantity, deltaQuantity = F('deltaQuantity') - diffQuantity ,inTransit=False )
                     newProduct = StockMovements(product = product_data, 
                              actionType = actionType,
                                          cantidad= quantity, cantidadNeta=netQuantity, task = task )
@@ -509,7 +509,7 @@ def inboundView(request):
                     # nuevoIngreso.barcode = form.cleaned_data['barcode_{}'.format(i)]
                     # nuevoIngreso.internalCode = form.cleaned_data['internalCode_{}'.format(i)]
                     
-
+                    
                     print('product is:', product)
                     print('quantity is:', quantity)
 
