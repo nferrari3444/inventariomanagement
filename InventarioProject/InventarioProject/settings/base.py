@@ -35,6 +35,7 @@ DEBUG = False
 #DEBUG = os.getenv("DEBUG", "True") == "True"
 #ALLOWED_HOSTS = ['127.0.0.1','localhost','inventariomanagement.vercel.app', '*.vercel.app', '.now.sh']
 
+
 ALLOWED_HOSTS= ["*"]
 
 SITE_ID = 1
@@ -54,7 +55,7 @@ INSTALLED_APPS = [
     'compressor',
      'whitenoise',
      'django.contrib.admin',
-     'django.contrib.sites'
+     'django.contrib.sites',
 ]
 
 MIDDLEWARE = [
@@ -96,24 +97,6 @@ TEMPLATES = [
     ,
 ]
 
-# import mimetypes
-# mimetypes.add_type("text/css", ".css", True)
-
-# DEVELOPMENT_MODE = os.getenv("DEVELOPMENT_MODE", "False") == "True"
-
-# if DEVELOPMENT_MODE is True:
-#     DATABASES = {
-#         "default": {
-#             "ENGINE": "django.db.backends.sqlite3",
-#             "NAME": os.path.join(BASE_DIR, "db.sqlite3"),
-#         }
-#     }
-# elif len(sys.argv) > 0 and sys.argv[1] != 'collectstatic':
-#     if os.getenv("DATABASE_URL", None) is None:
-#         raise Exception("DATABASE_URL environment variable not defined")
-#     DATABASES = {
-#         "default": dj_database_url.parse(os.environ.get("DATABASE_URL")),
-#     }
 
 WSGI_APPLICATION = 'InventarioProject.wsgi.application'
 
@@ -129,24 +112,11 @@ MEDIA_URL = '/media/'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
 
-# CACHES = {
-#     "default": {
-#         "BACKEND": "django_redis.cache.RedisCache",
-#         "LOCATION": "redis://127.0.0.1:6379/1",
-#         "OPTIONS": {
-#             "CLIENT_CLASS": "django_redis.client.DefaultClient",
-#         }
-#     }
-# }
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
+
+
 
 AUTH_PASSWORD_VALIDATORS = [
     {

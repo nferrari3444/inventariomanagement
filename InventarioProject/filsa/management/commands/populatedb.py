@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand, CommandError
 from filsa.models import CustomUser, StockMovements, DiffProducts, Product, Warehouses, Tasks
 from django.contrib.auth.models import Group
+import csv
 
 class Command(BaseCommand):
     help = 'import data'
@@ -32,6 +33,7 @@ class Command(BaseCommand):
         #products_file = './productosFilsa.txt' 
         users_file = "C:/Users/nicol/Inventario/InventarioProject/filsa/management/commands/usuariosFilsa.txt"
         products_file = "C:/Users/nicol/Inventario/InventarioProject/filsa/management/commands/productosFilsa.txt"
+        new_products_file = "C:/Users/nicol/Inventario/InventarioProject/filsa/management/Products.csv"
         #f = open(users_file, "r")
         #reader = f.read()
         #users_lines = list(reader)
@@ -65,10 +67,10 @@ class Command(BaseCommand):
                 user_group ,  created = Group.objects.get_or_create(name=rol) 
                 user_group.user_set.add(userobj)
                 
-            #    users_obj.append(user_model)
+             #   users_obj.append(user_model)
 
 
-           # CustomUser.objects.bulk_create(users_obj)
+     #   CustomUser.objects.bulk_create(users_obj)
 
 
 
@@ -78,9 +80,40 @@ class Command(BaseCommand):
         #lines = list(reader)
         
         objects = []
-        with open(products_file) as file:
-            # print(file.readlines())
-            product_lines = file.readlines()
+        with open(new_products_file,  newline='', encoding="utf-8") as csvfile:
+            reader = csv.DictReader(csvfile)
+            i = 0
+            for row in reader:
+                product_model = Product()
+                i +=1 
+                # Create an empty instance of your model
+              
+               # print('product line is ', line)
+                warehouse_name = row['Deposito']
+
+                
+                product_model.name= row['Producto']
+                product_model.barcode= row['CodigoOrigen']
+                product_model.internalCode= row['Codigo']
+                product_model.quantity= row['Cantidad']
+                product_model.category= row['Categoria']
+                product_model.location= row['Ubicacion']
+                product_model.supplier= row['Proveedor']
+                print('warehouse is ', warehouse_name)
+                print('i is',i)
+
+                product_model.warehouse= Warehouses.objects.get(name=warehouse_name)
+                product_model.deltaQuantity= 0
+                product_model.stockSecurity= row['StockSeguridad']
+                product_model.inTransit = False
+                
+                objects.append(product_model)
+        
+               
+        
+        # with open(products_file) as file:
+        #     # print(file.readlines())
+        #     product_lines = file.readlines()
 
             #print(f.read())
 
@@ -88,27 +121,27 @@ class Command(BaseCommand):
             
           
             # Iterate each record of the csv file
-            for line in product_lines[1:]:
-                product_model = Product()
-                # Create an empty instance of your model
-                line = line.split(',')
-                print('product line is ', line)
-                warehouse_name = line[5]
+            # for line in product_lines[1:]:
+                # product_model = Product()
+                # # Create an empty instance of your model
+                # line = line.split(',')
+                # print('product line is ', line)
+                # warehouse_name = line[5]
            
-                product_model.name= line[0] 
-                product_model.barcode= line[1]
-                product_model.internalCode= line[2]
-                product_model.quantity= line[7]
-                product_model.category= line[3]
-                product_model.location= line[8]
-                product_model.supplier= line[4]
-                print('warehouse is ', warehouse_name)
-                product_model.warehouse= Warehouses.objects.get(name=warehouse_name)
-                product_model.deltaQuantity= line[9]
-                product_model.stockSecurity= line[6]
-                product_model.inTransit = False
+                # product_model.name= line[0] 
+                # product_model.barcode= line[1]
+                # product_model.internalCode= line[2]
+                # product_model.quantity= line[7]
+                # product_model.category= line[3]
+                # product_model.location= line[8]
+                # product_model.supplier= line[4]
+                # print('warehouse is ', warehouse_name)
+                # product_model.warehouse= Warehouses.objects.get(name=warehouse_name)
+                # product_model.deltaQuantity= line[9]
+                # product_model.stockSecurity= line[6]
+                # product_model.inTransit = False
                 
-                objects.append(product_model)
+                # objects.append(product_model)
         
             Product.objects.bulk_create(objects, ignore_conflicts=True)
 

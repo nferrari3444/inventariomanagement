@@ -62,6 +62,9 @@ class AdminStockMovements(admin.ModelAdmin):
     diferencia.short_description = "Diferencia"
     faltante.boolean = True
 
+class StockSecurity(admin.ModelAdmin):
+    list_display = ["name", "internalCode", "warehouse", "quantity", "stockSecurity"]
+
 class AdminProductDiff(admin.ModelAdmin):
  
     list_display = ["product", "warehouse", "totalPurchase", "totalQuantity", "productDiff"]
@@ -78,7 +81,8 @@ class AdminProductDiff(admin.ModelAdmin):
 
 admin.site.register(Warehouses)
 
-admin.site.register(Product)
+admin.site.register(Product,StockSecurity)
+# admin.site.register(StockSecurity)
 admin.site.register(StockMovements,AdminStockMovements)
 admin.site.register(DiffProducts, AdminProductDiff)
 admin.site.register(CustomUser)

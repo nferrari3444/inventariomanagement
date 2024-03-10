@@ -794,9 +794,12 @@ class TaskListView(LoginRequiredMixin, generic.ListView):
         return context 
     
 class StockListView(LoginRequiredMixin, generic.ListView):
+    paginate_by = 10
     model = Product
+    
 
     template_name = 'stock.html'
+    
     print('llega aca con el checkbox')
    
 
@@ -1078,7 +1081,7 @@ def export_excel(request):
 
     workbook = openpyxl.Workbook()
     worksheet = workbook.active
-    worksheet.title = 'My Data'
+    worksheet.title = 'InventarioData'
 
     # Write header row
     header = ['Nombre', 'Codigo','Cantidad','Deposito','Categoria','Proveedor','Ubicacion','Stock de Seguridad']
@@ -1101,38 +1104,3 @@ def export_excel(request):
 
     return response
 
-# def password_reset_request(request):
-#     if request.method == 'POST':
-#         password_form = PasswordResetForm(request.POST)
-#         if password_form.is_valid():
-
-#             data = password_form.cleaned_data['email']
-
-#             user_email = CustomUser.objects.filter(Q(email =data))
-#             if user_email.exists():
-#                 for user in user_email:
-#                     subject = 'Password Request'
-#                     email_template_name = 'registration/password_message.txt'
-#                     parameters = {
-#                         'email': user.email,
-#                         'domain': '127.0.0.1:8000',
-#                         'site_name': 'Filsa',
-#                         'uid': urlsafe_base64_encode(force_bytes(user.pk)),
-#                         'token': default_token_generator.make_token(user),
-#                         'protocol':'http',
-#                     }
-
-#                     email = render_to_string(email_template_name, parameters)
-#                     try:
-#                         send_mail(subject, email, '',  [user.email] , fail_silently=False)
-#                     except:
-#                         return HttpResponse('Invalid Header')
-                    
-#                     return redirect('password_reset_done')
-#     else:
-#         password_form = PasswordResetForm()
-
-#     context = {
-#         'password_form': password_form,
-#     }
-#     return render(request, 'registration/password_reset.html' ,context)

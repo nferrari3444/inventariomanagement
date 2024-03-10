@@ -72,7 +72,7 @@ class Product(models.Model):
 
     product_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=40)
-    barcode = models.BigIntegerField(verbose_name=u"Codigo de Barras")
+    barcode = models.CharField(max_length= 100, verbose_name=u"Codigo de Barras")
     internalCode = models.BigIntegerField(verbose_name=u"Codigo Interno")
     quantity = models.FloatField()
     category = models.CharField(max_length=20, choices=CATEGORIES, default='Insumos')

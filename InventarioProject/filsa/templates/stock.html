@@ -100,7 +100,7 @@
 
 <!-- sm:col-span-2 -->
 <div class="w-full px-4 relative overflow-x-auto">
-    <table id="productTable" class="py-8 px-4 mx-auto max-w-2xl lg:py-16 text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+    <table  id="productTable" class="py-8 px-4 lg:py-16 text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
         <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
             <tr>
                 <th scope="col" class="px-3 py-2">
@@ -183,7 +183,7 @@
             </tr>
         </thead>
         <tbody>
-            {% for product in products %}
+            {% for product in page_obj %}
             <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
                 <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                     {{product.name}}
@@ -230,9 +230,34 @@
                 </td>
             </tr>
             {% endfor %}
+           
         </tbody>
+
     </table>
-</div>
+
+
+    {% if page_obj.has_previous %}
+    <a href="?page=1" &laquo; class="text-white bg-green-400 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-1.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" >first</a>
+    
+    <a href="?page={{ page_obj.previous_page_number }}" class="text-white bg-green-400 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-1.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">previous</a>
+
+       
+    {% endif %}
+    <span class="current">
+        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+    </span>
+
+    {% if page_obj.has_next %}
+    <a href="?page={{ page_obj.next_page_number }}" class="text-white bg-green-400 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-1.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">next</a>
+    <a href="?page={{ page_obj.paginator.num_pages }}" class=" text-white bg-green-400 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-1.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">last &raquo;</a>
+{% endif %}
+
+  
+
+    <hr>
+
+    
+
 
     {% if form.errors %}
     <div class="alert alert-danger">

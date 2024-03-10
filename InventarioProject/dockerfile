@@ -1,0 +1,31 @@
+FROM python:3.8.6-buster
+
+RUN apt update
+RUN apt-get install cron -y
+RUN alias py=python
+# Set unbuffered output for python
+ENV PYTHONUNBUFFERED 1
+
+# Create app directory
+WORKDIR /app
+
+# Install app dependencies
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+
+# Bundle app source
+COPY . .
+
+# django-crontab logfile
+RUN mkdir /cron
+RUN touch /cron/django_cron.log
+
+
+# Expose port
+EXPOSE 8000
+
+# entrypoint to run the django.sh file
+
+CMD service cron start && python /app/manage.py runserver 0.0.0.0:8000
+# service cron start
+# ENTRYPOINT ["/app/django.sh"]
