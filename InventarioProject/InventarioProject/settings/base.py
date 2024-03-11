@@ -56,7 +56,7 @@ INSTALLED_APPS = [
      'whitenoise',
      'django.contrib.admin',
      'django.contrib.sites',
-     'admin_export_action',
+     
 ]
 
 MIDDLEWARE = [
@@ -70,11 +70,6 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     "whitenoise.middleware.WhiteNoiseMiddleware",
 ]
-
-
-ADMIN_EXPORT_ACTION = {
-    'ENABLE_SITEWIDE': False
-}
 
 
 
