@@ -8,7 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.edit import FormView
 from django.db.models import Avg, Count, Exists, OuterRef
-from django.db.models import Count, F, Value, Q
+from django.db.models import Count, F, Value, Q, Sum
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
@@ -797,7 +797,6 @@ class StockListView(LoginRequiredMixin, generic.ListView):
     paginate_by = 10
     model = Product
     
-
     template_name = 'stock.html'
     
     print('llega aca con el checkbox')
@@ -1075,32 +1074,62 @@ class StockHistoryView(LoginRequiredMixin, generic.ListView):
         return context 
 
 
-def export_excel(request):
+def export_excel(request, dimension):
+
+    print('requestGET')
+    print('dimension is',dimension)
+   
+    
+
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response['Content-Disposition'] = 'attachment; filename="Inventario.xlsx"'
+    response['Content-Disposition'] = 'attachment; filename="Inventario{}.xlsx"'.format(dimension)
 
     workbook = openpyxl.Workbook()
     worksheet = workbook.active
-    worksheet.title = 'InventarioData'
+    worksheet.title = 'InventarioData{}'.format(dimension)
 
-    # Write header row
-    header = ['Nombre', 'Codigo','Cantidad','Deposito','Categoria','Proveedor','Ubicacion','Stock de Seguridad']
-    for col_num, column_title in enumerate(header, 1):
-        cell = worksheet.cell(row=1, column=col_num)
-        cell.value = column_title
+    if dimension == 'deposit':
 
-    # Write data rows
-    firstquery = Product.objects.all().select_related('warehouse')
-    queryset = firstquery.values_list('name', 'internalCode','quantity','warehouse__name','category','supplier','location','stockSecurity')
+        # Write header row
+        header = ['Nombre', 'Codigo','Cantidad','Deposito','Categoria','Proveedor','Ubicacion','Stock de Seguridad']
+        for col_num, column_title in enumerate(header, 1):
+            cell = worksheet.cell(row=1, column=col_num)
+            cell.value = column_title
+
+        # Write data rows
+        firstquery = Product.objects.all().select_related('warehouse')
+        queryset = firstquery.values_list('name', 'internalCode','quantity','warehouse__name','category','supplier','location','stockSecurity')
  
-    #list(Product.objects.all().values('name', 'internalCode','quantity','warehouse__name','category','supplier','location','stockSecurity'))
+        #list(Product.objects.all().values('name', 'internalCode','quantity','warehouse__name','category','supplier','location','stockSecurity'))
 
-    for row_num, row in enumerate(queryset, 1):
-        for col_num, cell_value in enumerate(row, 1):
-            cell = worksheet.cell(row=row_num+1, column=col_num)
-            cell.value = cell_value
+        for row_num, row in enumerate(queryset, 1):
+            for col_num, cell_value in enumerate(row, 1):
+                cell = worksheet.cell(row=row_num+1, column=col_num)
+                cell.value = cell_value
+
+
+    elif dimension == 'all':
+         # Write header row
+        header = ['Nombre', 'Codigo','CantidadTotal']
+        for col_num, column_title in enumerate(header, 1):
+            cell = worksheet.cell(row=1, column=col_num)
+            cell.value = column_title
+
+        # Write data rows
+        #firstquery = Product.objects.all().select_related('warehouse')
+        #queryset = firstquery.values_list('name', 'internalCode','quantity')
+ 
+        queryset = Product.objects.values_list('name', 'internalCode').order_by('name').annotate(CantidadTotal=Sum('quantity'))
+        #queryset = Product.objects.values('name','internalCode').order_by('name').annotate(=Sum('quantity'))
+        #list(Product.objects.all().values('name', 'internalCode','quantity','warehouse__name','category','supplier','location','stockSecurity'))
+
+        for row_num, row in enumerate(queryset, 1):
+            for col_num, cell_value in enumerate(row, 1):
+                cell = worksheet.cell(row=row_num+1, column=col_num)
+                cell.value = cell_value
 
     workbook.save(response)
 
+    
     return response
 

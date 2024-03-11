@@ -83,12 +83,10 @@ class Product(models.Model):
     stockSecurity = models.IntegerField()
     inTransit = models.BooleanField(default=False)
     
-  
-          
-
     def __str__(self):
         return self.name
 
+  
    
 class Tasks(models.Model):
     STATUS = [('Pending','Pending'),

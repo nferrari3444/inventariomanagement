@@ -1,12 +1,55 @@
+from typing import Any
 from django.contrib import admin
+from django.db.models.query import QuerySet
+from django.http import HttpRequest, HttpResponse
+from django.db import models
 from .models import Warehouses, Product, StockMovements, DiffProducts, CustomUser
 from django.urls import reverse
 from django.utils.html import format_html
 from django.contrib.admin import SimpleListFilter
-from django.db.models import F
+from django.db.models import F,ExpressionWrapper, FloatField, Sum
 # Register your models here.
+import csv
 
 
+
+def export_as_csv(self, request, queryset):
+
+    meta = self.model._meta
+    field_names = [field.name for field in meta.fields]
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename={}.csv'.format(meta)
+    writer = csv.writer(response)
+
+    writer.writerow(field_names)
+    for obj in queryset:
+        row = writer.writerow([getattr(obj, field) for field in field_names])
+
+    return response
+
+actions = [export_as_csv]
+
+class StatusProducto(SimpleListFilter):
+    title = "Status Producto"
+    parameter_name = "Status Producto"
+
+    def lookups(self, request, model_admin):
+        return [
+            ("critico", "Critico"),
+            ("alerta", "Alerta"),
+            ("normal", "Normal"),
+        ]
+
+    def queryset(self, request, queryset):
+        if self.value() == "critico":
+            return queryset.filter(quantity__lte = F('stockSecurity') * 1.2)
+        elif self.value() == "alerta":
+            return queryset.filter(quantity__lte = F('stockSecurity') * 1.5 ).filter(quantity__gte = F('stockSecurity') * 1.2 )
+        elif self.value() == 'normal':
+            return queryset.filter(quantity__gte = F('stockSecurity') * 1.5 )
+            
+        
 class FaltanteFilter(SimpleListFilter):
     title = "Faltante"
     parameter_name = "Faltante"
@@ -63,7 +106,63 @@ class AdminStockMovements(admin.ModelAdmin):
     faltante.boolean = True
 
 class StockSecurity(admin.ModelAdmin):
-    list_display = ["name", "internalCode", "warehouse", "quantity", "stockSecurity"]
+
+    products = Product.objects.filter(quantity__lt = F('stockSecurity') * 1.1)
+
+    list_display = ["status_order", "name", "internalCode", "status_product", "warehouse", "quantity", "stockSecurity"]
+
+    list_filter = ["category","supplier", StatusProducto]
+
+   
+
+
+    # ordering= ["quantity"]
+    def get_queryset(self, request: HttpRequest) -> QuerySet[Any]:
+        qs = super(StockSecurity, self).get_queryset(request)
+        qs = qs.annotate(stock_rate= ExpressionWrapper(F('quantity') * 1.0 / F('stockSecurity'), output_field=FloatField())).order_by('stock_rate')
+    
+        return qs
+    
+    def status_order(self, obj):
+        return obj.stock_rate
+   
+    status_order.admin_order_field =  'status_order'
+
+    
+    
+    def status_product(self,obj):
+        
+        if obj.quantity <= obj.stockSecurity * 1.2:
+            color = 'red'
+            status = 'Critico'
+
+            return format_html(
+            '<b style="background:{};">{}</b>',
+            color,status)
+        
+        elif obj.quantity > obj.stockSecurity * 1.2 and obj.quantity <= obj.stockSecurity * 1.5:
+            color = 'yellow'
+            status = 'Alerta'
+
+            return format_html(
+            '<b style="background:{};">{}</b>',
+            color,status)
+        
+        elif obj.quantity > obj.stockSecurity * 1.5:
+            color = 'green'
+            status = 'Normal'
+
+            return format_html(
+            '<b style="background:{};">{}</b>',
+            color,status)
+        
+        return status
+    
+
+    
+
+    
+
 
 class AdminProductDiff(admin.ModelAdmin):
  

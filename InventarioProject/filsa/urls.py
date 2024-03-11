@@ -43,7 +43,9 @@ urlpatterns = [
     path('reset_custom/<uidb64>/<token>/', PasswordResetConfirmView.as_view(template_name='registration/password_reset_confirm.html'),
                                                                     name='password_reset_confirm'),
     path('reset/done/',PasswordResetCompleteView.as_view(template_name='registration/password_reset_complete.html'),name='password_reset_complete'),
-    path('export_to_excel', export_excel, name='excel-export' )
+    path('export_to_excel/<str:dimension>', export_excel, name='excel-export' ),
+
+    path('export_action/', include("admin_export_action.urls", namespace="admin_export_action")),
 
 ]
 
