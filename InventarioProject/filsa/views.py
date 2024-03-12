@@ -2,6 +2,7 @@ from typing import Any
 from django.db.models.query import QuerySet
 from django.contrib import messages
 import numpy as np
+import pandas as pd
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
@@ -25,7 +26,7 @@ from annoying.functions import get_object_or_None
 from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError, PermissionDenied
-from .forms import SignUpForm , InboundForm, OutboundOrderForm, OutboundDeliveryForm, InboundReceptionForm, TransferForm, TransferReceptionForm, CustomSetPasswordForm
+from .forms import SignUpForm , InboundForm, OutboundOrderForm, CotizationForm, OutboundDeliveryForm, InboundReceptionForm, TransferForm, TransferReceptionForm, CustomSetPasswordForm
 from .models import CustomUser, StockMovements, DiffProducts, Product, Warehouses, Tasks
 from django.core.cache import cache
 from django.utils.http import urlsafe_base64_encode
@@ -1254,3 +1255,26 @@ def export_excel(request, dimension):
     
     return response
 
+def handle_uploaded_file(file):
+
+    file_data = pd.read_excel(file)
+
+    print(file_data)
+
+    
+
+
+def newCotization(request):
+
+    print('request.Files are')
+    print(request.FILES)
+    if request.method == 'POST':
+        form = CotizationForm(request.POST, request.FILES)
+        if form.is_valid():
+            print('el form es valido')
+            handle_uploaded_file(request.FILES['file'])
+            return HttpResponseRedirect('/success/url/')
+    else:
+        form = CotizationForm()
+    
+    return render(request, 'cotization.html', {'form': form})

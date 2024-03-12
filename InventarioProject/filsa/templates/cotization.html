@@ -1,0 +1,34 @@
+{% extends '_base.html' %}
+
+<head>
+{% load static %}
+
+</head>
+
+{% block content %}
+
+
+<div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+
+    <div class="mx-auto relative top-52">
+    <form enctype="multipart/form-data" id="forms" action="{% url 'newcotization' %}" method="POST" onsubmit="openLoader()">
+        {% csrf_token %}
+
+        {{ form.as_p }}
+
+        <button type="submit" id='nuevoIngreso' class="inline-flex items-center px-5 py-2.5 mt-4 sm:mt-6 text-sm font-medium text-center text-white bg-primary-700 rounded-lg focus:ring-4 focus:ring-primary-200 dark:focus:ring-primary-900 hover:bg-primary-800">
+            Nueva Cotizacion
+        </button>
+
+    </form>
+
+
+    
+    </div>
+
+<div>
+
+
+</div>
+</div>
+{% endblock content %}

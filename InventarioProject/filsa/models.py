@@ -175,3 +175,11 @@ class DiffProducts(models.Model):
     totalPurchase = models.FloatField()
     totalQuantity = models.FloatField()
     productDiff = models.IntegerField()
+
+class Cotization(models.Model):
+    
+    name = models.CharField(max_length=60)
+
+    quantityBooked = models.IntegerField()
+
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
