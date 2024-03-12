@@ -178,10 +178,18 @@
 
 <script>
 
+$('#warehouse').on('change', function() {
+    this.warehouse =  $(this).find(":selected").val() ;
+    console.log('warehouse selected is', warehouse)
+});
+
 let form_count = Number($("[name=extra_field_count]").val());
 console.log('form_count is ', form_count)
 $("#add-product").click(function(event) {
     
+    var warehouse = $("#warehouse option:selected" ).val()
+    console.log('warehouse is', warehouse)
+
     event.preventDefault()
 // get extra form count so we know what index to use for the next item
     console.log(event.target.value)
@@ -230,7 +238,7 @@ $("#add-product").click(function(event) {
     newCell.innerHTML=  `<tr><td><input type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" type="text" id="productname_${form_count}" name="product_${form_count}" placeholder="producto" required></td></tr>`;
 
     newCell = newRow.insertCell();
-    newCell.innerHTML=`<tr><td><input type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" type='text' id="barcode_${form_count}" name="barcode_${form_count}" placeholder="barcode" required></td></tr>`;
+    newCell.innerHTML=`<tr><td><input type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" type='text' id="barcode_${form_count}" name="barcode_${form_count}" placeholder="barcode"></td></tr>`;
 
     newCell = newRow.insertCell();
     newCell.innerHTML=`<tr><td><input type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" type='text' id="internalcode_${form_count}" name="internalCode_${form_count}" placeholder="internalCode" required></td></tr>`;
@@ -257,7 +265,7 @@ $("#add-product").click(function(event) {
 
                 console.log('productId',productId)
 
-                request_url = '/product/' + productId + '/';
+                request_url = '/product/' + productId + '/' + warehouse;
                 $.ajax({
                     url: request_url,
                     success: function(data){
@@ -271,7 +279,12 @@ $("#add-product").click(function(event) {
                     $(`#barcode_${form_count -1}`).val(barcode)
                     $(`#internalcode_${form_count -1 }`).val(internalCode)
 //             $('productname').attr('')
-           }
+           },
+
+           error: function(data){
+               alert(data.responseJSON.error);
+               }
+
         });
 
     }})
@@ -311,7 +324,12 @@ $("#add-product").click(function(event) {
                     $(`#barcode_${form_count -1}`).val(barcode)
                     $(`#productname_${form_count -1 }`).val(product)
 //             $('productname').attr('')
-           }
+           },
+
+           error: function(data){
+               alert(data.responseJSON.error);
+               }
+               
         });
 
     }})

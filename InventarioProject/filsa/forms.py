@@ -34,6 +34,9 @@ class TransferForm(forms.ModelForm):
     warehouse = forms.ModelChoiceField(queryset=Warehouses.objects.all()
                                       ,widget=forms.Select(attrs={
                                          'class': "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500",
+                                        'id':'warehouse',
+                                         "name":'warehouse',
+                                         
                                          'style': 'max-width: auto;',
                                      }), empty_label='-------------', to_field_name='name')
 
@@ -289,6 +292,8 @@ class OutboundOrderForm(forms.ModelForm):
     warehouse = forms.ModelChoiceField(queryset=Warehouses.objects.all()
                                       ,widget=forms.Select(attrs={
                                          'class': "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500",
+                                         'id':'warehouse',
+                                         "name":'warehouse',
                                          'style': 'max-width: auto;',
                                      }), empty_label='-------------', to_field_name='name')
     
@@ -309,11 +314,17 @@ class OutboundOrderForm(forms.ModelForm):
         
         extra_fields = kwargs.pop('extra',0)
         user = kwargs.pop('user')
+        #args.pop('extra_field_count')
         print('*args ', *args)
         print('args ', args)
         print('extra_fields', extra_fields)
      
         super(OutboundOrderForm, self).__init__(*args, **kwargs)
+
+        print('self.is_bound is', self.is_bound)
+
+       
+
         self.fields['extra_field_count'].initial = extra_fields
         self.fields['issuer'].initial = user
         print('args is' , args)
@@ -321,14 +332,13 @@ class OutboundOrderForm(forms.ModelForm):
         print('user is', user)
         self.fields['department'].widget.attrs.update({'class':'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500'})
         self.fields['motivoEgreso'].widget.attrs.update({'class':'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500'})
-        
+    
         self.fields['issuer'].widget.attrs.update({'class':'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500', 'disabled': True})
         #self.fields['issuer'].widget.value_from_datadict = lambda *args: self.instance.user
-       # self.fields['extra_field_count'] = 
+    # self.fields['extra_field_count'] = 
 
         for index in range(0, int(extra_fields) ):
-            self.fields['producto_{index}'.format(index=index)] =   forms.CharField()
-            
+            self.fields['producto_{index}'.format(index=index)] =   forms.CharField()             
             self.fields['barcode_{index}'.format(index=index)] = forms.CharField()
             self.fields['internalCode_{index}'.format(index=index)] = forms.CharField()
             self.fields['cantidad_{index}'.format(index=index)] = forms.IntegerField()
@@ -359,6 +369,10 @@ class OutboundOrderForm(forms.ModelForm):
             else:
                 raise ValidationError('El producto {} no se encuentra en el deposito {}'.format(product,warehouse))
    
+    def save(self, *args, **kwargs):
+      
+        meal = super(OutboundOrderForm, self).save(*args, **kwargs)
+        return meal
     
 ### OutboundDelivery Form
 class OutboundDeliveryForm(forms.ModelForm):

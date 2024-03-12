@@ -242,10 +242,30 @@
             {% endfor %}
            
         </tbody>
+<!-- 
+         <div id="pagination-filter">
+            {% if page_obj.has_previous %}
+            <a href="?page=1" &laquo; class="text-white bg-green-400 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-1.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" >first</a>
+            
+            <a href="?page={{ page_obj.previous_page_number }}" class="text-white bg-green-400 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-1.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">previous</a>
+        
+               
+            {% endif %}
+            <span class="current">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+            </span>
+        
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}" class="text-white bg-green-400 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-1.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">next</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}" class=" text-white bg-green-400 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-1.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">last &raquo;</a>
+        {% endif %} -->
+         
+        
 
+        </div>
     </table>
 
-
+    <div id="pagination">
     {% if page_obj.has_previous %}
     <a href="?page=1" &laquo; class="text-white bg-green-400 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-1.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" >first</a>
     
@@ -262,23 +282,15 @@
     <a href="?page={{ page_obj.paginator.num_pages }}" class=" text-white bg-green-400 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-1.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">last &raquo;</a>
 {% endif %}
 
+</div>
+
   
 
     <hr>
-
-    
-
-
-    {% if form.errors %}
-    <div class="alert alert-danger">
-        {{ form.errors }}
-    </div>
-{% endif %}
   </section>
 
 
   <script>
-
 
 var checkbox = $('#checkbox').is(':disabled')
 
@@ -295,6 +307,7 @@ $.ajax({
 
         
         console.log('data in hmtl',data.html_table)
+        $('#pagination').empty()
         $('#productTable').html(data.html_table);
 
 }}
@@ -357,23 +370,6 @@ $('#supplier').change(function() {
 
  getData(warehouse_filter,category_filter,supplier_filter)})
 
-//  var category_filter =   $('#categoria').val()
-    
-//  var supplier_filter =   $('#supplier').val()
-    
-
-// var category_filter =   $('#categoria').change()
-
-// var supplier_filter =   $('#supplier').change()
-
-//  console.log(warehouse_filter)
-//  console.log(category_filter)
-//  console.log(supplier_filter)
-
-
-
-
-
 function getProductData(product_name) {
 
 request_url = "{% url 'filterproducts' %}"  //+ warehouse_filter + '/' + category_filter + '/' + supplier_filter + '/';
@@ -386,7 +382,7 @@ $.ajax({
     url: request_url,
     success: function(data){
 
-        
+         $('#pagination').empty()
         console.log('data in hmtl',data.html_table)
     $('#productTable').html(data.html_table);
 
@@ -407,7 +403,7 @@ $.ajax({
     },
     url: request_url,
     success: function(data){
-
+         $('#pagination').empty()
     $('#productTable').html(data.html_table);
 
 }}

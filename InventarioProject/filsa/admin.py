@@ -1,34 +1,18 @@
 from typing import Any
 from django.contrib import admin
 from django.db.models.query import QuerySet
-from django.http import HttpRequest, HttpResponse
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.db import models
 from .models import Warehouses, Product, StockMovements, DiffProducts, CustomUser
 from django.urls import reverse
 from django.utils.html import format_html
 from django.contrib.admin import SimpleListFilter
 from django.db.models import F,ExpressionWrapper, FloatField, Sum
+from import_export.admin import ExportActionMixin
+from django.contrib.admin.views.decorators import staff_member_required
 # Register your models here.
 import csv
 
-
-
-def export_as_csv(self, request, queryset):
-
-    meta = self.model._meta
-    field_names = [field.name for field in meta.fields]
-
-    response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename={}.csv'.format(meta)
-    writer = csv.writer(response)
-
-    writer.writerow(field_names)
-    for obj in queryset:
-        row = writer.writerow([getattr(obj, field) for field in field_names])
-
-    return response
-
-actions = [export_as_csv]
 
 class StatusProducto(SimpleListFilter):
     title = "Status Producto"
@@ -68,7 +52,7 @@ class FaltanteFilter(SimpleListFilter):
         else:
             return queryset.filter(actionType='Confirma Ingreso')
         
-class AdminStockMovements(admin.ModelAdmin):
+class AdminStockMovements(ExportActionMixin, admin.ModelAdmin):
     list_display = ["date", "product","actionType","faltante", "Ingreso", "warehouse", "cantidad","cantidadNeta", "diferencia"]
     list_select_related = ["product"]
     list_filter = ["product", FaltanteFilter]
@@ -105,16 +89,13 @@ class AdminStockMovements(admin.ModelAdmin):
     diferencia.short_description = "Diferencia"
     faltante.boolean = True
 
-class StockSecurity(admin.ModelAdmin):
+class StockSecurity(ExportActionMixin, admin.ModelAdmin):
 
     products = Product.objects.filter(quantity__lt = F('stockSecurity') * 1.1)
 
     list_display = ["status_order", "name", "internalCode", "status_product", "warehouse", "quantity", "stockSecurity"]
 
     list_filter = ["category","supplier", StatusProducto]
-
-   
-
 
     # ordering= ["quantity"]
     def get_queryset(self, request: HttpRequest) -> QuerySet[Any]:
@@ -159,12 +140,8 @@ class StockSecurity(admin.ModelAdmin):
         return status
     
 
-    
 
-    
-
-
-class AdminProductDiff(admin.ModelAdmin):
+class AdminProductDiff(ExportActionMixin, admin.ModelAdmin):
  
     list_display = ["product", "warehouse", "totalPurchase", "totalQuantity", "productDiff"]
     list_select_related = ["product", "warehouse"]

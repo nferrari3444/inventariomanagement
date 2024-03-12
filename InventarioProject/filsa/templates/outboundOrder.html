@@ -161,10 +161,30 @@
 
   <script>
 
+    
     let form_count = Number($("[name=extra_field_count]").val());
+
+    //let warehouse = $("[name= warehouse]").val()
+ 
+
+    console.log('warehouse selected is', warehouse)
+
+
+
+   // var warehouse = $("#warehouse option:selected" ).val()
     console.log('form_count is ', form_count)
+    var table = document.getElementById('productTable')
+
+    $('#warehouse').on('change', function() {
+    this.warehouse =  $(this).find(":selected").val() ;
+    console.log('warehouse selected is', warehouse)
+});
+
+    
     $("#add-product").click(function(event) {
         
+        var warehouse = $("#warehouse option:selected" ).val()
+        console.log('warehouse is', this.warehouse)
         event.preventDefault()
     // get extra form count so we know what index to use for the next item
         console.log(event.target.value)
@@ -209,16 +229,17 @@
         
         var newCell = newRow.insertCell();
     
-        newCell.innerHTML=  `<tr><td><input type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" type="text" id="productname_${form_count}" name="producto_${form_count}" placeholder="producto" required></td></tr>`;
+        newCell.innerHTML=  `<tr><td><input type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"  type="text" id="productname_${form_count}" name="producto_${form_count}" placeholder="producto" required></td></tr>`;
     
         newCell = newRow.insertCell();
-        newCell.innerHTML=`<tr><td><input type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" type='text' id="barcode_${form_count}" name="barcode_${form_count}" placeholder="barcode" required></td></tr>`;
+        newCell.innerHTML=`<tr><td><input type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" type='text' id="barcode_${form_count}" name="barcode_${form_count}" placeholder="barcode"></td></tr>`;
     
         newCell = newRow.insertCell();
         newCell.innerHTML=`<tr><td><input type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" type='text' id="internalcode_${form_count}" name="internalCode_${form_count}" placeholder="internalCode" required></td></tr>`;
     
         newCell = newRow.insertCell();
         newCell.innerHTML= `<tr><td><input type = "number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" type='text' id="cantidad_${form_count}" name="cantidad_${form_count}" placeholder="cantidad" required></td></tr>`; 
+        
     
         $(`#productname_${form_count}`).autocomplete({
             source: '{% url "autocomplete-name" %}',
@@ -238,8 +259,8 @@
                     var productId = dataLS[product]
     
                     console.log('productId',productId)
-    
-                    request_url = '/product/' + productId + '/';
+                    console.log('warehouse in request_url', warehouse)
+                    request_url = '/product/' + productId + '/' + warehouse;
                     $.ajax({
                         url: request_url,
                         success: function(data){
@@ -253,7 +274,12 @@
                         $(`#barcode_${form_count -1}`).val(barcode)
                         $(`#internalcode_${form_count -1 }`).val(internalCode)
     //             $('productname').attr('')
+               },
+               
+           error: function(data){
+               alert(data.responseJSON.error);
                }
+                
             });
     
         }})
@@ -277,10 +303,10 @@ $(`#internalcode_${form_count}`).autocomplete({
                 // console.log('productSelected', dataLS[String(product)])
 
                 var productId = dataLS[code]
-
+                var warehouse = $("#warehouse option:selected" ).val()
                 console.log('productId',productId)
 
-                request_url = '/product/' + productId + '/';
+                request_url = '/product/' + productId + '/' + warehouse;
                 $.ajax({
                     url: request_url,
                     success: function(data){
@@ -294,7 +320,12 @@ $(`#internalcode_${form_count}`).autocomplete({
                     $(`#barcode_${form_count -1}`).val(barcode)
                     $(`#productname_${form_count -1 }`).val(product)
 //             $('productname').attr('')
-           }
+           },
+
+           error: function(data){
+               alert(data.responseJSON.error);
+               }
+                
         });
 
     }})
@@ -314,6 +345,8 @@ $(`#internalcode_${form_count}`).autocomplete({
     
         lastRow.remove()
         form_count --;
+
+        $("[name=extra_field_count]").val(form_count);
     
     
     })
