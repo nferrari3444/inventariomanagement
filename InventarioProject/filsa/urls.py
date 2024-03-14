@@ -1,7 +1,7 @@
 from django.urls import path, include
 from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
-from .views import index,  Login, Logout, Register, filterProducts,  newCotization, inboundView, getProducts, getProduct, getProductsNames, transferView,  transferReceptionView, transferConfirmedView, outboundDeliveryView, outboundOrderView, outboundConfirmedView, finishTask, inboundReceptionView, inboundConfirmedView, TaskListView, StockListView, StockHistoryView, export_excel
+from .views import index,  Login, Logout, Register, filterProducts,  newCotization, inboundView, getProducts, getProduct, getProductsNames, transferView,  transferReceptionView, transferConfirmedView, outboundDeliveryView, outboundOrderView, outboundConfirmedView, finishTask, inboundReceptionView, inboundConfirmedView, cotizationView, TaskListView, StockListView, StockHistoryView, export_excel
 from django.contrib.auth.views import (
     LogoutView, 
     PasswordResetView, 
@@ -28,6 +28,7 @@ urlpatterns = [
     path('finishtask/<int:requested_id>', finishTask,  name='finishtask'),
     path('tasks/', TaskListView.as_view() , name='tasks'),
     path('new-cotization/', newCotization , name='newcotization'),
+    path('modal/<int:cotization_id>/', cotizationView , name='cotizationview'),
     # path('stock/', StockListView.as_view() , name='stock'),
     path('historical-movements/<int:product_id>', StockHistoryView.as_view(), name= "stockhistory" ) ,
     path('autocomplete-name', getProductsNames, name='autocomplete-name'),

@@ -1,7 +1,8 @@
 from django.core.management.base import BaseCommand, CommandError
-from filsa.models import CustomUser, StockMovements, DiffProducts, Product, Warehouses, Tasks
+from filsa.models import CustomUser, StockMovements, DiffProducts, Product, Warehouses, Tasks, Cotization
 from django.contrib.auth.models import Group
 import csv
+from datetime import datetime
 
 class Command(BaseCommand):
     help = 'import data'
@@ -17,8 +18,16 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):  
 
+
+      #  customer = 'UTE'
+      #  numberOfProducts = 5
+      #  registered_date = datetime.now().date()
+
+        Cotization.objects.create()
+
         warehouses_list = ['Anaya 2710' , 'Crocker 2652' , 'Juanico' ,'Taller', 'En Transito']
 
+        customer = 'UTE'
         
         warehouse_object = []
         for i in range(0,len(warehouses_list)):
@@ -106,6 +115,9 @@ class Command(BaseCommand):
                 product_model.deltaQuantity= 0
                 product_model.stockSecurity= row['StockSeguridad']
                 product_model.inTransit = False
+
+                print('product name is')
+                print(product_model.name)
                 
                 objects.append(product_model)
         

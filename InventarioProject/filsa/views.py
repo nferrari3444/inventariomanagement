@@ -27,7 +27,7 @@ from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError, PermissionDenied
 from .forms import SignUpForm , InboundForm, OutboundOrderForm, CotizationForm, OutboundDeliveryForm, InboundReceptionForm, TransferForm, TransferReceptionForm, CustomSetPasswordForm
-from .models import CustomUser, StockMovements, DiffProducts, Product, Warehouses, Tasks
+from .models import CustomUser, StockMovements, DiffProducts, Product, Warehouses, Tasks, Cotization
 from django.core.cache import cache
 from django.utils.http import urlsafe_base64_encode
 from django.core.mail import send_mail, BadHeaderError
@@ -205,14 +205,16 @@ def getProduct(request, productId, warehouse):
     #Warehouse = Warehouses.objects.filter(name=warehouse)
     product = Product.objects.filter(product_id=productId)
 
-   
+    print('product has offer', product[0].hasOffer)
+    if product[0].hasOffer != None:
+        print('el producto está en Oferta de cotizacion')
     try:
         product = Product.objects.get(product_id=productId, warehouse= Warehouses.objects.get(name=warehouse))
         
         print('product is', product)
-        product_data = Product.objects.filter(product_id=productId, warehouse= Warehouses.objects.get(name=warehouse)).values_list('barcode','internalCode', 'name','warehouse','location','category','supplier','quantity')
+        product_data = Product.objects.filter(product_id=productId, warehouse= Warehouses.objects.get(name=warehouse)).values_list('barcode','internalCode', 'name','warehouse','location','category','supplier','quantity', 'hasOffer')
         
-        #print('data',data)
+        print('product_data is', product_data)
 
         return JsonResponse({'product': list(product_data)})
     except Product.DoesNotExist:
@@ -220,6 +222,8 @@ def getProduct(request, productId, warehouse):
         response =  JsonResponse({'error': 'El Producto ingresado no se encuentra en el Deposito {} '.format(warehouse)})
         response.status_code = 403
         return response
+    
+    
 
 
 @login_required
@@ -1259,22 +1263,58 @@ def handle_uploaded_file(file):
 
     file_data = pd.read_excel(file)
 
-    print(file_data)
+    return file_data
 
-    
+#     date = file_data['date'][0
+#  = file_data['date'][0]
+#     date = file_data['date'][0]
+#     date = file_data['date'][0]
+#     Cotization.objects.create(name=)
+#     for i in range(0, len(file_data)):
+#         producto = file_data.iloc[i]['product']
+        
+#         product_to_offer = Product.objects.get(name=producto)
+        
+        
+
+
+def cotizationView(request,cotization_id):
+
+    products = Product.objects.filter(hasOffer=cotization_id)#.values_list('name', 'quantityOffer','priceOffer')    
+   # products = get_object_or_404(Product, hasOffer=cotization_id)
+    print('products is', products)
+    context = {'products':products}
+    return render(request, 'modal.html', context)
+    #return JsonResponse({'products': list(products)})
 
 
 def newCotization(request):
 
     print('request.Files are')
     print(request.FILES)
+    cotizations = Cotization.objects.all()
     if request.method == 'POST':
         form = CotizationForm(request.POST, request.FILES)
         if form.is_valid():
             print('el form es valido')
-            handle_uploaded_file(request.FILES['file'])
+            data = handle_uploaded_file(request.FILES['file'])
+            
+            register_date = datetime.now().date()
+            customer = form.cleaned_data['customer']
+            observations = form.cleaned_data['observations']
+            numberOfProducts = len(data)
+
+            cotization = Cotization.objects.create(date=register_date, customer = customer, numberOfProducts=numberOfProducts,observations=observations)
+
+            for i in range(0,len(data)):
+                product_code = data.iloc[i]['codigo']
+                product_quantity = data.iloc[i]['cantidad']
+                product_price = data.iloc[i]['precio']
+                productdb = Product.objects.filter(internalCode = product_code).update(hasOffer=cotization, quantityOffer=product_quantity,priceOffer=product_price)
+
+
             return HttpResponseRedirect('/success/url/')
     else:
         form = CotizationForm()
     
-    return render(request, 'cotization.html', {'form': form})
+    return render(request, 'cotization.html', {'form': form, 'cotizations':cotizations})

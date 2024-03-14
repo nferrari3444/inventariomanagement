@@ -7,10 +7,9 @@
 
 {% block content %}
 
+<div class="grid grid-cols-2 md:grid-cols-3 gap-4 block">
 
-<div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-
-    <div class="mx-auto relative top-52">
+    <div class="mx-auto relative top-52 block">
     <form enctype="multipart/form-data" id="forms" action="{% url 'newcotization' %}" method="POST" onsubmit="openLoader()">
         {% csrf_token %}
 
@@ -26,9 +25,108 @@
     
     </div>
 
-<div>
+     <div class="relative mx-auto top-52 lg:ml-40 overflow-x-auto block"> 
+        <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                <tr>
+                    <th scope="col" class="px-6 py-3">
+                        Fecha Ingreso
+                    </th>
+                    <th scope="col" class="px-6 py-3">
+                        Cliente
+                    </th>
+                    <th scope="col" class="px-6 py-3">
+                        Cantidad Productos
+                    </th>
+                    <th scope="col" class="px-6 py-3">
+                        Ver
+                    </th>
 
+                    <th scope="col" class="px-6 py-3">
+                        Observaciones
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cotization in cotizations %}
+                <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                    <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                        {{cotization.date}}
+                    </th>
+                    <td class="px-6 py-4">
+                        {{cotization.customer}}
+                    </td>
+                    <td class="px-6 py-4">
+                        {{cotization.numberOfProducts}}
+                    </td>
+                    
+
+                    <td class="px-3 py-2">
+                  
+                    <button onclick="openmodal('{{cotization.cotization_id}}')"  class="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">
+                    Ver Productos
+                    </button>
+              </a>
+                    </td>
+
+                    <td class="px-6 py-4">
+                        {{cotization.observations}}
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+            </tbody>
+        </table>
+
+      <!-- Modal toggle -->
+        <div id="modal-div">
+            <div id="static-modal">
+
+            </div>
+
+        </div>
+  
+    
+    </div>
 
 </div>
-</div>
+
+<!-- Modal toggle -->
+<script >
+
+
+var modalDiv = $("#modal-div")
+function openmodal(cotization_id) {
+
+    console.log('cotizationId in modal is',cotization_id)
+
+    request_url = '/modal/' + cotization_id + '/';
+
+    $.ajax({
+    url: request_url,
+    success: function(data){
+
+        $("#modal-div").html(data);
+      $("#static-modal").show();
+    //     console.log('data.product',data.product)
+    // let barcode = data.product[0][0]
+    // let internalCode = data.product[0][1]
+    //  console.log(barcode)
+
+    //  console.log(internalCode)
+    //  console.log('form_count is', form_count)
+    // $(`#barcode_${form_count -1}`).val(barcode)
+    // $(`#internalcode_${form_count -1 }`).val(internalCode)
+
+    console.log(data)
+//             $('productname').attr('')
+}
+});
+
+}
+
+
+</script>
+
 {% endblock content %}

@@ -55,8 +55,15 @@ class Warehouses(models.Model):
     def __str__(self):
         return self.name
 
-
 # Tabla para Ubicaciones
+
+class Cotization(models.Model):
+    
+    cotization_id = models.AutoField(primary_key=True)
+    date = models.DateField(verbose_name=u"Fecha", null=True, blank=True)
+    customer = models.CharField(max_length=60, null=True, blank=True)
+    numberOfProducts = models.IntegerField(null=True, blank=True)
+    observations = models.CharField(max_length=500, null=True, blank= True)
 
 # Tabla de Productos
 class Product(models.Model):
@@ -82,6 +89,9 @@ class Product(models.Model):
     deltaQuantity = models.FloatField()
     stockSecurity = models.IntegerField()
     inTransit = models.BooleanField(default=False)
+    hasOffer = models.ForeignKey(Cotization, on_delete=models.SET_DEFAULT, blank=True, null=True, default=None)
+    quantityOffer = models.FloatField(null=True, blank= True)
+    priceOffer = models.FloatField(null=True, blank= True)
     
     def __str__(self):
         return self.name
@@ -175,11 +185,3 @@ class DiffProducts(models.Model):
     totalPurchase = models.FloatField()
     totalQuantity = models.FloatField()
     productDiff = models.IntegerField()
-
-class Cotization(models.Model):
-    
-    name = models.CharField(max_length=60)
-
-    quantityBooked = models.IntegerField()
-
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
