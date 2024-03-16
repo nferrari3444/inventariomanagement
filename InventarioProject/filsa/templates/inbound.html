@@ -281,8 +281,8 @@ $(`#internalcode_${form_count}`).autocomplete({
                 // console.log('productSelected', dataLS[String(product)])
 
                 var productId = dataLS[code]
-
-                console.log('productId',productId)
+                var warehouse = $("#warehouse option:selected" ).val()
+                console.log('productId',productId)  
 
                 request_url = '/product/' + productId + '/';
                 $.ajax({

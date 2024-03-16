@@ -40,22 +40,9 @@ class CustomUser( AbstractBaseUser , PermissionsMixin ):
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
-
-    
-  
-    
     objects = CustomUserManager()
     
     # isAdmin = models.BooleanField()
-
-# Create your models here.
-class Warehouses(models.Model):
-    name = models.CharField(max_length=40)
-
-    def __str__(self):
-        return self.name
-
-# Tabla para Ubicaciones
 
 class Cotization(models.Model):
     
@@ -83,9 +70,9 @@ class Product(models.Model):
     internalCode = models.BigIntegerField(verbose_name=u"Codigo Interno")
     quantity = models.FloatField()
     category = models.CharField(max_length=20, choices=CATEGORIES, default='Insumos')
-    location = models.CharField(max_length=20, default='')
+    #location = models.CharField(max_length=20, default='')
     supplier = models.CharField(max_length=20, default='')
-    warehouse = models.ForeignKey(Warehouses, on_delete=models.CASCADE, related_name='warehouse_name')
+    #warehouse = models.ForeignKey(Warehouses, on_delete=models.CASCADE, related_name='warehouse_name')
     deltaQuantity = models.FloatField()
     stockSecurity = models.IntegerField()
     inTransit = models.BooleanField(default=False)
@@ -96,8 +83,26 @@ class Product(models.Model):
     def __str__(self):
         return self.name
 
-  
-   
+
+    # def get_total_stock(self):
+    #     stock = 0
+    #     for product in Product.objects.all():
+    #         stock += product.quantity
+    #     return stock
+    
+# Create your models here.
+class WarehousesProduct(models.Model):
+    name = models.CharField(max_length=40)
+    product = models.ForeignKey(Product, on_delete = models.DO_NOTHING)
+    quantity = models.FloatField()
+    location = models.CharField(max_length=20, default='')
+    
+
+    def __str__(self):
+        return self.name
+
+# Tabla para Ubicaciones
+        
 class Tasks(models.Model):
     STATUS = [('Pending','Pending'),
               ('Confirmed','Confirmed')]
@@ -135,7 +140,8 @@ class Tasks(models.Model):
     motivoIngreso = models.CharField(max_length=30, choices = MOTIVOSINGRESO) # default='Transferencia Depósitos')
     motivoEgreso = models.CharField(max_length=30, choices = MOTIVOSEGRESO) #default='Transferencia Depósitos')
 
-    warehouse = models.ForeignKey(Warehouses, on_delete= models.CASCADE, blank=True, null=True)
+    #warehouse = models.ForeignKey(Warehouses, on_delete= models.CASCADE, blank=True, null=True)
+    warehouse = models.ForeignKey(WarehousesProduct, on_delete= models.CASCADE, blank=True, null=True)
     actionType = models.CharField(max_length=20,  default='Inbound')
     observations = models.CharField(max_length=500, null=True, blank= True)
    # date = models.DateField(verbose_name=u"Fecha")
@@ -181,7 +187,7 @@ class DiffProducts(models.Model):
       verbose_name_plural = 'Faltante Productos Total'
      
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    warehouse = models.ForeignKey(Warehouses, on_delete= models.CASCADE, blank=True, null=True)
+    warehouse = models.ForeignKey(WarehousesProduct, on_delete= models.CASCADE, blank=True, null=True)
     totalPurchase = models.FloatField()
     totalQuantity = models.FloatField()
     productDiff = models.IntegerField()

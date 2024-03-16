@@ -27,7 +27,7 @@ from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError, PermissionDenied
 from .forms import SignUpForm , InboundForm, OutboundOrderForm, CotizationForm, OutboundDeliveryForm, InboundReceptionForm, TransferForm, TransferReceptionForm, CustomSetPasswordForm
-from .models import CustomUser, StockMovements, DiffProducts, Product, Warehouses, Tasks, Cotization
+from .models import CustomUser, StockMovements, DiffProducts, Product, WarehousesProduct, Tasks, Cotization
 from django.core.cache import cache
 from django.utils.http import urlsafe_base64_encode
 from django.core.mail import send_mail, BadHeaderError
@@ -146,7 +146,7 @@ def getProducts(request):
         objects = Product.objects.all()
         categories = Product.objects.all().values('category').distinct()
         suppliers = Product.objects.all().values('supplier').distinct()
-        warehouses = Warehouses.objects.all().values('name').distinct()
+        warehouses = WarehousesProduct.objects.all().values('name').distinct()
 
         cache.set('products', objects)
         cache.set('categories', categories)
@@ -197,8 +197,17 @@ def getProductsNames(request):
             return JsonResponse(codes,safe=False)
             
 
+def getProduct(request,productId):
+    product = Product.objects.get(product_id=productId)
+        
+    print('product is', product)
+    product_data = Product.objects.filter(product_id=productId).values_list('barcode','internalCode', 'name','category','supplier','quantity')
+    
+    print('product_data is', product_data)
 
-def getProduct(request, productId, warehouse):
+    return JsonResponse({'product': list(product_data)})
+
+def getProductWarehouse(request, productId, warehouse):
 
     print('warehouse from template is', warehouse)
 
@@ -207,16 +216,31 @@ def getProduct(request, productId, warehouse):
 
     print('product has offer', product[0].hasOffer)
     if product[0].hasOffer != None:
+        product_name = product[0].name
+        quantity = product[0].quantity
+        quantityOffer = product[0].quantityOffer
+        stockSecurity = product[0].stockSecurity
+
+        if quantity - quantityOffer < stockSecurity * 1.1:
+            response =  JsonResponse({'error': 'El producto {} tiene cotización de Oferta y se encuentra cerca del Stock de Seguridad. El stock se encuentra reservado '.format(product_name)})
+            response.status_code = 403
+            return response
+        else:
+            response =  JsonResponse({'error': 'El producto {} tiene cotización de Oferta y se encuentra cerca del Stock de Seguridad. El stock se encuentra reservado '.format(product_name)})
+            response.status_code = 403
+            return response
+
         print('el producto está en Oferta de cotizacion')
     try:
-        product = Product.objects.get(product_id=productId, warehouse= Warehouses.objects.get(name=warehouse))
-        
+        product = Product.objects.get(product_id=productId) #, warehouse= Warehouses.objects.get(name=warehouse))
+        #product = getProductWarehouse.objects.get(Product, name= warehouse)
         print('product is', product)
-        product_data = Product.objects.filter(product_id=productId, warehouse= Warehouses.objects.get(name=warehouse)).values_list('barcode','internalCode', 'name','warehouse','location','category','supplier','quantity', 'hasOffer')
-        
-        print('product_data is', product_data)
+        #product_data = Product.objects.filter(product_id=productId, warehouse= Warehouses.objects.get(name=warehouse)).values_list('barcode','internalCode', 'name','warehouse','location','category','supplier','quantity', 'hasOffer')
+        product_warehouse = WarehousesProduct.objects.filter(Product, name= warehouse).values_list('barcode','internalCode', 'name','warehouse','location','category','supplier','quantity', 'hasOffer')
+        #print('product_data is', product_data)
+        print('product_data is', product)
 
-        return JsonResponse({'product': list(product_data)})
+        return JsonResponse({'product': list(product)})
     except Product.DoesNotExist:
         print('da error en la vista')
         response =  JsonResponse({'error': 'El Producto ingresado no se encuentra en el Deposito {} '.format(warehouse)})

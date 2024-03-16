@@ -3,7 +3,7 @@ from django.contrib import admin
 from django.db.models.query import QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.db import models
-from .models import Warehouses, Product, StockMovements, DiffProducts, CustomUser
+from .models import WarehousesProduct, Product, StockMovements, DiffProducts, CustomUser
 from django.urls import reverse
 from django.utils.html import format_html
 from django.contrib.admin import SimpleListFilter
@@ -155,10 +155,10 @@ class AdminProductDiff(ExportActionMixin, admin.ModelAdmin):
 
     search_fields = ["product", "product__name"]
 
-admin.site.register(Warehouses)
+# admin.site.register(WarehousesProduct)
 
-admin.site.register(Product,StockSecurity)
-# admin.site.register(StockSecurity)
-admin.site.register(StockMovements,AdminStockMovements)
-admin.site.register(DiffProducts, AdminProductDiff)
-admin.site.register(CustomUser)
+# admin.site.register(Product,StockSecurity)
+# # admin.site.register(StockSecurity)
+# admin.site.register(StockMovements,AdminStockMovements)
+# admin.site.register(DiffProducts, AdminProductDiff)
+# admin.site.register(CustomUser)

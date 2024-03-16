@@ -262,7 +262,7 @@ $("#add-product").click(function(event) {
                 // console.log('productSelected', dataLS[String(product)])
 
                 var productId = dataLS[product]
-
+                var warehouse = $("#warehouse option:selected" ).val()
                 console.log('productId',productId)
 
                 request_url = '/product/' + productId + '/' + warehouse;
@@ -292,7 +292,7 @@ $("#add-product").click(function(event) {
     $(`#internalcode_${form_count}`).autocomplete({
         source: '{% url "autocomplete-name" %}',
     
-        minLength: 2,
+        minLength: 1,
         select: function(event, ui) {
                       console.log(ui)
                       console.log('event is',event)
@@ -307,10 +307,10 @@ $("#add-product").click(function(event) {
                 // console.log('productSelected', dataLS[String(product)])
 
                 var productId = dataLS[code]
-
+                var warehouse = $("#warehouse option:selected" ).val()
                 console.log('productId',productId)
 
-                request_url = '/product/' + productId + '/';
+                request_url = '/product/' + productId + '/' + warehouse;
                 $.ajax({
                     url: request_url,
                     success: function(data){

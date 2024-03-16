@@ -4,7 +4,7 @@ from django.db import transaction
 from django.forms.utils import ValidationError
 from django.forms import ModelChoiceField
 from django.forms import modelformset_factory
-from .models import (CustomUser, StockMovements, Product, DiffProducts , Warehouses, Tasks)
+from .models import (CustomUser, StockMovements, Product, DiffProducts , WarehousesProduct, Tasks)
 
 
 class SignUpForm(UserCreationForm):
@@ -31,7 +31,7 @@ class TransferForm(forms.ModelForm):
                                          'style': 'max-width: auto;',
                                      }), empty_label='-------------', to_field_name='username')
 
-    warehouse = forms.ModelChoiceField(queryset=Warehouses.objects.all()
+    warehouse = forms.ModelChoiceField(queryset=WarehousesProduct.objects.all()
                                       ,widget=forms.Select(attrs={
                                          'class': "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500",
                                         'id':'warehouse',
@@ -171,7 +171,7 @@ class InboundForm(forms.ModelForm):
                                          'style': 'max-width: auto;',
                                      }), empty_label='-------------', to_field_name='username')
 
-    warehouse = forms.ModelChoiceField(queryset=Warehouses.objects.all()
+    warehouse = forms.ModelChoiceField(queryset=WarehousesProduct.objects.all()
                                       ,widget=forms.Select(attrs={
                                                  
                                          'class': "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500",
@@ -289,7 +289,7 @@ class OutboundOrderForm(forms.ModelForm):
     
     extra_field_count = forms.CharField(widget=forms.HiddenInput())
      
-    warehouse = forms.ModelChoiceField(queryset=Warehouses.objects.all()
+    warehouse = forms.ModelChoiceField(queryset=WarehousesProduct.objects.all()
                                       ,widget=forms.Select(attrs={
                                          'class': "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500",
                                          'id':'warehouse',
@@ -473,11 +473,11 @@ class CotizationForm(forms.Form):
     # <!-- <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" for="file_input">Upload file</label>
     # <input class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400" id="file_input" type="file"> -->
    
-    file = forms.FileField(widget=forms.FileInput(attrs={'class': "block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400" ,'id':"file_input" ,'type':"file" }))
+    file = forms.FileField(widget=forms.FileInput(attrs={'class': "mb-4 block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400" ,'id':"file_input" ,'type':"file" }))
      
-    customer = forms.CharField(widget=forms.TextInput(attrs={"class" : "block p-2.5 w-1/2 text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" ,"placeholder":"Cliente"}))
+    customer = forms.CharField(widget=forms.TextInput(attrs={"class" : "mt-4 block p-2.5 w-1/2 text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" ,"placeholder":"Cliente"}))
    
-    observations = forms.CharField(widget=forms.Textarea(attrs={"rows":"5", "class" : "block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" ,"placeholder":"Your description here"}))
+    observations = forms.CharField(widget=forms.Textarea(attrs={"rows":"5", "class" : "mt-4 block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" ,"placeholder":"Your description here"}))
   
 
 

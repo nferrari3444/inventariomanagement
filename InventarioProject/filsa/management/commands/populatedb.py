@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand, CommandError
-from filsa.models import CustomUser, StockMovements, DiffProducts, Product, Warehouses, Tasks, Cotization
+from filsa.models import CustomUser, StockMovements, DiffProducts, Product, WarehousesProduct, Tasks, Cotization
 from django.contrib.auth.models import Group
 import csv
 from datetime import datetime
@@ -29,20 +29,20 @@ class Command(BaseCommand):
 
         customer = 'UTE'
         
-        warehouse_object = []
-        for i in range(0,len(warehouses_list)):
-            warehouses_model = Warehouses()
-            warehouses_model.name = warehouses_list[i]
-            warehouse_object.append(warehouses_model)
+        # warehouse_object = []
+        # for i in range(0,len(warehouses_list)):
+        #     warehouses_model = Warehouses()
+        #     warehouses_model.name = warehouses_list[i]
+        #     warehouse_object.append(warehouses_model)
 
-        Warehouses.objects.bulk_create(warehouse_object)
+        # Warehouses.objects.bulk_create(warehouse_object)
 
 
         #users_file = './usuariosFilsa.txt' 
         #products_file = './productosFilsa.txt' 
         users_file = "C:/Users/nicol/Inventario/InventarioProject/filsa/management/commands/usuariosFilsa.txt"
         products_file = "C:/Users/nicol/Inventario/InventarioProject/filsa/management/commands/productosFilsa.txt"
-        new_products_file = "C:/Users/nicol/Inventario/InventarioProject/filsa/management/Products.csv"
+        new_products_file = "C:/Users/nicol/Inventario/InventarioProject/filsa/management/ProdsFilsa.csv"
         #f = open(users_file, "r")
         #reader = f.read()
         #users_lines = list(reader)
@@ -94,24 +94,25 @@ class Command(BaseCommand):
             i = 0
             for row in reader:
                 product_model = Product()
+                #warehouse_product_model = WarehousesProduct()
                 i +=1 
                 # Create an empty instance of your model
-              
+                print('row is', row)
                # print('product line is ', line)
-                warehouse_name = row['Deposito']
+                #warehouse_name = row['Deposito']
 
-                
+                #product_model.warehouse= Warehouses.objects.get(name=warehouse_name)
                 product_model.name= row['Producto']
                 product_model.barcode= row['CodigoOrigen']
                 product_model.internalCode= row['Codigo']
-                product_model.quantity= row['Cantidad']
+                product_model.quantity= row['StockActual']
                 product_model.category= row['Categoria']
-                product_model.location= row['Ubicacion']
+                #product_model.location= row['Ubicacion']
                 product_model.supplier= row['Proveedor']
-                print('warehouse is ', warehouse_name)
+                #print('warehouse is ', warehouse_name)
                 print('i is',i)
 
-                product_model.warehouse= Warehouses.objects.get(name=warehouse_name)
+                
                 product_model.deltaQuantity= 0
                 product_model.stockSecurity= row['StockSeguridad']
                 product_model.inTransit = False
@@ -120,43 +121,47 @@ class Command(BaseCommand):
                 print(product_model.name)
                 
                 objects.append(product_model)
-        
-               
-        
-        # with open(products_file) as file:
-        #     # print(file.readlines())
-        #     product_lines = file.readlines()
-
-            #print(f.read())
-
-            # Create an empty list of objects of your model
             
-          
-            # Iterate each record of the csv file
-            # for line in product_lines[1:]:
-                # product_model = Product()
-                # # Create an empty instance of your model
-                # line = line.split(',')
-                # print('product line is ', line)
-                # warehouse_name = line[5]
-           
-                # product_model.name= line[0] 
-                # product_model.barcode= line[1]
-                # product_model.internalCode= line[2]
-                # product_model.quantity= line[7]
-                # product_model.category= line[3]
-                # product_model.location= line[8]
-                # product_model.supplier= line[4]
-                # print('warehouse is ', warehouse_name)
-                # product_model.warehouse= Warehouses.objects.get(name=warehouse_name)
-                # product_model.deltaQuantity= line[9]
-                # product_model.stockSecurity= line[6]
-                # product_model.inTransit = False
-                
-                # objects.append(product_model)
-        
             Product.objects.bulk_create(objects, ignore_conflicts=True)
 
+
+        objects = []
+        with open(new_products_file,  newline='', encoding="utf-8") as csvfile:
+            reader = csv.DictReader(csvfile)
+            i = 0
+            for row in reader:
+                #product_model = Product()
+                warehouse_product_model = WarehousesProduct()
+                i +=1  
+                anaya_quantity = row['STOCK ANAYA 2710']
+                crocker_quantity = row['STOCK CROKER']
+                juanico_quantity = row['STOCK JUANICO']
+
+                if anaya_quantity != '':
+                    warehouse_product_model.name = 'Anaya 2710'
+                    #product_model.name= row['Producto']
+                    warehouse_product_model.product = Product.objects.get(row['Producto'])
+                    warehouse_product_model.quantity = anaya_quantity
+                    warehouse_product_model.location = row['Ubicacion Anaya']
+
+                if crocker_quantity != '':
+                    warehouse_product_model.name = 'Crocker'
+                    warehouse_product_model.product = Product.objects.get(row['Producto'])
+                    warehouse_product_model.quantity = crocker_quantity
+                    warehouse_product_model.location = row['Ubicacion Crocker']
+
+                if juanico_quantity != '':
+                    warehouse_product_model.name = 'Juanico'
+                    warehouse_product_model.product = Product.objects.get(row['Producto'])
+                    warehouse_product_model.quantity = juanico_quantity
+                    warehouse_product_model.location = row['Ubicacion Juanico']
+
+            
+
+                objects.append(warehouse_product_model)
+
+            WarehousesProduct.objects.bulk_create(objects)
+            
     # Populate the fields of the model based on the record line of your file
 #    obj.field1 = line[0] # The first column
 #    obj.field2 = line[1] # The second column
