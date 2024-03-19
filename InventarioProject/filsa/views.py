@@ -877,14 +877,15 @@ class StockListView(LoginRequiredMixin, generic.ListView):
             supplierList = Product.objects.all().values('supplier').distinct()
 
         if warehouse:
-            warehouse = Warehouses.objects.get(name=warehouse)
-            warehouseList = Warehouses.objects.get(name=warehouse)
-            context.update({'products' : Product.objects.select_related('warehouse').filter(warehouse=warehouse, category ='Insumos', inTransit=False)}) #, supplier ='De Salt') 
+            warehouse = WarehousesProduct.objects.get(name=warehouse)
+            warehouseList = WarehousesProduct.objects.get(name=warehouse)
+            # context.update({'products' : Product.objects.select_related('warehouse').filter(warehouse=warehouse, category ='Insumos', inTransit=False)}) #, supplier ='De Salt') 
+            context.update({'products': WarehousesProduct.objects.filter(name=warehouse) } )
         else:
-            warehouseList = Warehouses.objects.all()
+            warehouseList = WarehousesProduct.objects.all()
             
             #context['products'] = Product.objects.select_related('warehouse').filter(category ='Insumos') #, supplier ='De Salt') 
-        context['products'] = Product.objects.all().select_related('warehouse').filter(inTransit=False) #.filter(category__in=categoryList, supplier__in=supplierList) 
+        context['products'] = Product.objects.all().filter(inTransit=False) #.filter(category__in=categoryList, supplier__in=supplierList)                   # Product.objects.all().select_related('warehouse').filter(inTransit=False) #.filter(category__in=categoryList, supplier__in=supplierList) 
         print('categoryList', categoryList)
         print('args', args)
         print('kwargs in get_context_data', kwargs)
@@ -897,7 +898,7 @@ class StockListView(LoginRequiredMixin, generic.ListView):
         context['productList'] = Product.objects.all().values('name').distinct()
         context['categoryList'] = Product.objects.all().values('category').distinct()
         context['supplierList'] = Product.objects.all().values('supplier').distinct()
-        context['warehouseList'] = Warehouses.objects.all().values('name').distinct()
+        context['warehouseList'] = WarehousesProduct.objects.all().values('name').distinct()
         
         print('context in get_context_data', context)
         return context 
@@ -1000,7 +1001,7 @@ def filterProducts(request):
         checkbox= request.GET.get('checkbox',None)
 
         if checkbox:
-            products = Product.objects.select_related('warehouse').filter(inTransit=False)  
+            products = Product.objects.filter(inTransit=False)                 # Product.objects.select_related('warehouse').filter(inTransit=False)  
             data = dict() 
             product_dict  = {'page_obj' : products}
             data['html_table'] =  render_to_string('inject_table.html',
@@ -1013,7 +1014,11 @@ def filterProducts(request):
         print('product is',product)
         if product:
             products = Product.objects.filter(name=product, inTransit=False)
+            print('product in ajax request in view is', products)
             context = {'page_obj' : products}
+
+            # return render(request, "stock.html", context=context)
+        
             data['html_table'] =  render_to_string('inject_table.html',
                                 context,
                                 request = request
@@ -1040,10 +1045,13 @@ def filterProducts(request):
         print('supplier is', supplierList)
 
         if warehouse and warehouse != 'Total Depositos':
-            warehouse = Warehouses.objects.get(name=warehouse)
-            filter_data = Product.objects.select_related('warehouse').filter(warehouse=warehouse, category__in =categoryList, supplier__in=supplierList, inTransit=False) 
+            # warehouse = WarehousesProduct.objects.get(name=warehouse)
+            filter_data = WarehousesProduct.objects.select_related('product').filter(name=warehouse, product__category__in= categoryList, product__supplier__in=supplierList, product__inTransit=False )
+            # Product.objects.select_related('warehouse').filter(warehouse=warehouse, category__in =categoryList, supplier__in=supplierList, inTransit=False) 
         else:
-            filter_data = Product.objects.select_related('warehouse').filter(category__in =categoryList, supplier__in=supplierList, inTransit=False) 
+            filter_data = WarehousesProduct.objects.filter(product__category__in= categoryList, product__supplier__in=supplierList, product__inTransit=False )
+
+            #filter_data = Product.objects.select_related('warehouse').filter(category__in =categoryList, supplier__in=supplierList, inTransit=False) 
 
     # data = serializers.serialize("json", Product.objects.filter(warehouse=warehouse, category=category, supplier=supplier).select_related('warehouse') )
         
@@ -1066,7 +1074,7 @@ def filterProducts(request):
         productList = Product.objects.all().values('name').distinct()
         categoryList = Product.objects.all().values('category').distinct()
         supplierList = Product.objects.all().values('supplier').distinct()
-        warehouseList = Warehouses.objects.all().values('name').distinct()
+        warehouseList = WarehousesProduct.objects.all().values('name').distinct()
         
        # return render(request, 'stock.html',{'productList' : productList, 'supplierList':supplierList, 'warehouseList':warehouseList,   'categoryList':categoryList,  'page_obj': page_obj})
     

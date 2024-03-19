@@ -74,7 +74,7 @@ class Product(models.Model):
     supplier = models.CharField(max_length=20, default='')
     #warehouse = models.ForeignKey(Warehouses, on_delete=models.CASCADE, related_name='warehouse_name')
     deltaQuantity = models.FloatField()
-    stockSecurity = models.IntegerField()
+    stockSecurity = models.IntegerField(default=0)
     inTransit = models.BooleanField(default=False)
     hasOffer = models.ForeignKey(Cotization, on_delete=models.SET_DEFAULT, blank=True, null=True, default=None)
     quantityOffer = models.FloatField(null=True, blank= True)
@@ -93,8 +93,8 @@ class Product(models.Model):
 # Create your models here.
 class WarehousesProduct(models.Model):
     name = models.CharField(max_length=40)
-    product = models.ForeignKey(Product, on_delete = models.DO_NOTHING)
-    quantity = models.FloatField()
+    product = models.ForeignKey(Product, on_delete = models.CASCADE,  blank=True, null=True )
+    quantity = models.FloatField(default=0)
     location = models.CharField(max_length=20, default='')
     
 

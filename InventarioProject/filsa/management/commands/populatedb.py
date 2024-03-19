@@ -42,7 +42,7 @@ class Command(BaseCommand):
         #products_file = './productosFilsa.txt' 
         users_file = "C:/Users/nicol/Inventario/InventarioProject/filsa/management/commands/usuariosFilsa.txt"
         products_file = "C:/Users/nicol/Inventario/InventarioProject/filsa/management/commands/productosFilsa.txt"
-        new_products_file = "C:/Users/nicol/Inventario/InventarioProject/filsa/management/ProdsFilsa.csv"
+        new_products_file = "C:/Users/nicol/Inventario/InventarioProject/filsa/management/filsa_out4.csv"
         #f = open(users_file, "r")
         #reader = f.read()
         #users_lines = list(reader)
@@ -89,31 +89,49 @@ class Command(BaseCommand):
         #lines = list(reader)
         
         objects = []
-        with open(new_products_file,  newline='', encoding="utf-8") as csvfile:
+        with open(new_products_file,  newline='',  encoding="utf-8") as csvfile:
             reader = csv.DictReader(csvfile)
             i = 0
             for row in reader:
+                if row['Producto'] == '' or row['Producto'] == None:
+                    continue
                 product_model = Product()
                 #warehouse_product_model = WarehousesProduct()
                 i +=1 
                 # Create an empty instance of your model
                 print('row is', row)
+                
                # print('product line is ', line)
                 #warehouse_name = row['Deposito']
-
+                #print('product is', row['Producto'])
+                ##print('codigo origen is', row['CodigoOrigen'])
+                #print('codigo is', row['Codigo'])
+                #print('stockActual is', row['StockActual'])
+            
                 #product_model.warehouse= Warehouses.objects.get(name=warehouse_name)
                 product_model.name= row['Producto']
+
                 product_model.barcode= row['CodigoOrigen']
                 product_model.internalCode= row['Codigo']
-                product_model.quantity= row['StockActual']
+
+                product_model.deltaQuantity= 0
+                if row['StockActual'] == '':
+                    quantity  = 0
+                else:
+                    quantity = row['StockActual'].replace(',','.')
+
+                product_model.quantity= quantity
                 product_model.category= row['Categoria']
                 #product_model.location= row['Ubicacion']
                 product_model.supplier= row['Proveedor']
                 #print('warehouse is ', warehouse_name)
                 print('i is',i)
-
+                print('stockSecurity is', row['StockSeguridad'])
                 
                 product_model.deltaQuantity= 0
+                if row['StockSeguridad'] == '':
+                    row['StockSeguridad'] = 0
+
                 product_model.stockSecurity= row['StockSeguridad']
                 product_model.inTransit = False
 
@@ -131,29 +149,45 @@ class Command(BaseCommand):
             i = 0
             for row in reader:
                 #product_model = Product()
+                if row['Producto'] == '' or row['Producto'] == None:
+                    continue
                 warehouse_product_model = WarehousesProduct()
                 i +=1  
                 anaya_quantity = row['STOCK ANAYA 2710']
-                crocker_quantity = row['STOCK CROKER']
+                crocker_quantity = row['STOCK CROCKER']
                 juanico_quantity = row['STOCK JUANICO']
+                
+                #try:
+
+                try:
+                    print('producto antes del get is ', row['Producto'])
+                    product = Product.objects.get(name=row['Producto'])
+                except Exception as e:
+                    print(e)
+
 
                 if anaya_quantity != '':
                     warehouse_product_model.name = 'Anaya 2710'
                     #product_model.name= row['Producto']
-                    warehouse_product_model.product = Product.objects.get(row['Producto'])
-                    warehouse_product_model.quantity = anaya_quantity
+                    #print('product in Anaya is', row['Producto'])
+                    warehouse_product_model.product = Product.objects.get(product_id=product.product_id)
+                    #warehouse_product_model.product_id = product.product_id
+                    
+                    warehouse_product_model.quantity = anaya_quantity.replace(',','')
                     warehouse_product_model.location = row['Ubicacion Anaya']
 
                 if crocker_quantity != '':
                     warehouse_product_model.name = 'Crocker'
-                    warehouse_product_model.product = Product.objects.get(row['Producto'])
-                    warehouse_product_model.quantity = crocker_quantity
+                    #print('product in Crocker is', row['Producto'])
+                    warehouse_product_model.product =  Product.objects.get(product_id=product.product_id) #  product # Product.objects.get(name=row['Producto'])
+                    warehouse_product_model.quantity = crocker_quantity.replace(',','')
                     warehouse_product_model.location = row['Ubicacion Crocker']
 
                 if juanico_quantity != '':
                     warehouse_product_model.name = 'Juanico'
-                    warehouse_product_model.product = Product.objects.get(row['Producto'])
-                    warehouse_product_model.quantity = juanico_quantity
+                    #print('product in Juanico is', row['Producto'])
+                    warehouse_product_model.product = Product.objects.get(product_id=product.product_id)    # product #   Product.objects.get(name=row['Producto'])
+                    warehouse_product_model.quantity = juanico_quantity.replace(',','')
                     warehouse_product_model.location = row['Ubicacion Juanico']
 
             
