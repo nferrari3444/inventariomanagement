@@ -68,7 +68,7 @@
                 <div>
                     <label for="departamento" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Depósito</label>
                         
-                    <div class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">{{task.warehouse}}</div>
+                    <div class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">{{task.warehouseProduct.name}}</div>
                     </div>
                                 
                 </div>
@@ -90,7 +90,7 @@
                            {% if  product.actionType == 'Confirma Ingreso' %}
                          
                                 <tr class="bg-gray-200 border-b dark:bg-gray-800 dark:border-gray-700">
-                                   <td class="w-1/2"><input type="text" name="producto_{{ forloop.counter0 }}" value="{{product.product.name}}"  class="bg-gray-150 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"  id="" name="" placeholder="" disabled></td>
+                                   <td class="w-1/2"><input type="text" name="producto_{{ forloop.counter0 }}" value="{{product.warehouseProduct.product.name}}"  class="bg-gray-150 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"  id="" name="" placeholder="" disabled></td>
                                    <td class="px-6 py-4"><input type="number" name="cantidad_{{ forloop.counter0 }}" value="{{product.cantidad}}"  class="bg-gray-150 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" id="" name="" placeholder="" disabled></td>             
                                        <!-- <td class="px-6 py-4" name="producto_{{ forloop.counter0 }}" value="{{product.product.name}}">{{product.product.name}}</td>
                                    <td class="px-6 py-4" name="cantidad_{{ forloop.counter0 }}" value="{{product.cantidad}}">{{product.cantidad}}</td> -->

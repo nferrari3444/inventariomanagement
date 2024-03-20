@@ -155,10 +155,10 @@ class AdminProductDiff(ExportActionMixin, admin.ModelAdmin):
 
     search_fields = ["product", "product__name"]
 
-# admin.site.register(WarehousesProduct)
+admin.site.register(WarehousesProduct)
 
-# admin.site.register(Product,StockSecurity)
-# # admin.site.register(StockSecurity)
-# admin.site.register(StockMovements,AdminStockMovements)
-# admin.site.register(DiffProducts, AdminProductDiff)
-# admin.site.register(CustomUser)
+admin.site.register(Product,StockSecurity)
+# admin.site.register(StockSecurity)
+admin.site.register(StockMovements,AdminStockMovements)
+admin.site.register(DiffProducts, AdminProductDiff)
+admin.site.register(CustomUser)

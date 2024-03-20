@@ -169,10 +169,12 @@ class Command(BaseCommand):
                         #product_model.name= row['Producto']
                         #print('product in Anaya is', row['Producto'])
                         warehouse_product_model_anaya.product = Product.objects.get(product_id=product.product_id)
-                        #warehouse_product_model.product_id = product.product_id
+                       
+                       #warehouse_product_model.product_id = product.product_id
                         
                         warehouse_product_model_anaya.quantity = anaya_quantity.replace(',','')
                         warehouse_product_model_anaya.location = row['Ubicacion Anaya']
+                        warehouse_product_model_anaya.deltaQuantity = 0
                         objects.append(warehouse_product_model_anaya)
 
                     if crocker_quantity != '':
@@ -182,6 +184,7 @@ class Command(BaseCommand):
                         warehouse_product_model_crocker.product =  Product.objects.get(product_id=product.product_id) #  product # Product.objects.get(name=row['Producto'])
                         warehouse_product_model_crocker.quantity = crocker_quantity.replace(',','')
                         warehouse_product_model_crocker.location = row['Ubicacion Crocker']
+                        warehouse_product_model_crocker.deltaQuantity = 0
                         objects.append(warehouse_product_model_crocker)
 
                     if juanico_quantity != '':
@@ -191,6 +194,7 @@ class Command(BaseCommand):
                         warehouse_product_model_juanico.product = Product.objects.get(product_id=product.product_id)    # product #   Product.objects.get(name=row['Producto'])
                         warehouse_product_model_juanico.quantity = juanico_quantity.replace(',','')
                         warehouse_product_model_juanico.location = row['Ubicacion Juanico']
+                        warehouse_product_model_juanico.deltaQuantity = 0
                         objects.append(warehouse_product_model_juanico)
 
                 except Exception as e:

@@ -44,7 +44,7 @@ class TransferForm(forms.ModelForm):
     
     class Meta:
         model = Tasks
-        fields = ['warehouse','issuer','receptor','department','date']
+        fields = ['issuer','receptor','department','date']
         widgets = {
             'date': forms.DateInput(attrs={'type': 'date'})
         }
@@ -102,11 +102,21 @@ class TransferReceptionForm(forms.ModelForm):
     extra_field_count = forms.CharField(widget=forms.HiddenInput())
     observations = forms.CharField(widget=forms.Textarea(attrs={"rows":"5", "class" : "block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" ,"placeholder":"Your description here"}))
     
+    
+    warehouse = forms.ModelChoiceField(queryset=WarehousesProduct.objects.values_list('name', flat=True ).distinct()
+                                      ,widget=forms.Select(attrs={
+                                         'class': "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500",
+                                        'id':'warehouse',
+                                         "name":'warehouse',
+
+                                         'style': 'max-width: auto;',
+                                     }), empty_label='-------------', to_field_name='name')
+
     class Meta:
         model = Tasks
         # fields = ['product','department','issuer', 'motivoEgreso', 'cantidad', 'date',
         #           'receptor', 'cantidadEntregada', 'deliveryDate', 'warehouse']
-        fields = ['department','issuer', 'date', 'receptor', 'warehouse', 'observations'] #, 'task']
+        fields = ['department','issuer', 'date', 'receptor', 'observations'] #, 'task']
    
     def __init__(self, *args, **kwargs):
         
@@ -124,7 +134,7 @@ class TransferReceptionForm(forms.ModelForm):
         products = self.instance.stockmovements_set.all()
         print('products in Inbound Reception form are', products)
         for product in products:
-            print('product in loop of line 127 form is ', product.product.name)
+            print('product in loop of line 127 form is ', product.warehouseProduct.product)   #product.product.name)
        
         print('self.instance is:', self.instance)
         self.fields['department'].widget.attrs.update({'class':'bg-gray-100 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 flex w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500', 'disabled':True }) #= self.instance.department
@@ -141,14 +151,14 @@ class TransferReceptionForm(forms.ModelForm):
         # self.fields['issuer'].widget.value_from_datadict = lambda *args: self.instance.issuer
         #self.fields['issuer'].initial = user
         for i , product in enumerate(products):
-            print('product in form loop is {} for i {}'.format(product.product.name,i))
+            print('product in form loop is {} for i {}'.format(product.warehouseProduct.product.name,i))
 
             field_name = 'producto_{}'.format(i)
             quantity = 'cantidad_{}'.format(i)
             netQuantity = 'cantidadNeta_{}'.format(i)
             # print('product in form is {}'.format(product))
 
-            print('product name in form is {}'.format(product.product.name))
+            #print('product name in form is {}'.format(product.product.name))
             # print('product cantidad in form is {}'.format(product.cantidad))
             
             self.fields[field_name] = forms.CharField()
@@ -156,7 +166,7 @@ class TransferReceptionForm(forms.ModelForm):
             self.fields[netQuantity] = forms.CharField()
 
             # self.fields[field_name].widget.attrs.update({'class':'bg-gray-200 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 flex w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500', 'disabled':True }) #    .widget.value_from_datadict = self.instance.issuer
-            self.fields[field_name].widget.value_from_datadict = lambda *args: product.product.name
+            self.fields[field_name].widget.value_from_datadict = lambda *args: product.warehouseProduct.product.name
 
             self.fields[quantity].widget.attrs.update({'type':'number' , 'class':'bg-gray-200 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 flex w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500', 'disabled':True }) #    .widget.value_from_datadict = self.instance.issuer
             self.fields[quantity].widget.value_from_datadict = lambda *args: int(product.cantidad)
@@ -182,7 +192,7 @@ class InboundForm(forms.ModelForm):
     
     class Meta:
         model = Tasks
-        fields = ['warehouse','motivoIngreso','issuer', 'receptor', 'department' , 'date']
+        fields = ['motivoIngreso','issuer', 'receptor', 'department' , 'date']
         widgets = {
             'date': forms.DateInput(attrs={'type': 'date'})
         }
@@ -205,7 +215,7 @@ class InboundForm(forms.ModelForm):
             print('index in line 73 is {}'.format(index))
             self.fields['product_{index}'.format(index=index)] =   forms.CharField()
             
-            self.fields['barcode_{index}'.format(index=index)] = forms.CharField()
+            #self.fields['barcode_{index}'.format(index=index)] = forms.CharField()
             self.fields['internalCode_{index}'.format(index=index)] = forms.CharField()
             self.fields['cantidad_{index}'.format(index=index)] = forms.IntegerField()
    
@@ -213,13 +223,20 @@ class InboundReceptionForm(forms.ModelForm):
     extra_field_count = forms.CharField(widget=forms.HiddenInput())
     observations = forms.CharField(widget=forms.Textarea(attrs={"rows":"5", "class" : "block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" ,"placeholder":"Your description here"}))
 
-    
+    warehouse = forms.ModelChoiceField(queryset=WarehousesProduct.objects.values_list('name', flat=True).distinct()
+                                      ,widget=forms.Select(attrs={
+                                                 
+                                         'class': "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500",
+                                         'style': 'max-width: auto;',
+                                     }), empty_label='-------------', to_field_name='name')
+
     class Meta:
         model = Tasks
         # fields = ['product','department','issuer', 'motivoEgreso', 'cantidad', 'date',
         #           'receptor', 'cantidadEntregada', 'deliveryDate', 'warehouse']
-        fields = ['department','issuer', 'motivoIngreso', 'date', 'receptor', 'warehouse','observations'] #, 'task']
-   
+#       fields = ['department','issuer', 'motivoIngreso', 'date', 'receptor', 'warehouse','observations'] #, 'task']
+        fields = ['department','issuer', 'motivoIngreso', 'date', 'receptor','observations'] #, 'task']
+    
     def __init__(self, *args, **kwargs):
         
         extra_fields = kwargs.pop('extra',0)
@@ -236,7 +253,7 @@ class InboundReceptionForm(forms.ModelForm):
         products = self.instance.stockmovements_set.all()
         print('products in Inbound Reception form are', products)
         for product in products:
-            print('product in loop of line 127 form is ', product.product.name)
+            print('product in loop of line 127 form is ', product.warehouseProduct.product.name)
        
         print('self.instance is:', self.instance)
         self.fields['department'].widget.attrs.update({'class':'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 flex w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500', 'disabled':True }) #= self.instance.department
@@ -249,19 +266,19 @@ class InboundReceptionForm(forms.ModelForm):
         self.fields['department'].widget.value_from_datadict = lambda *args: self.instance.department
         self.fields['motivoIngreso'].widget.value_from_datadict = lambda *args: self.instance.motivoIngreso
         self.fields['date'].widget.value_from_datadict = lambda *args: self.instance.date
-        self.fields['warehouse'].widget.value_from_datadict = lambda *args: self.instance.warehouse
+        self.fields['warehouse'].widget.value_from_datadict = lambda *args: self.instance.warehouseProduct.name
         self.fields['receptor'].widget.value_from_datadict = lambda *args: self.instance.receptor
         self.fields['issuer'].widget.value_from_datadict = lambda *args: self.instance.issuer
 
         for i , product in enumerate(products):
-            print('product in form loop is {} for i {}'.format(product.product.name,i))
+            print('product in form loop is {} for i {}'.format(product.warehouseProduct.product.name,i))
 
             field_name = 'producto_{}'.format(i)
             quantity = 'cantidad_{}'.format(i)
             netQuantity = 'cantidadNeta_{}'.format(i)
             # print('product in form is {}'.format(product))
 
-            print('product name in form is {}'.format(product.product.name))
+            print('product name in form is {}'.format(product.warehouseProduct.product.name))
             # print('product cantidad in form is {}'.format(product.cantidad))
             
             self.fields[field_name] = forms.CharField()
@@ -269,7 +286,7 @@ class InboundReceptionForm(forms.ModelForm):
             self.fields[netQuantity] = forms.CharField()
 
             self.fields[field_name].widget.attrs.update({'class':'bg-gray-150 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 flex w-1/2 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500', 'disabled':True }) #    .widget.value_from_datadict = self.instance.issuer
-            self.fields[field_name].widget.value_from_datadict = lambda *args: product.product.name
+            self.fields[field_name].widget.value_from_datadict = lambda *args: product.warehouseProduct.product.name
 
             self.fields[quantity].widget.attrs.update({'type':'number' , 'class':'bg-gray-150 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 flex w-1/2 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500', 'disabled':True }) #    .widget.value_from_datadict = self.instance.issuer
             self.fields[quantity].widget.value_from_datadict = lambda *args: int(product.cantidad)
@@ -308,8 +325,9 @@ class OutboundOrderForm(forms.ModelForm):
         model = Tasks
         # fields = ['product','department','issuer', 'motivoEgreso', 'cantidad', 'date']
         #fields = ['department','issuer', 'motivoEgreso', 'warehouse','date', 'receptor' ]
-        fields = ['warehouse','motivoEgreso', 'issuer', 'receptor', 'department' , 'date']
-   
+       # fields = ['warehouse','motivoEgreso', 'issuer', 'receptor', 'department' , 'date']
+        fields = ['motivoEgreso', 'issuer', 'receptor', 'department' , 'date']
+    
     def __init__(self, *args, **kwargs):
         
         extra_fields = kwargs.pop('extra',0)
@@ -350,13 +368,14 @@ class OutboundOrderForm(forms.ModelForm):
         for index in range(0, int(extra_fields)):
             product = self.cleaned_data['producto_{index}'.format(index=index)]
             print('product warehouse is ')
-            print(Product.objects.filter(name = product, warehouse=warehouse).exists())
+            product_db = Product.objects.filter(name = product)
 
-            product = self.cleaned_data['producto_{index}'.format(index=index)]
-            if  Product.objects.filter(name = product, warehouse=warehouse).exists():
+            #product = self.cleaned_data['producto_{index}'.format(index=index)]
+            if  WarehousesProduct.objects.filter(product__name= product, name=warehouse).exists():            #Product.objects.filter(name = product, warehouse=warehouse).exists():
 
-                product_db = Product.objects.get(name = product, warehouse=warehouse )
-                product_stock = product_db.quantity
+                product_db = Product.objects.get(name = product)
+                productWarehouse_db = WarehousesProduct.objects.get(product = product_db, name = warehouse)
+                product_stock = productWarehouse_db.quantity
                 stockSecurity = product_db.stockSecurity
                 print('product in method is {}'.format(product))
                 print('product in stock is {}'.format(product_stock))
@@ -380,6 +399,13 @@ class OutboundDeliveryForm(forms.ModelForm):
   
     observations = forms.CharField(widget=forms.Textarea(attrs={"rows":"5", "class" : "block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" ,"placeholder":"Your description here"}))
     
+    warehouse = forms.ModelChoiceField(queryset=WarehousesProduct.objects.values_list('name', flat=True).distinct()
+                                      ,widget=forms.Select(attrs={
+                                                 
+                                         'class': "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500",
+                                         'style': 'max-width: auto;',
+                                     }), empty_label='-------------', to_field_name='name')
+    
     widgets = {
             'deliveryDate': forms.widgets.DateInput(attrs={'type': 'date'}),
          #   'cantidad': forms.Input(attrs={'class':"bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"})
@@ -389,7 +415,9 @@ class OutboundDeliveryForm(forms.ModelForm):
         model = Tasks
         # fields = ['product','department','issuer', 'motivoEgreso', 'cantidad', 'date',
         #           'receptor', 'cantidadEntregada', 'deliveryDate', 'warehouse']
-        fields = ['department','issuer', 'motivoEgreso', 'date', 'receptor', 'warehouse', 'observations']
+#        fields = ['department','issuer', 'motivoEgreso', 'date', 'receptor', 'warehouse', 'observations']
+        fields = ['department','issuer', 'motivoEgreso', 'date', 'receptor', 'observations']
+
 
 
     #def __init__(self, *args, **kwargs):
@@ -411,7 +439,7 @@ class OutboundDeliveryForm(forms.ModelForm):
             print('products in form OutboundDelivery are', products)
             #numberOfProducts = 2
             for product in products:
-                print('product in products of self.instance.stockmovements_set.all() is', product.product.name)
+                print('product in products of self.instance.stockmovements_set.all() is', product.warehouseProduct.product.name)
             #print('self.instance is:', self.instance.)
           
             self.fields['department'].widget.attrs.update({'class':'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 flex w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500', 'disabled':True }) #= self.instance.department
@@ -424,7 +452,7 @@ class OutboundDeliveryForm(forms.ModelForm):
             self.fields['department'].widget.value_from_datadict = lambda *args: self.instance.department
             self.fields['motivoEgreso'].widget.value_from_datadict = lambda *args: self.instance.motivoEgreso
             self.fields['date'].widget.value_from_datadict = lambda *args: self.instance.date
-            self.fields['warehouse'].widget.value_from_datadict = lambda *args: self.instance.warehouse
+            self.fields['warehouse'].widget.value_from_datadict = lambda *args: self.instance.warehouseProduct.name
             self.fields['receptor'].widget.value_from_datadict = lambda *args: self.instance.receptor
             self.fields['issuer'].widget.value_from_datadict = lambda *args: self.instance.issuer
 
@@ -445,7 +473,7 @@ class OutboundDeliveryForm(forms.ModelForm):
                 #print('self.fields[field_name] before value is ', self.fields[field_name])
 
                 #self.initial[field_name] =  product.product.name
-                self.fields[field_name].widget.value_from_datadict = lambda *args: product.product.name
+                self.fields[field_name].widget.value_from_datadict = lambda *args: product.warehouseProduct.product.name
              
                 #self.initial[quantity] = int(product.cantidad)
                 self.fields[quantity].widget.attrs.update({'type':'number' ,  'class':'bg-gray-150 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 flex w-1/2 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500', 'disabled':True }) #    .widget.value_from_datadict = self.instance.issuer
