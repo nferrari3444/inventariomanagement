@@ -1,4 +1,6 @@
 <div class="w-full px-4 relative overflow-x-auto">
+   {{warehouse}}
+   {{product}}
     <table id="productTable" class="text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
         <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
             <tr>
@@ -21,6 +23,16 @@
   </svg></a>
                     </div>
                 </th>
+                {% if warehouse %}
+                <th scope="col" class="px-3 py-2">
+                    <div class="flex items-center">
+                        Ubicacion
+                        <a href="#"><svg class="w-3 h-3 ms-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+    <path d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z"/>
+  </svg></a>
+                    </div>
+                </th>
+                {% endif %}
 
                 <th scope="col" class="px-3 py-2">
                     <div class="flex items-center">
@@ -66,41 +78,116 @@
             </tr>
         </thead>
         <tbody>
-            {% for product in page_obj %}
+            {% for product_obj in page_obj %}
             <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                {% if product %}
                 <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                    {{product.product.name}}
+                    {{product_obj.name}}
                 </th>
-                <td class="px-3 py-2">
-                    {{product.product.barcode}}
-                </td>
-                <td class="px-3 py-2">
-                    {{product.product.internalCode}}
-                </td>
+                
+                {% else %}
+                
+                <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                    {{product_obj.product.name}}
+                </th>
+
+                {% endif %}
+
+                {% if product %}
+                <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                    {{product_obj.barcode}}
+                </th>
+
+                {% else %}
 
                 <td class="px-3 py-2">
-                    {{product.product.category}}
+                    {{product_obj.product.barcode}}
+                </td>
+
+                {% endif %}
+
+                {% if product %}
+                <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                    {{product_obj.internalCode}}
+                </th>
+                {% else %}
+
+                <td class="px-3 py-2">
+                    {{product_obj.product.internalCode}}
+                </td>
+
+                {% endif %}
+
+                {% if warehouse %}
+                <td class="px-3 py-2">
+                    {{product_obj.location}}
+                </td>
+
+                {% endif %}
+
+                {% if product %}
+                <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                    {{product_obj.category}}
+                </th>
+
+                {% else %}
+
+                <td class="px-3 py-2">
+                    {{product_obj.product.category}}
                 
                 </td>
 
+                {% endif %}
+                
+                
+                {% if product %}
+                <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                    {{product_obj.supplier}}
+                </th>
+
+                {% else %}
+
                 <td class="px-3 py-2">
-                    {{product.product.supplier}}
+                    {{product_obj.product.supplier}}
                 
                 </td>
 
+
+                {% endif %}
+
+               
+                {% if product %}
+                <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                    {{product_obj.quantity}}
+                </th>
+                {% else %}
+
                 <td class="px-3 py-2">
-                    {{product.product.quantity}}
+                    {{product_obj.quantity}}
                 
                 </td>
 
+                {% endif %}
+
+              
+
+                {% if product %}
+                <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                    {{product_obj.stockSecurity}}
+                </th>
+
+                {% else %}
+
                 <td class="px-3 py-2">
-                    {{product.product.stockSecurity}}
-                
+                    {{product_obj.product.stockSecurity}}
                 </td>
+
+                {% endif %}
+
+                
     
-
                 <td class="px-3 py-2">
-                    <a href="{% url 'stockhistory' product_id=product.product_id %}"   class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Movimientos</a>
+                    <a href="{% url 'stockhistory' product_id=product_obj.product_id %}"   class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Movimientos</a>
                 </td>
             </tr>
             {% endfor %}

@@ -31,7 +31,7 @@ class TransferForm(forms.ModelForm):
                                          'style': 'max-width: auto;',
                                      }), empty_label='-------------', to_field_name='username')
 
-    warehouse = forms.ModelChoiceField(queryset=WarehousesProduct.objects.all()
+    warehouse = forms.ModelChoiceField(queryset=WarehousesProduct.objects.values_list('name', flat=True ).distinct()
                                       ,widget=forms.Select(attrs={
                                          'class': "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500",
                                         'id':'warehouse',
@@ -79,9 +79,9 @@ class TransferForm(forms.ModelForm):
         for index in range(0, int(extra_fields)):
             
             product = self.cleaned_data['product_{index}'.format(index=index)]
-            if  Product.objects.filter(name = product, warehouse=warehouse).exists():
+            if  WarehousesProduct.objects.filter(product__name=product, name=warehouse).exists():  #Product.objects.filter(name = product, warehouse=warehouse).exists():
 
-                product_db = Product.objects.get(name = product, warehouse=warehouse )
+                product_db = Product.objects.get(name = product)
                 product_stock = product_db.quantity
                 stockSecurity = product_db.stockSecurity
                 print('product in method is {}'.format(product))
@@ -171,7 +171,7 @@ class InboundForm(forms.ModelForm):
                                          'style': 'max-width: auto;',
                                      }), empty_label='-------------', to_field_name='username')
 
-    warehouse = forms.ModelChoiceField(queryset=WarehousesProduct.objects.all()
+    warehouse = forms.ModelChoiceField(queryset=WarehousesProduct.objects.values_list('name', flat=True).distinct()
                                       ,widget=forms.Select(attrs={
                                                  
                                          'class': "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500",
@@ -289,7 +289,7 @@ class OutboundOrderForm(forms.ModelForm):
     
     extra_field_count = forms.CharField(widget=forms.HiddenInput())
      
-    warehouse = forms.ModelChoiceField(queryset=WarehousesProduct.objects.all()
+    warehouse = forms.ModelChoiceField(queryset=WarehousesProduct.objects.values_list('name', flat=True).distinct()
                                       ,widget=forms.Select(attrs={
                                          'class': "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500",
                                          'id':'warehouse',

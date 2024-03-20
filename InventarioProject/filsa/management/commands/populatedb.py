@@ -151,7 +151,7 @@ class Command(BaseCommand):
                 #product_model = Product()
                 if row['Producto'] == '' or row['Producto'] == None:
                     continue
-                warehouse_product_model = WarehousesProduct()
+                
                 i +=1  
                 anaya_quantity = row['STOCK ANAYA 2710']
                 crocker_quantity = row['STOCK CROCKER']
@@ -162,37 +162,46 @@ class Command(BaseCommand):
                 try:
                     print('producto antes del get is ', row['Producto'])
                     product = Product.objects.get(name=row['Producto'])
+                    
+                    if anaya_quantity != '':
+                        warehouse_product_model_anaya = WarehousesProduct()
+                        warehouse_product_model_anaya.name = 'Anaya 2710'
+                        #product_model.name= row['Producto']
+                        #print('product in Anaya is', row['Producto'])
+                        warehouse_product_model_anaya.product = Product.objects.get(product_id=product.product_id)
+                        #warehouse_product_model.product_id = product.product_id
+                        
+                        warehouse_product_model_anaya.quantity = anaya_quantity.replace(',','')
+                        warehouse_product_model_anaya.location = row['Ubicacion Anaya']
+                        objects.append(warehouse_product_model_anaya)
+
+                    if crocker_quantity != '':
+                        warehouse_product_model_crocker = WarehousesProduct()
+                        warehouse_product_model_crocker.name = 'Crocker'
+                        #print('product in Crocker is', row['Producto'])
+                        warehouse_product_model_crocker.product =  Product.objects.get(product_id=product.product_id) #  product # Product.objects.get(name=row['Producto'])
+                        warehouse_product_model_crocker.quantity = crocker_quantity.replace(',','')
+                        warehouse_product_model_crocker.location = row['Ubicacion Crocker']
+                        objects.append(warehouse_product_model_crocker)
+
+                    if juanico_quantity != '':
+                        warehouse_product_model_juanico = WarehousesProduct()
+                        warehouse_product_model_juanico.name = 'Juanico'
+                        #print('product in Juanico is', row['Producto'])
+                        warehouse_product_model_juanico.product = Product.objects.get(product_id=product.product_id)    # product #   Product.objects.get(name=row['Producto'])
+                        warehouse_product_model_juanico.quantity = juanico_quantity.replace(',','')
+                        warehouse_product_model_juanico.location = row['Ubicacion Juanico']
+                        objects.append(warehouse_product_model_juanico)
+
                 except Exception as e:
                     print(e)
 
 
-                if anaya_quantity != '':
-                    warehouse_product_model.name = 'Anaya 2710'
-                    #product_model.name= row['Producto']
-                    #print('product in Anaya is', row['Producto'])
-                    warehouse_product_model.product = Product.objects.get(product_id=product.product_id)
-                    #warehouse_product_model.product_id = product.product_id
-                    
-                    warehouse_product_model.quantity = anaya_quantity.replace(',','')
-                    warehouse_product_model.location = row['Ubicacion Anaya']
-
-                if crocker_quantity != '':
-                    warehouse_product_model.name = 'Crocker'
-                    #print('product in Crocker is', row['Producto'])
-                    warehouse_product_model.product =  Product.objects.get(product_id=product.product_id) #  product # Product.objects.get(name=row['Producto'])
-                    warehouse_product_model.quantity = crocker_quantity.replace(',','')
-                    warehouse_product_model.location = row['Ubicacion Crocker']
-
-                if juanico_quantity != '':
-                    warehouse_product_model.name = 'Juanico'
-                    #print('product in Juanico is', row['Producto'])
-                    warehouse_product_model.product = Product.objects.get(product_id=product.product_id)    # product #   Product.objects.get(name=row['Producto'])
-                    warehouse_product_model.quantity = juanico_quantity.replace(',','')
-                    warehouse_product_model.location = row['Ubicacion Juanico']
+                
 
             
 
-                objects.append(warehouse_product_model)
+                #objects.append(warehouse_product_model)
 
             WarehousesProduct.objects.bulk_create(objects)
             

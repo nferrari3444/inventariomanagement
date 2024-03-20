@@ -1021,18 +1021,6 @@ input[type="range"]::-ms-fill-lower {
   top: 0px;
 }
 
-.top-52 {
-  top: 13rem;
-}
-
-.top-32 {
-  top: 8rem;
-}
-
-.top-14 {
-  top: 3.5rem;
-}
-
 .top-8 {
   top: 2rem;
 }
@@ -1278,10 +1266,6 @@ input[type="range"]::-ms-fill-lower {
 
 .animate-spin {
   animation: spin 1s linear infinite;
-}
-
-.grid-cols-2 {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .grid-cols-4 {

@@ -210,7 +210,7 @@ def getProduct(request,productId):
 def getProductWarehouse(request, productId, warehouse):
 
     print('warehouse from template is', warehouse)
-
+    print('productId is', productId)
     #Warehouse = Warehouses.objects.filter(name=warehouse)
     product = Product.objects.filter(product_id=productId)
 
@@ -236,11 +236,11 @@ def getProductWarehouse(request, productId, warehouse):
         #product = getProductWarehouse.objects.get(Product, name= warehouse)
         print('product is', product)
         #product_data = Product.objects.filter(product_id=productId, warehouse= Warehouses.objects.get(name=warehouse)).values_list('barcode','internalCode', 'name','warehouse','location','category','supplier','quantity', 'hasOffer')
-        product_warehouse = WarehousesProduct.objects.filter(Product, name= warehouse).values_list('barcode','internalCode', 'name','warehouse','location','category','supplier','quantity', 'hasOffer')
+        product_warehouse = WarehousesProduct.objects.filter(product=product, name= warehouse).values_list('product__barcode','product__internalCode', 'product__name','name','location','product__category','product__supplier','quantity', 'product__hasOffer')
         #print('product_data is', product_data)
         print('product_data is', product)
 
-        return JsonResponse({'product': list(product)})
+        return JsonResponse({'product': list(product_warehouse)})
     except Product.DoesNotExist:
         print('da error en la vista')
         response =  JsonResponse({'error': 'El Producto ingresado no se encuentra en el Deposito {} '.format(warehouse)})
@@ -277,7 +277,7 @@ def transferView(request):
             # motivoIngreso = form.cleaned_data['motivoIngreso']
             actionType = 'Transferencia'
        
-
+            warehourse_inst = WarehousesProduct.objects.filter(name=warehouse_out).first()
             print('number of Products in form is {}'.format(numberOfProducts))
             datalist = []
             
@@ -286,8 +286,8 @@ def transferView(request):
             print('products_list exists:')
             
             print('Product that not exist in database are:')    
-
-            task = Tasks.objects.create(date= date, receptor= receptor, warehouse= warehouse_out, issuer=solicitante,
+            #  warehouse= warehouse_out,
+            task = Tasks.objects.create(date= date, receptor= receptor, warehouse= warehourse_inst, issuer=solicitante,
                                         motivoIngreso=motivoIngreso,  actionType=actionType, department=department)
             
             for i in range(0,int(numberOfProducts)):
@@ -985,7 +985,8 @@ class StockListView(LoginRequiredMixin, generic.ListView):
 def filterProducts(request):
     
     
-    
+    warehouseSelection = False
+    productSelection = False
     is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
     page_num = request.GET.get('page')
     if is_ajax:
@@ -997,44 +998,103 @@ def filterProducts(request):
         supplier = request.GET.get('supplier',None)
     
         product = request.GET.get('product',None)
-    
+        codeSelection = request.GET.get('code',False)
+        print('codeSelection is', codeSelection)
+
         checkbox= request.GET.get('checkbox',None)
 
         if checkbox:
-            products = Product.objects.filter(inTransit=False)                 # Product.objects.select_related('warehouse').filter(inTransit=False)  
-            data = dict() 
-            product_dict  = {'page_obj' : products}
-            data['html_table'] =  render_to_string('inject_table.html',
-                            context = product_dict,
-                        request = request
-                            )
+            #products = Product.objects.filter(inTransit=False)   
+            productSelection = True              # Product.objects.select_related('warehouse').filter(inTransit=False)  
+            filter_data = Product.objects.filter(inTransit=False)
+            paginator = Paginator(filter_data, 20) # 6 employees per page
 
+            page_num = request.GET.get('page')
+            try:
+                page_obj = paginator.page(page_num)
+            except PageNotAnInteger:
+                # if page is not an integer, deliver the first page
+                page_obj = paginator.page(1)
+            except EmptyPage:
+                # if the page is out of range, deliver the last page
+                page_obj = paginator.page(paginator.num_pages)
+
+            # Se sustituye filter_data por page_obj
+            # context = {'products' : filter_data}
+            context = {'page_obj' : page_obj, 'product':productSelection}
+    
+            productList = Product.objects.all().values('name').distinct()
+            categoryList = Product.objects.all().values('category').distinct()
+            supplierList = Product.objects.all().values('supplier').distinct()
+            warehouseList = WarehousesProduct.objects.all().values('name').distinct()
+        
+       # return render(request, 'stock.html',{'productList' : productList, 'supplierList':supplierList, 'warehouseList':warehouseList,   'categoryList':categoryList,  'page_obj': page_obj})
+    
+            data['html_table'] =  render_to_string('inject_table.html',
+                                 context,
+                                 request = request
+                                 )
+        
+            #return render(request, 'stock.html', {'page_obj': page_obj})
             return JsonResponse(data)
+        
     
         print('product is',product)
+        
         if product:
-            products = Product.objects.filter(name=product, inTransit=False)
-            print('product in ajax request in view is', products)
-            context = {'page_obj' : products}
+            productSelection = True
+          #  products = Product.objects.filter(name=product, inTransit=False)}
+            if product.isdigit() == True:
+                filter_data = Product.objects.filter(internalCode=product, inTransit=False)
+                print('code search in ajax request in view is', filter_data)
+            else :
+                
+                filter_data = Product.objects.filter(name= product, inTransit=False)
+                print('name search in ajax request in view is', filter_data)
 
-            # return render(request, "stock.html", context=context)
+            paginator = Paginator(filter_data, 20) # 6 employees per page
+
+            page_num = request.GET.get('page')
+            try:
+                page_obj = paginator.page(page_num)
+            except PageNotAnInteger:
+                # if page is not an integer, deliver the first page
+                page_obj = paginator.page(1)
+            except EmptyPage:
+                # if the page is out of range, deliver the last page
+                page_obj = paginator.page(paginator.num_pages)
+
+            # Se sustituye filter_data por page_obj
+            # context = {'products' : filter_data}
+            
+            context = {'page_obj' : page_obj, 'product': productSelection}
+    
+            productList = Product.objects.all().values('name').distinct()
+            categoryList = Product.objects.all().values('category').distinct()
+            supplierList = Product.objects.all().values('supplier').distinct()
+            warehouseList = WarehousesProduct.objects.all().values('name').distinct()
         
+       # return render(request, 'stock.html',{'productList' : productList, 'supplierList':supplierList, 'warehouseList':warehouseList,   'categoryList':categoryList,  'page_obj': page_obj})
+    
             data['html_table'] =  render_to_string('inject_table.html',
-                                context,
-                                request = request
-                                )
+                                 context,
+                                 request = request
+                                 )
         
+            #return render(request, 'stock.html', {'page_obj': page_obj})
             return JsonResponse(data)
-
+        
         if category and category != 'Total Categorias':
             category_filter = True
             categoryList = [category]
+            productSelection = False
         else:
             categoryList = Product.objects.all().values('category').distinct()
 
         if supplier and supplier != 'Total Proveedores':
             supplier_filter = True
             supplierList = [supplier]
+            productSelection = False
         
         else:
             supplierList = Product.objects.all().values('supplier').distinct()
@@ -1047,10 +1107,13 @@ def filterProducts(request):
         if warehouse and warehouse != 'Total Depositos':
             # warehouse = WarehousesProduct.objects.get(name=warehouse)
             filter_data = WarehousesProduct.objects.select_related('product').filter(name=warehouse, product__category__in= categoryList, product__supplier__in=supplierList, product__inTransit=False )
+            warehouseSelection = True
+            productSelection = False
             # Product.objects.select_related('warehouse').filter(warehouse=warehouse, category__in =categoryList, supplier__in=supplierList, inTransit=False) 
         else:
             filter_data = WarehousesProduct.objects.filter(product__category__in= categoryList, product__supplier__in=supplierList, product__inTransit=False )
-
+            warehouseSelection = True
+            productSelection = False
             #filter_data = Product.objects.select_related('warehouse').filter(category__in =categoryList, supplier__in=supplierList, inTransit=False) 
 
     # data = serializers.serialize("json", Product.objects.filter(warehouse=warehouse, category=category, supplier=supplier).select_related('warehouse') )
@@ -1069,7 +1132,7 @@ def filterProducts(request):
 
         # Se sustituye filter_data por page_obj
         # context = {'products' : filter_data}
-        context = {'page_obj' : page_obj}
+        context = {'page_obj' : page_obj, 'warehouse':warehouseSelection, 'product': productSelection}
     
         productList = Product.objects.all().values('name').distinct()
         categoryList = Product.objects.all().values('category').distinct()
@@ -1255,8 +1318,9 @@ def export_excel(request, dimension):
             cell.value = column_title
 
         # Write data rows
-        firstquery = Product.objects.all().select_related('warehouse')
-        queryset = firstquery.values_list('name', 'internalCode','quantity','warehouse__name','category','supplier','location','stockSecurity')
+        #firstquery = Product.objects.all().select_related('warehouse')
+        firstquery = WarehousesProduct.objects.all()
+        queryset = firstquery.values_list('product__name', 'product__internalCode','quantity','name','product__category','product__supplier','location','product__stockSecurity')
  
         #list(Product.objects.all().values('name', 'internalCode','quantity','warehouse__name','category','supplier','location','stockSecurity'))
 
@@ -1277,7 +1341,7 @@ def export_excel(request, dimension):
         #firstquery = Product.objects.all().select_related('warehouse')
         #queryset = firstquery.values_list('name', 'internalCode','quantity')
  
-        queryset = Product.objects.values_list('name', 'internalCode').order_by('name').annotate(CantidadTotal=Sum('quantity'))
+        queryset = Product.objects.values_list('name', 'internalCode', 'quantity').order_by('name') #.annotate(CantidadTotal=Sum('quantity'))
         #queryset = Product.objects.values('name','internalCode').order_by('name').annotate(=Sum('quantity'))
         #list(Product.objects.all().values('name', 'internalCode','quantity','warehouse__name','category','supplier','location','stockSecurity'))
 
