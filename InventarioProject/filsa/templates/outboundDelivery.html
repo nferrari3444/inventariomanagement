@@ -13,6 +13,7 @@
         <form id ='productsreception' action="{% url 'outbounddelivery' task_id  %}" method="POST" onsubmit="openLoader()">
             {% csrf_token %}
             {{form.extra_field_count}}
+           
             <div class="grid gap-4 sm:grid-cols-2 sm:gap-6">
               
                 <div>

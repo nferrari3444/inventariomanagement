@@ -68,7 +68,7 @@ class TransferForm(forms.ModelForm):
             print('index in line 73 is {}'.format(index))
             self.fields['product_{index}'.format(index=index)] =   forms.CharField()
             
-            self.fields['barcode_{index}'.format(index=index)] = forms.CharField()
+            #self.fields['barcode_{index}'.format(index=index)] = forms.CharField()
             self.fields['internalCode_{index}'.format(index=index)] = forms.CharField()
             self.fields['cantidad_{index}'.format(index=index)] = forms.IntegerField()
 
@@ -357,7 +357,7 @@ class OutboundOrderForm(forms.ModelForm):
 
         for index in range(0, int(extra_fields) ):
             self.fields['producto_{index}'.format(index=index)] =   forms.CharField()             
-            self.fields['barcode_{index}'.format(index=index)] = forms.CharField()
+            #self.fields['barcode_{index}'.format(index=index)] = forms.CharField()
             self.fields['internalCode_{index}'.format(index=index)] = forms.CharField()
             self.fields['cantidad_{index}'.format(index=index)] = forms.IntegerField()
 
@@ -399,12 +399,13 @@ class OutboundDeliveryForm(forms.ModelForm):
   
     observations = forms.CharField(widget=forms.Textarea(attrs={"rows":"5", "class" : "block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" ,"placeholder":"Your description here"}))
     
-    warehouse = forms.ModelChoiceField(queryset=WarehousesProduct.objects.values_list('name', flat=True).distinct()
-                                      ,widget=forms.Select(attrs={
+    warehouse = forms.CharField()  
+    # forms.ModelChoiceField(queryset=WarehousesProduct.objects.values_list('name', flat=True).distinct()
+    #                                   ,widget=forms.Select(attrs={
                                                  
-                                         'class': "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500",
-                                         'style': 'max-width: auto;',
-                                     }), empty_label='-------------', to_field_name='name')
+    #                                      'class': "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500",
+    #                                      'style': 'max-width: auto;',
+    #                                  }), empty_label='-------------', to_field_name='name')
     
     widgets = {
             'deliveryDate': forms.widgets.DateInput(attrs={'type': 'date'}),
@@ -431,6 +432,7 @@ class OutboundDeliveryForm(forms.ModelForm):
 
         super(OutboundDeliveryForm, self).__init__(*args, **kwargs)
         self.fields['extra_field_count'].initial = extra_fields
+       
         print('kwargs is :', kwargs)
         print('args are', *args)
 
@@ -445,14 +447,16 @@ class OutboundDeliveryForm(forms.ModelForm):
             self.fields['department'].widget.attrs.update({'class':'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 flex w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500', 'disabled':True }) #= self.instance.department
             self.fields['motivoEgreso'].widget.attrs.update({'class':'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 flex w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500', 'disabled':True })    #widget.value_from_datadict = self.instance.motivoIngreso
             self.fields['receptor'].widget.attrs.update({'class':'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 flex w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500', 'disabled':True })    #.widget.value_from_datadict = self.instance.receptor
-            self.fields['warehouse'].widget.attrs.update({'class':'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 flex w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500', 'disabled':True })      #.widget.value_from_datadict = self.instance.warehouse
+                 #.widget.value_from_datadict = self.instance.warehouse
             self.fields['issuer'].widget.attrs.update({'class':'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 flex w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500', 'disabled':True }) #    .widget.value_from_datadict = self.instance.issuer
             self.fields['date'].widget.attrs.update({'class':'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 flex w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500', 'disabled':True }) #    .widget.value_from_datadict = self.instance.issuer
             
             self.fields['department'].widget.value_from_datadict = lambda *args: self.instance.department
             self.fields['motivoEgreso'].widget.value_from_datadict = lambda *args: self.instance.motivoEgreso
             self.fields['date'].widget.value_from_datadict = lambda *args: self.instance.date
-            self.fields['warehouse'].widget.value_from_datadict = lambda *args: self.instance.warehouseProduct.name
+            self.fields['warehouse'].widget.value_from_datadict =  lambda *args: self.instance.warehouseProduct.name
+            self.fields['warehouse'].initial =  self.instance.warehouseProduct.name
+            self.fields['warehouse'].widget.attrs.update({'class':'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 flex w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500', 'disabled':True })
             self.fields['receptor'].widget.value_from_datadict = lambda *args: self.instance.receptor
             self.fields['issuer'].widget.value_from_datadict = lambda *args: self.instance.issuer
 
@@ -501,11 +505,11 @@ class CotizationForm(forms.Form):
     # <!-- <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" for="file_input">Upload file</label>
     # <input class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400" id="file_input" type="file"> -->
    
-    file = forms.FileField(widget=forms.FileInput(attrs={'class': "mb-4 block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400" ,'id':"file_input" ,'type':"file" }))
+    archivo = forms.FileField(widget=forms.FileInput(attrs={'class': "mb-4 block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400" ,'id':"file_input" ,'type':"file" }))
      
-    customer = forms.CharField(widget=forms.TextInput(attrs={"class" : "mt-4 block p-2.5 w-1/2 text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" ,"placeholder":"Cliente"}))
+    cliente = forms.CharField(widget=forms.TextInput(attrs={"class" : "mt-4 block p-2.5 w-1/2 text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" ,"placeholder":"Cliente"}))
    
-    observations = forms.CharField(widget=forms.Textarea(attrs={"rows":"5", "class" : "mt-4 block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" ,"placeholder":"Your description here"}))
+    observaciones = forms.CharField(widget=forms.Textarea(attrs={"rows":"5", "class" : "mt-4 block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" ,"placeholder":"Your description here"}))
   
 
 

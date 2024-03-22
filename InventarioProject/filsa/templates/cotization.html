@@ -7,10 +7,33 @@
 
 {% block content %}
 
+{% if messages %}
+{% for message in messages %}
+{% if "CotizacionOferta" in message.tags %}
+<div class="p-4 mb-4 mx-auto text-green-800 rounded-lg bg-green-200 dark:bg-gray-800 dark:text-green-400" role="alert">
+    <span class="font-medium">{{message}}</span>
+
+    <a href="{% url 'newcotization' %}?next={{request.path}}">
+        <button type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 ml-2 mb-2 mt-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
+            Continuar
+        </button>
+        {% endif %}
+        {% endfor %}
+        {% endif %}
+
+    </a>
+</div>
 <div class="grid sm:grid-cols-2 sm:gap-6 md:grid-cols-3 gap-4 block">
     
     <div class="mx-auto relative top-8 block">
         <h3 class="text-3xl font-bold dark:text-white mb-6">Crear Nueva Cotización</h3>
+        <div class="relative text-sm text-blue-800 rounded-lg bg-blue-50 dark:bg-gray-800 dark:text-blue-400" role="alert">
+           Información Importante! <br/> 
+           El archivo excel debe contener las siguientes columnas:
+           <br/> <br/>
+           Codigo &nbsp; Cantidad &nbsp; Precio
+           <br/> <br/>
+          </div>
     <form enctype="multipart/form-data" id="forms" action="{% url 'newcotization' %}" method="POST" onsubmit="openLoader()">
         {% csrf_token %}
 

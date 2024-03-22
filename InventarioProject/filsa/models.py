@@ -69,7 +69,7 @@ class Product(models.Model):
     barcode = models.CharField(max_length= 100, verbose_name=u"Codigo de Barras")
     internalCode = models.BigIntegerField(verbose_name=u"Codigo Interno")
     quantity = models.FloatField()
-    category = models.CharField(max_length=20, choices=CATEGORIES, default='Insumos')
+    category = models.CharField(max_length=20, default='Insumos') #  choices=CATEGORIES,
     #location = models.CharField(max_length=20, default='')
     supplier = models.CharField(max_length=20, default='')
     #warehouse = models.ForeignKey(Warehouses, on_delete=models.CASCADE, related_name='warehouse_name')

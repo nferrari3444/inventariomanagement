@@ -5,12 +5,13 @@ import numpy as np
 import pandas as pd
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.models import User
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.edit import FormView
 from django.db.models import Avg, Count, Exists, OuterRef
 from django.db.models import Count, F, Value, Q, Sum
 from django.shortcuts import get_object_or_404, redirect, render
+# from django.rest_framework import permissions
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
@@ -215,9 +216,10 @@ def getProductWarehouse(request, productId, warehouse):
     product = Product.objects.filter(product_id=productId)
 
     print('product has offer', product[0].hasOffer)
+    quantity = product[0].quantity
     if product[0].hasOffer != None:
         product_name = product[0].name
-        quantity = product[0].quantity
+        
         quantityOffer = product[0].quantityOffer
         stockSecurity = product[0].stockSecurity
 
@@ -231,19 +233,30 @@ def getProductWarehouse(request, productId, warehouse):
             return response
 
         print('el producto está en Oferta de cotizacion')
+    
+    if quantity == 0:
+        response =  JsonResponse({'error': 'El producto {} no tiene Stock Disponible '.format(product[0].name)})
+        response.status_code = 403
+        return response
+
     try:
+        
         product = Product.objects.get(product_id=productId) #, warehouse= Warehouses.objects.get(name=warehouse))
+        
+        product_warehouse_check = WarehousesProduct.objects.get(product=product, name=warehouse)
         #product = getProductWarehouse.objects.get(Product, name= warehouse)
         print('product is', product)
+        # SAL ESCO (AXAL) x KG (BOLSA 25KG)
         #product_data = Product.objects.filter(product_id=productId, warehouse= Warehouses.objects.get(name=warehouse)).values_list('barcode','internalCode', 'name','warehouse','location','category','supplier','quantity', 'hasOffer')
         product_warehouse = WarehousesProduct.objects.filter(product=product, name= warehouse).values_list('product__barcode','product__internalCode', 'product__name','name','location','product__category','product__supplier','quantity', 'product__hasOffer')
+        print('product_warehouse in view', product_warehouse)
         #print('product_data is', product_data)
         print('product_data is', product)
 
         return JsonResponse({'product': list(product_warehouse)})
-    except Product.DoesNotExist:
+    except WarehousesProduct.DoesNotExist:
         print('da error en la vista')
-        response =  JsonResponse({'error': 'El Producto ingresado no se encuentra en el Deposito {} '.format(warehouse)})
+        response =  JsonResponse({'error': 'El Producto ingresado no se encuentra en el Deposito {} o tiene Stock 0'.format(warehouse)})
         response.status_code = 403
         return response
     
@@ -632,6 +645,7 @@ def inboundView(request):
 
     return render(request, "inbound.html", {"form": form}) #, "products" :productNames})
 
+    
 @login_required
 def inboundReceptionView(request, requested_id):
 
@@ -864,8 +878,19 @@ class TaskListView(LoginRequiredMixin, generic.ListView):
     template_name = 'tasks.html'
     model = Tasks    
 
+    
     def get_queryset(self) -> QuerySet[Any]:
-        self.tasks = Tasks.objects.all() #filter(status='Pending') # , actionType='Nueva Solicitud')
+        
+        user_group = self.request.user.groups.values_list('name',flat = True)[0].strip()
+
+        print('user_group', user_group)
+        if user_group == 'Tecnico':
+            tasks = ["Transferencia","Confirma Transferencia"]
+        elif user_group == 'Comercial':
+            tasks = ["Nuevo Egreso", "Confirma Egreso"]
+        else:
+            tasks = ["Transferencia","Confirma Transferencia", "Nuevo Ingreso", "Confirma Ingreso", "Nuevo Egreso", "Confirma Egreso"]
+        self.tasks = Tasks.objects.filter(actionType__in = tasks) #filter(status='Pending') # , actionType='Nueva Solicitud')
 
         return self.tasks
     def get_context_data(self, **kwargs):
@@ -1326,8 +1351,18 @@ class StockHistoryView(LoginRequiredMixin, generic.ListView):
         # Call the base implementation first to get the context
         context = super(StockHistoryView, self).get_context_data(**kwargs)
         # Create any data and add it to the context
-        movements = StockMovements.objects.filter(product=product_id)
-        context['movements'] = StockMovements.objects.filter(product=product_id)
+        #movements = StockMovements.objects.filter(product=product_id)
+        context['movements'] = StockMovements.objects.filter(warehouseProduct__product__name=
+        product_name[0].name).select_related('task')
+        
+        # .values_list(
+        # 'actionType', 'task__date', 'task__department', 'cantidad', 'cantidadNeta',
+        # 'warehouseProduct__name',  'task__receptor__username', 'task__motivoIngreso',
+        # 'task__motivoEgreso', 'task__status', 'task__deliveryDate')
+        
+    
+
+        #context['movements'] = StockMovements.objects.filter(warehouseProduct__product__name= product_name[0].name).select_related # , name=product_name[0].name)
 
         context['product'] = product_name[0].name
         return context 
@@ -1396,7 +1431,7 @@ def export_excel(request, dimension):
 def handle_uploaded_file(file):
 
     file_data = pd.read_excel(file)
-
+    file_data.columns = map(str.lower, file_data.columns)
     return file_data
 
 #     date = file_data['date'][0
@@ -1446,8 +1481,8 @@ def newCotization(request):
                 product_price = data.iloc[i]['precio']
                 productdb = Product.objects.filter(internalCode = product_code).update(hasOffer=cotization, quantityOffer=product_quantity,priceOffer=product_price)
 
-
-            return HttpResponseRedirect('/success/url/')
+            messages.info(request, "Nueva Cotizacion de Oferta creada en forma exitosa", extra_tags="CotizacionOferta")
+            #return HttpResponseRedirect('new-cotization/')
     else:
         form = CotizationForm()
     

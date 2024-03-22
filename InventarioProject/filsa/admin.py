@@ -9,11 +9,30 @@ from django.utils.html import format_html
 from django.contrib.admin import SimpleListFilter
 from django.db.models import F,ExpressionWrapper, FloatField, Sum
 from import_export.admin import ExportActionMixin
+from django.db.models import Q
 from django.contrib.admin.views.decorators import staff_member_required
 # Register your models here.
 import csv
 
+class Offer(SimpleListFilter):
 
+    title = "Tiene Oferta"
+    parameter_name = "Oferta"
+
+    def lookups(self, request, model_admin):
+        return [
+            ("yes", "Yes"),
+            ("no", "No"),
+        ]
+
+    
+    def queryset(self, request, queryset):
+        if self.value() == "yes":
+            return queryset.filter(hasOffer__isnull=False)
+        elif self.value() == "no":
+            return queryset.filter(hasOffer__isnull=True)
+    
+        
 class StatusProducto(SimpleListFilter):
     title = "Status Producto"
     parameter_name = "Status Producto"
@@ -28,10 +47,10 @@ class StatusProducto(SimpleListFilter):
     def queryset(self, request, queryset):
         if self.value() == "critico":
             return queryset.filter(quantity__lte = F('stockSecurity') * 1.2)
-        elif self.value() == "alerta":
-            return queryset.filter(quantity__lte = F('stockSecurity') * 1.5 ).filter(quantity__gte = F('stockSecurity') * 1.2 )
-        elif self.value() == 'normal':
-            return queryset.filter(quantity__gte = F('stockSecurity') * 1.5 )
+        if self.value() == "alerta":
+            return queryset.filter(quantity__gte= F('stockSecurity') * 1.2).filter(quantity__lte = F('stockSecurity') * 1.5 ).filter(quantity__gt  = 0)
+        if self.value() == 'normal':
+            return queryset.filter(quantity__gte = F('stockSecurity') * 1.5 ).filter(quantity__gt  = 0)
             
         
 class FaltanteFilter(SimpleListFilter):
@@ -53,9 +72,9 @@ class FaltanteFilter(SimpleListFilter):
             return queryset.filter(actionType='Confirma Ingreso')
         
 class AdminStockMovements(ExportActionMixin, admin.ModelAdmin):
-    list_display = ["date", "product","actionType","faltante", "Ingreso", "warehouse", "cantidad","cantidadNeta", "diferencia"]
-    list_select_related = ["product"]
-    list_filter = ["product", FaltanteFilter]
+    list_display = ["date", "producto","actionType","faltante", "Ingreso", "warehouse", "cantidad","cantidadNeta", "diferencia"]
+    list_select_related = ["warehouseProduct"]
+    #list_filter = ["warehouseProduct_product", FaltanteFilter]
 
     @admin.display(ordering='task__motivoIngreso', description='Motivo Ingreso')
     def Ingreso(self, obj):
@@ -68,9 +87,13 @@ class AdminStockMovements(ExportActionMixin, admin.ModelAdmin):
     
     @admin.display(description='Deposito')
     def warehouse(self, obj):
-        return obj.task.warehouse.name
+        return obj.warehouseProduct.name
     
+    @admin.display(description='Producto')
+    def producto(self, obj):
+        return obj.task.warehouseProduct.product.name
     
+
     # def motivoIngreso(self, obj):
     #     return obj.task.name
     # get_name.admin_order_field  = 'author'  #Allows column order sorting
@@ -93,9 +116,9 @@ class StockSecurity(ExportActionMixin, admin.ModelAdmin):
 
     products = Product.objects.filter(quantity__lt = F('stockSecurity') * 1.1)
 
-    list_display = ["status_order", "name", "internalCode", "status_product", "warehouse", "quantity", "stockSecurity"]
+    list_display = ["status_order", "name", "internalCode", "status_product",  "quantity", "stockSecurity", "oferta"]
 
-    list_filter = ["category","supplier", StatusProducto]
+    list_filter = [StatusProducto, Offer]
 
     # ordering= ["quantity"]
     def get_queryset(self, request: HttpRequest) -> QuerySet[Any]:
@@ -106,11 +129,16 @@ class StockSecurity(ExportActionMixin, admin.ModelAdmin):
     
     def status_order(self, obj):
         return obj.stock_rate
-   
+    
+    
+    def oferta(self, obj):
+        if obj.hasOffer:
+            return obj.hasOffer.cotization.customer
+        else:
+            return ''
+        
     status_order.admin_order_field =  'status_order'
 
-    
-    
     def status_product(self,obj):
         
         if obj.quantity <= obj.stockSecurity * 1.2:
@@ -121,7 +149,7 @@ class StockSecurity(ExportActionMixin, admin.ModelAdmin):
             '<b style="background:{};">{}</b>',
             color,status)
         
-        elif obj.quantity > obj.stockSecurity * 1.2 and obj.quantity <= obj.stockSecurity * 1.5:
+        if ((obj.quantity > obj.stockSecurity * 1.2) and (obj.quantity <= obj.stockSecurity * 1.5)):
             color = 'yellow'
             status = 'Alerta'
 
@@ -129,7 +157,7 @@ class StockSecurity(ExportActionMixin, admin.ModelAdmin):
             '<b style="background:{};">{}</b>',
             color,status)
         
-        elif obj.quantity > obj.stockSecurity * 1.5:
+        if obj.quantity > obj.stockSecurity * 1.5:
             color = 'green'
             status = 'Normal'
 
@@ -140,12 +168,21 @@ class StockSecurity(ExportActionMixin, admin.ModelAdmin):
         return status
     
 
-
 class AdminProductDiff(ExportActionMixin, admin.ModelAdmin):
  
     list_display = ["product", "warehouse", "totalPurchase", "totalQuantity", "productDiff"]
-    list_select_related = ["product", "warehouse"]
+    list_select_related = ["warehouseProduct"]
 
+    #search_fields = ["product", "product__name"]
+
+    @admin.display(description='Producto')
+    def product(self, obj):
+        return obj.DiffProducts.warehouseProduct.product.name
+    
+
+    @admin.display(description='Deposito')
+    def warehouse(self, obj):
+        return obj.DiffProducts.warehouseProduct.name
     
     # def product_history(self, obj):
     #     link = reverse("admin:filsa_stockmovements", args=[obj.product.product_id])
@@ -153,7 +190,7 @@ class AdminProductDiff(ExportActionMixin, admin.ModelAdmin):
 
     # product_history.short_description = "Product History"
 
-    search_fields = ["product", "product__name"]
+    
 
 admin.site.register(WarehousesProduct)
 

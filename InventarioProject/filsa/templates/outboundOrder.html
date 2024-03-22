@@ -10,7 +10,7 @@
 
 {% if form.errors %}
 <div class="mb-4 text-center text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400" role="alert">
-    <span class="font-medium">{{form.non_field_errors}} </span>
+    <span class="font-medium">{{form.errors}} </span>
     <button class="inline-flex items-center px-2 py-1 mt-2 sm:mt-3 text-sm font-medium text-center text-white bg-red-700 hover:bg-red-800 rounded-lg focus:ring-4 focus:ring-primary-200 dark:focus:ring-primary-900"><a href="{% url 'outboundorder' %}">Presione Ok para Continuar</a></button>
 {% endif %}
 
@@ -310,6 +310,7 @@ $(`#internalcode_${form_count}`).autocomplete({
                 $.ajax({
                     url: request_url,
                     success: function(data){
+                        console.log('only data',data)
                         console.log('data.codes',data.codes)
                     let barcode = data.product[0][0]
                     let product = data.product[0][2]
