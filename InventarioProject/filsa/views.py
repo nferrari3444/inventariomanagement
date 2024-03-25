@@ -208,12 +208,35 @@ def getProduct(request,productId):
 
     return JsonResponse({'product': list(product_data)})
 
-def getProductWarehouse(request, productId, warehouse):
+def getProductWarehouse(request): #, productId, warehouse):
 
-    print('warehouse from template is', warehouse)
-    print('productId is', productId)
+   # print('warehouse from template is', warehouse)
+   # print('productId is', productId)
     #Warehouse = Warehouses.objects.filter(name=warehouse)
+    productId = request.GET.get('productId',None)
+    warehouse = request.GET.get('warehouse',None)
+    quantity_input = request.GET.get('cantidad',None)
+
     product = Product.objects.filter(product_id=productId)
+   
+    #product = Product.objects.filter(name=product_name)
+
+    
+    
+    if quantity_input:
+        product_obj = Product.objects.get(product_id=productId)
+        product_warehouse =  WarehousesProduct.objects.get(product=product_obj, name=warehouse)
+        product_name = product_warehouse.product.name
+        stock_warehouse_quantity = product_warehouse.quantity
+
+        if stock_warehouse_quantity < int(quantity_input):
+            response =  JsonResponse({'error': 'La cantidad ingresada del producto {} es mayor a la cantidad en stock en el deposito {} '.format(product_name, warehouse)})
+            response.status_code = 403
+            return response
+
+    
+        print('quantity input is', quantity_input)
+
 
     print('product has offer', product[0].hasOffer)
     quantity = product[0].quantity
@@ -242,8 +265,10 @@ def getProductWarehouse(request, productId, warehouse):
     try:
         
         product = Product.objects.get(product_id=productId) #, warehouse= Warehouses.objects.get(name=warehouse))
-        
+        #product = Product.objects.get(name=product_name)
+
         product_warehouse_check = WarehousesProduct.objects.get(product=product, name=warehouse)
+        
         #product = getProductWarehouse.objects.get(Product, name= warehouse)
         print('product is', product)
         # SAL ESCO (AXAL) x KG (BOLSA 25KG)
@@ -577,8 +602,9 @@ def inboundView(request):
 
                 product = form.cleaned_data['product_{}'.format(i)]
                 print('product in inbound view is {}'.format(product))
+                product_ = product.strip()
                 quantity = form.cleaned_data['cantidad_{}'.format(i)]
-                productdb = Product.objects.get(name= product)
+                productdb = Product.objects.get(name= product_)
                 warehouseProduct = WarehousesProduct.objects.filter(product= productdb, name=warehouse)
 
                 if warehouseProduct.exists():                     #Product.objects.filter(name=product, warehouse=warehouse).exists():
@@ -1445,6 +1471,25 @@ def handle_uploaded_file(file):
 #         product_to_offer = Product.objects.get(name=producto)
         
         
+
+def cotizationDelete(request,cotization_id):
+    
+    Cotization.objects.filter(cotization_id=cotization_id).delete()
+    products = Product.objects.filter(hasOffer=cotization_id)#.values_list('name', 'quantityOffer','priceOffer')    
+   # products = get_object_or_404(Product, hasOffer=cotization_id)
+    
+    for product in products:
+        product.hasOffer = None
+        product.quantityOffer = None
+        product.priceOffer = None
+
+    
+
+    #cotizations = Cotization.objects.all()
+
+    return redirect('/new-cotization/')
+    #return render(request, 'cotization.html', {'cotizations': cotizations})
+    #return JsonResponse({'products': list(products)})
 
 
 def cotizationView(request,cotization_id):

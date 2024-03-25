@@ -72,15 +72,22 @@ class FaltanteFilter(SimpleListFilter):
             return queryset.filter(actionType='Confirma Ingreso')
         
 class AdminStockMovements(ExportActionMixin, admin.ModelAdmin):
-    list_display = ["date", "producto","actionType","faltante", "Ingreso", "warehouse", "cantidad","cantidadNeta", "diferencia"]
+    list_display = ["date", "producto", "internalCode", "faltante", "Ingreso", "warehouse", "cantidad","cantidadNeta", "diferencia"]
     list_select_related = ["warehouseProduct"]
-    #list_filter = ["warehouseProduct_product", FaltanteFilter]
+    list_filter = [FaltanteFilter]
+    search_fields = ["warehouseProduct__product__name", "warehouseProduct__product__internalCode"]
 
-    @admin.display(ordering='task__motivoIngreso', description='Motivo Ingreso')
+    #"actionType",
+
+    @admin.display(description='Codigo')
+    def internalCode(self, obj):
+        return obj.warehouseProduct.product.internalCode
+    
+    @admin.display(ordering='task__motivoIngreso', description='Tipo Ingreso')
     def Ingreso(self, obj):
         return obj.task.motivoIngreso
     
-    @admin.display(ordering='task__deliveryDate', description='Fecha de Entrega')
+    @admin.display(ordering='task__deliveryDate', description='Fecha')
     def date(self, obj):
         return obj.task.deliveryDate
     
@@ -91,7 +98,7 @@ class AdminStockMovements(ExportActionMixin, admin.ModelAdmin):
     
     @admin.display(description='Producto')
     def producto(self, obj):
-        return obj.task.warehouseProduct.product.name
+        return obj.warehouseProduct.product.name
     
 
     # def motivoIngreso(self, obj):
@@ -99,7 +106,7 @@ class AdminStockMovements(ExportActionMixin, admin.ModelAdmin):
     # get_name.admin_order_field  = 'author'  #Allows column order sorting
     # get_name.short_description = 'Author Name'  #Renames column head
 
-    search_fields = ["product__name"]
+    
     def diferencia(self, obj):
         if obj.actionType == "Confirma Ingreso":
             return obj.cantidad - obj.cantidadNeta  
@@ -177,12 +184,18 @@ class AdminProductDiff(ExportActionMixin, admin.ModelAdmin):
 
     @admin.display(description='Producto')
     def product(self, obj):
-        return obj.DiffProducts.warehouseProduct.product.name
+        return obj.warehouseProduct.product.name
     
+    
+    # def receipt_amount(self, request):
+    #     current_receipt_purchase_amounts = StockMovements.objects.filter(WarehousesProduct = request.id).values_list('price', flat = True)
+    #     total_amount = sum(current_receipt_purchase_amounts)
+    #     return total_amount
+    # receipt_amount.short_description = 'Receipt Amount'
 
     @admin.display(description='Deposito')
     def warehouse(self, obj):
-        return obj.DiffProducts.warehouseProduct.name
+        return obj.warehouseProduct.name
     
     # def product_history(self, obj):
     #     link = reverse("admin:filsa_stockmovements", args=[obj.product.product_id])

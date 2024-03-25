@@ -28,7 +28,7 @@
     <div class="mx-auto relative top-8 block">
         <h3 class="text-3xl font-bold dark:text-white mb-6">Crear Nueva Cotización</h3>
         <div class="relative text-sm text-blue-800 rounded-lg bg-blue-50 dark:bg-gray-800 dark:text-blue-400" role="alert">
-           Información Importante! <br/> 
+            
            El archivo excel debe contener las siguientes columnas:
            <br/> <br/>
            Codigo &nbsp; Cantidad &nbsp; Precio
@@ -63,13 +63,21 @@
                     <th scope="col" class="px-6 py-3">
                         Cantidad Productos
                     </th>
+                   
+
+                    <th scope="col" class="px-6 py-3">
+                        Observaciones
+                    </th>
+
                     <th scope="col" class="px-6 py-3">
                         Ver
                     </th>
 
                     <th scope="col" class="px-6 py-3">
-                        Observaciones
+                        Eliminar
                     </th>
+
+
                 </tr>
             </thead>
             <tbody>
@@ -85,19 +93,27 @@
                         {{cotization.numberOfProducts}}
                     </td>
                     
-
-                    <td class="px-3 py-2">
-                  
-                    <button onclick="openmodal('{{cotization.cotization_id}}')"  class="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">
-                    Ver Productos
-                    </button>
-              </a>
-                    </td>
-
                     <td class="px-6 py-4">
                         {{cotization.observations}}
                     </td>
 
+                    <td class="px-5 py-2">
+                  
+                    <button onclick="openmodal('{{cotization.cotization_id}}')"  class="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">
+                    Ver Productos
+                    </button>
+              
+                    </td>
+
+                    <td class="px-5 py-2">
+                        
+                        <a href="{% url 'deletecotization' cotization_id=cotization.cotization_id %}">
+                        <button class="block text-white bg-red-500 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">
+                        Eliminar Oferta
+                        </button>
+                    </a>
+
+                        </td>
                 </tr>
 
                 {% endfor %}

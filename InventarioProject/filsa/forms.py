@@ -267,6 +267,7 @@ class InboundReceptionForm(forms.ModelForm):
         self.fields['motivoIngreso'].widget.value_from_datadict = lambda *args: self.instance.motivoIngreso
         self.fields['date'].widget.value_from_datadict = lambda *args: self.instance.date
         self.fields['warehouse'].widget.value_from_datadict = lambda *args: self.instance.warehouseProduct.name
+        self.fields['warehouse'].initial =  self.instance.warehouseProduct.name
         self.fields['receptor'].widget.value_from_datadict = lambda *args: self.instance.receptor
         self.fields['issuer'].widget.value_from_datadict = lambda *args: self.instance.issuer
 

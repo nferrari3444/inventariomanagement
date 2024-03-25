@@ -222,7 +222,7 @@ $("#add-product").click(function(event) {
 
     if (quantity === '') {
 
-    alert('Ingresar la cantidad comprada del Producto')
+    alert('Ingresar la cantidad a transferir del Producto')
             return
     }
 
@@ -246,6 +246,41 @@ $("#add-product").click(function(event) {
     newCell = newRow.insertCell();
     newCell.innerHTML= `<tr><td><input type = "number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" type='text' id="cantidad_${form_count}" name="cantidad_${form_count}" placeholder="cantidad" required></td></tr>`; 
 
+
+    $(`#cantidad_${form_count}`).change(function(e){
+
+console.log('e is', e)
+var product = $(`[name='product_${form_count -1}']`).val()
+var cantidad = $(`[name='cantidad_${form_count -1}']`).val()
+
+var dataLS = JSON.parse(localStorage.getItem('products'))
+
+var productId = dataLS[product]
+
+console.log('cantidad in front end is', cantidad)
+console.log('product in front end is', product)
+
+request_url = "{% url 'productwarehouse' %}" 
+// request_url = '/product/' + productId + '/' + warehouse;
+    $.ajax({
+        url: request_url,
+        type: "GET",
+        data: {
+        'productId' : productId,
+        'warehouse': warehouse,   
+        'cantidad' : cantidad, 
+            },
+        success: function(data){
+            console.log('only data',data)
+        },
+
+        error: function(data){
+   alert(data.responseJSON.error);
+   }
+
+})
+}) 
+
     $(`#productname_${form_count}`).autocomplete({
         source: '{% url "autocomplete-name" %}',
         minLength:1,
@@ -265,9 +300,17 @@ $("#add-product").click(function(event) {
                 var warehouse = $("#warehouse option:selected" ).val()
                 console.log('productId',productId)
 
-                request_url = '/product/' + productId + '/' + warehouse;
+                request_url = "{% url 'productwarehouse' %}" 
+
+                // request_url = '/product/' + productId + '/' + warehouse;
                 $.ajax({
                     url: request_url,
+
+                    data: {
+                    'productId' : productId,
+                    'warehouse': warehouse,  
+                    
+                },
                     success: function(data){
                         console.log('data.product',data.product)
                     let barcode = data.product[0][0]
@@ -310,9 +353,18 @@ $("#add-product").click(function(event) {
                 var warehouse = $("#warehouse option:selected" ).val()
                 console.log('productId',productId)
 
-                request_url = '/product/' + productId + '/' + warehouse;
+                request_url = "{% url 'productwarehouse' %}" 
+
+                // request_url = '/product/' + productId + '/' + warehouse;
                 $.ajax({
                     url: request_url,
+
+                    data: {
+                    'productId' : productId,
+                    'warehouse': warehouse,  
+                    
+                },
+
                     success: function(data){
                         console.log('data.codes',data.codes)
                     let barcode = data.product[0][0]

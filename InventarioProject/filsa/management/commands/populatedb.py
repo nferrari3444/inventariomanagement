@@ -109,7 +109,7 @@ class Command(BaseCommand):
                 #print('stockActual is', row['StockActual'])
             
                 #product_model.warehouse= Warehouses.objects.get(name=warehouse_name)
-                product_model.name= row['Producto']
+                product_model.name= row['Producto'].strip()
 
                 product_model.barcode= row['CodigoOrigen']
                 product_model.internalCode= row['Codigo']

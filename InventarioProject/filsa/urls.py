@@ -1,7 +1,7 @@
 from django.urls import path, include
 from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
-from .views import index,  Login, Logout, Register, filterProducts, getProductWarehouse,  newCotization, inboundView, getProducts, getProduct, getProductsNames, transferView,  transferReceptionView, transferConfirmedView, outboundDeliveryView, outboundOrderView, outboundConfirmedView, finishTask, inboundReceptionView, inboundConfirmedView, cotizationView, TaskListView, StockListView, StockHistoryView, export_excel
+from .views import index,  Login, Logout, Register, filterProducts, getProductWarehouse,  newCotization, inboundView, getProducts, getProduct, getProductsNames, transferView,  transferReceptionView, transferConfirmedView, outboundDeliveryView, outboundOrderView, outboundConfirmedView, finishTask, inboundReceptionView, inboundConfirmedView, cotizationView, TaskListView, StockListView, StockHistoryView, cotizationDelete, export_excel
 from django.contrib.auth.views import (
     LogoutView, 
     PasswordResetView, 
@@ -29,12 +29,14 @@ urlpatterns = [
     path('tasks/', TaskListView.as_view() , name='tasks'),
     path('new-cotization/', newCotization , name='newcotization'),
     path('modal/<int:cotization_id>/', cotizationView , name='cotizationview'),
+    path('delete-cotization/<int:cotization_id>/', cotizationDelete , name='deletecotization'),
     # path('stock/', StockListView.as_view() , name='stock'),
     path('historical-movements/<int:product_id>', StockHistoryView.as_view(), name= "stockhistory" ) ,
     path('autocomplete-name', getProductsNames, name='autocomplete-name'),
     path('products/', getProducts, name='products'),
     path('product/<int:productId>/', getProduct, name='product'),
-    path('product/<int:productId>/<str:warehouse>', getProductWarehouse, name='product'),
+   # <int:productId>/<str:warehouse>/$
+    path('product/$', getProductWarehouse, name='productwarehouse'),
     path('stock/', StockListView.as_view(), name='stock'),
     path('products-filter/$', filterProducts, name='filterproducts'),
     path('login/', Login, name='login'),
