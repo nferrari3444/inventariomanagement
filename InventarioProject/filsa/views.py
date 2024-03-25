@@ -57,8 +57,8 @@ class UserSignUpView(CreateView):
 
 
 @login_required
-def index(request):
-    return render(request, 'index.html')
+def home(request):
+    return render(request, 'home.html')
 
 def Register(request):
 
@@ -907,6 +907,14 @@ class TaskListView(LoginRequiredMixin, generic.ListView):
     
     def get_queryset(self) -> QuerySet[Any]:
         
+        user_is_staff = self.request.user.is_staff
+        if user_is_staff:
+            self.tasks = Tasks.objects.all() # , actionType='Nueva Solicitud')
+
+            return self.tasks
+
+        
+        print('user is superuser', self.request.user.is_superuser)
         user_group = self.request.user.groups.values_list('name',flat = True)[0].strip()
 
         print('user_group', user_group)

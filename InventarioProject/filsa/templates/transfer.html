@@ -276,6 +276,10 @@ request_url = "{% url 'productwarehouse' %}"
 
         error: function(data){
    alert(data.responseJSON.error);
+   
+   $(`#cantidad_${form_count -1}`).val("")
+              
+                
    }
 
 })
@@ -326,6 +330,12 @@ request_url = "{% url 'productwarehouse' %}"
 
            error: function(data){
                alert(data.responseJSON.error);
+
+               
+               $(`#internalcode_${form_count -1}`).val("")
+               $(`#barcode_${form_count -1}`).val("")
+                $(`#productname_${form_count -1 }`).val("")
+
                }
 
         });
@@ -380,6 +390,13 @@ request_url = "{% url 'productwarehouse' %}"
 
            error: function(data){
                alert(data.responseJSON.error);
+
+               
+               $(`#internalcode_${form_count -1}`).val("")
+               $(`#barcode_${form_count -1}`).val("")
+                $(`#productname_${form_count -1 }`).val("")
+                
+
                }
                
         });

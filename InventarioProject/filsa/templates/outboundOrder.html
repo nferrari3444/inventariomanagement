@@ -242,8 +242,8 @@
         newCell = newRow.insertCell();
         newCell.innerHTML= `<tr><td><input type = "number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" type='text' id="cantidad_${form_count}" name="cantidad_${form_count}" placeholder="cantidad" required></td></tr>`; 
         
-    
-    $(`#cantidad_${form_count}`).change(function(e){
+
+$(`#cantidad_${form_count}`).change(function(e){
 
             console.log('e is', e)
             var product = $(`[name='producto_${form_count -1}']`).val()
@@ -271,14 +271,13 @@
 
                     error: function(data){
                alert(data.responseJSON.error);
+                $(`#cantidad_${form_count -1}`).val("")
                }
 
         })
     }) 
-
-
         
-        $(`#productname_${form_count}`).autocomplete({
+    $(`#productname_${form_count}`).autocomplete({
             source: '{% url "autocomplete-name" %}',
             minLength:1,
             select: function(event, ui) {
@@ -322,6 +321,11 @@
                
            error: function(data){
                alert(data.responseJSON.error);
+
+               $(`#internalcode_${form_count -1}`).val("")
+               $(`#barcode_${form_count -1}`).val("")
+                $(`#productname_${form_count -1 }`).val("")
+                
                }
                 
             });
@@ -375,6 +379,11 @@ $(`#internalcode_${form_count}`).autocomplete({
 
            error: function(data){
                alert(data.responseJSON.error);
+
+               $(`#internalcode_${form_count -1}`).val("")
+               $(`#barcode_${form_count -1}`).val("")
+                $(`#productname_${form_count -1 }`).val("")
+
                }
                 
         });

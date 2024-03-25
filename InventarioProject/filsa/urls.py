@@ -1,7 +1,7 @@
 from django.urls import path, include
 from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
-from .views import index,  Login, Logout, Register, filterProducts, getProductWarehouse,  newCotization, inboundView, getProducts, getProduct, getProductsNames, transferView,  transferReceptionView, transferConfirmedView, outboundDeliveryView, outboundOrderView, outboundConfirmedView, finishTask, inboundReceptionView, inboundConfirmedView, cotizationView, TaskListView, StockListView, StockHistoryView, cotizationDelete, export_excel
+from .views import home,  Login, Logout, Register, filterProducts, getProductWarehouse,  newCotization, inboundView, getProducts, getProduct, getProductsNames, transferView,  transferReceptionView, transferConfirmedView, outboundDeliveryView, outboundOrderView, outboundConfirmedView, finishTask, inboundReceptionView, inboundConfirmedView, cotizationView, TaskListView, StockListView, StockHistoryView, cotizationDelete, export_excel
 from django.contrib.auth.views import (
     LogoutView, 
     PasswordResetView, 
@@ -14,7 +14,7 @@ from django.urls.base import reverse_lazy
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', index, name='index'),
+    path('', home, name='home'),
     path('inbound/', inboundView, name='inbound'),
     path('inbound-reception/<int:requested_id>', inboundReceptionView, name='inboundreception'),
     path('inbound-confirmed/<int:requested_id>', inboundConfirmedView, name='inboundconfirmed'),
