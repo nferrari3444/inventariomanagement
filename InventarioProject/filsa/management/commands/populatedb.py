@@ -42,7 +42,7 @@ class Command(BaseCommand):
         #products_file = './productosFilsa.txt' 
         users_file = "C:/Users/nicol/Inventario/InventarioProject/filsa/management/commands/usuariosFilsa.txt"
         products_file = "C:/Users/nicol/Inventario/InventarioProject/filsa/management/commands/productosFilsa.txt"
-        new_products_file = "C:/Users/nicol/Inventario/InventarioProject/filsa/management/filsa_out4.csv"
+        new_products_file = "C:/Users/nicol/Inventario/InventarioProject/filsa/management/filsa_out6.csv"
         #f = open(users_file, "r")
         #reader = f.read()
         #users_lines = list(reader)
@@ -80,10 +80,6 @@ class Command(BaseCommand):
 
 
      #   CustomUser.objects.bulk_create(users_obj)
-
-
-
-
         #f = open(products_file, "r")
         #reader = f.read()
         #lines = list(reader)
@@ -199,11 +195,6 @@ class Command(BaseCommand):
 
                 except Exception as e:
                     print(e)
-
-
-                
-
-            
 
                 #objects.append(warehouse_product_model)
 

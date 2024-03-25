@@ -65,13 +65,13 @@ class Product(models.Model):
     #     unique_together = (('product_id', 'warehouse'),)
 
     product_id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=40)
+    name = models.CharField(max_length=100)
     barcode = models.CharField(max_length= 100, verbose_name=u"Codigo de Barras")
     internalCode = models.BigIntegerField(verbose_name=u"Codigo Interno")
     quantity = models.FloatField()
-    category = models.CharField(max_length=20, default='Insumos') #  choices=CATEGORIES,
+    category = models.CharField(max_length=100, default='Insumos') #  choices=CATEGORIES,
     #location = models.CharField(max_length=20, default='')
-    supplier = models.CharField(max_length=20, default='')
+    supplier = models.CharField(max_length=100, default='')
     #warehouse = models.ForeignKey(Warehouses, on_delete=models.CASCADE, related_name='warehouse_name')
     # deltaQuantity = models.FloatField()
     stockSecurity = models.IntegerField(default=0)
@@ -92,10 +92,10 @@ class Product(models.Model):
     
 # Create your models here.
 class WarehousesProduct(models.Model):
-    name = models.CharField(max_length=40)
+    name = models.CharField(max_length=100)
     product = models.ForeignKey(Product, on_delete = models.CASCADE,  blank=True, null=True )
     quantity = models.FloatField(default=0)
-    location = models.CharField(max_length=20, default='')
+    location = models.CharField(max_length=100, default='')
     deltaQuantity = models.FloatField()
     inTransit = models.BooleanField(default=False)
 
