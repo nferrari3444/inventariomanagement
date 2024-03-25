@@ -126,6 +126,7 @@ class StockSecurity(ExportActionMixin, admin.ModelAdmin):
     list_display = ["status_order", "name", "internalCode", "status_product",  "quantity", "stockSecurity", "oferta"]
 
     list_filter = [StatusProducto, Offer]
+    search_fields = ["name", "internalCode"]
 
     # ordering= ["quantity"]
     def get_queryset(self, request: HttpRequest) -> QuerySet[Any]:
