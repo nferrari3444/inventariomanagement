@@ -6,6 +6,8 @@ Django
 django-annoying
 django-appconf
 django-compressor
+django-crontab
+django-import-export
 django-environ
 django-redis
 django-storages
@@ -14,6 +16,7 @@ gunicorn
 jmespath
 openpyxl
 packaging
+pandas
 pillow
 psycopg2-binary
 python-dateutil
