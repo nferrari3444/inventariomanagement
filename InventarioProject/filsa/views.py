@@ -1519,11 +1519,11 @@ def newCotization(request):
         form = CotizationForm(request.POST, request.FILES)
         if form.is_valid():
             print('el form es valido')
-            data = handle_uploaded_file(request.FILES['file'])
+            data = handle_uploaded_file(request.FILES['archivo'])
             
             register_date = datetime.now().date()
-            customer = form.cleaned_data['customer']
-            observations = form.cleaned_data['observations']
+            customer = form.cleaned_data['cliente']
+            observations = form.cleaned_data['observaciones']
             numberOfProducts = len(data)
 
             cotization = Cotization.objects.create(date=register_date, customer = customer, numberOfProducts=numberOfProducts,observations=observations)
