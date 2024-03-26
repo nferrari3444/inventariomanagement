@@ -56,6 +56,7 @@ INSTALLED_APPS = [
      'whitenoise',
      'django.contrib.admin',
      'django.contrib.sites',
+      'import_export',
      
 ]
 
@@ -103,7 +104,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'InventarioProject.wsgi.application'
 
-#ADMIN_MEDIA_PREFIX = '/static/admin/' 
+ADMIN_MEDIA_PREFIX = '/static/admin/' 
 
 AUTH_USER_MODEL = 'filsa.CustomUser'
 
