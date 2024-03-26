@@ -52,7 +52,7 @@ class Command(BaseCommand):
             users_lines = file.readlines()
         # # Archivo: Nombre,Correo,Contraseña, Deparamento,Rol
             users_obj = []
-          #  superuser = CustomUser.objects.create_superuser(username = 'filsacompany' , email='operaciones@filsa.com.uy', password='sitioweb_2024')
+            superuser = CustomUser.objects.create_superuser(username = 'filsacompany' , email='operaciones@filsa.com.uy', password='sitioweb_2024')
             for line in users_lines[1:]:
                 
                 user_model = CustomUser()

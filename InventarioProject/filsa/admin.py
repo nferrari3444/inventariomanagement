@@ -10,6 +10,7 @@ from django.contrib.admin import SimpleListFilter
 from django.db.models import F,ExpressionWrapper, FloatField, Sum
 from import_export.admin import ExportActionMixin
 from django.db.models import Q
+from django.db.models.functions.comparison import NullIf
 from django.contrib.admin.views.decorators import staff_member_required
 # Register your models here.
 import csv
@@ -131,7 +132,7 @@ class StockSecurity(ExportActionMixin, admin.ModelAdmin):
     # ordering= ["quantity"]
     def get_queryset(self, request: HttpRequest) -> QuerySet[Any]:
         qs = super(StockSecurity, self).get_queryset(request)
-        qs = qs.annotate(stock_rate= ExpressionWrapper(F('quantity') * 1.0 / F('stockSecurity'), output_field=FloatField())).order_by('stock_rate')
+        qs = qs.annotate(stock_rate= ExpressionWrapper(F('quantity') * 1.0 / NullIf(F('stockSecurity'), 0), output_field=FloatField())).order_by('stock_rate')
     
         return qs
     
