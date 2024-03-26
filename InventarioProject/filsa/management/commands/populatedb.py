@@ -52,7 +52,7 @@ class Command(BaseCommand):
             users_lines = file.readlines()
         # # Archivo: Nombre,Correo,Contraseña, Deparamento,Rol
             users_obj = []
-            superuser = CustomUser.objects.create_superuser(username = 'filsacompany' , email='operaciones@filsa.com.uy', password='sitioweb_2024')
+          #  superuser = CustomUser.objects.create_superuser(username = 'filsacompany' , email='operaciones@filsa.com.uy', password='sitioweb_2024')
             for line in users_lines[1:]:
                 
                 user_model = CustomUser()
@@ -76,10 +76,10 @@ class Command(BaseCommand):
                 user_group ,  created = Group.objects.get_or_create(name=rol) 
                 user_group.user_set.add(userobj)
                 
-             #   users_obj.append(user_model)
+                #users_obj.append(user_model)
 
 
-     #   CustomUser.objects.bulk_create(users_obj)
+            #CustomUser.objects.bulk_create(users_obj)
         #f = open(products_file, "r")
         #reader = f.read()
         #lines = list(reader)
@@ -146,6 +146,7 @@ class Command(BaseCommand):
             for row in reader:
                 #product_model = Product()
                 if row['Producto'] == '' or row['Producto'] == None:
+                    print('product {} is None or empty'.format(row['Producto']))
                     continue
                 
                 i +=1  
@@ -160,6 +161,7 @@ class Command(BaseCommand):
                     product = Product.objects.get(name=row['Producto'])
                     
                     if anaya_quantity != '':
+                        print('entra en anaya with quantity', anaya_quantity)
                         warehouse_product_model_anaya = WarehousesProduct()
                         warehouse_product_model_anaya.name = 'Anaya 2710'
                         #product_model.name= row['Producto']
@@ -169,27 +171,29 @@ class Command(BaseCommand):
                        #warehouse_product_model.product_id = product.product_id
                         
                         warehouse_product_model_anaya.quantity = anaya_quantity.replace(',','')
-                        warehouse_product_model_anaya.location = row['Ubicacion Anaya']
+                        warehouse_product_model_anaya.location = row['Ubicación Anaya']
                         warehouse_product_model_anaya.deltaQuantity = 0
                         objects.append(warehouse_product_model_anaya)
 
                     if crocker_quantity != '':
+                        print('entra en crocker with quantity', crocker_quantity)
                         warehouse_product_model_crocker = WarehousesProduct()
                         warehouse_product_model_crocker.name = 'Crocker'
                         #print('product in Crocker is', row['Producto'])
                         warehouse_product_model_crocker.product =  Product.objects.get(product_id=product.product_id) #  product # Product.objects.get(name=row['Producto'])
                         warehouse_product_model_crocker.quantity = crocker_quantity.replace(',','')
-                        warehouse_product_model_crocker.location = row['Ubicacion Crocker']
+                        warehouse_product_model_crocker.location = row['Ubicación Crocker']
                         warehouse_product_model_crocker.deltaQuantity = 0
                         objects.append(warehouse_product_model_crocker)
 
                     if juanico_quantity != '':
+                        print('entra en juanico with quantity', juanico_quantity)
                         warehouse_product_model_juanico = WarehousesProduct()
                         warehouse_product_model_juanico.name = 'Juanico'
                         #print('product in Juanico is', row['Producto'])
                         warehouse_product_model_juanico.product = Product.objects.get(product_id=product.product_id)    # product #   Product.objects.get(name=row['Producto'])
                         warehouse_product_model_juanico.quantity = juanico_quantity.replace(',','')
-                        warehouse_product_model_juanico.location = row['Ubicacion Juanico']
+                        warehouse_product_model_juanico.location = row['Ubicación Juanico']
                         warehouse_product_model_juanico.deltaQuantity = 0
                         objects.append(warehouse_product_model_juanico)
 

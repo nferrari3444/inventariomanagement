@@ -8,7 +8,7 @@ COMPRESS_URL = '/static/'
 COMPRESS_ROOT = BASE_DIR / 'static'
 
 COMPRESS_ENABLED = True
-PYTHONIOENCODING='utf-8'
+
 STATICFILES_FINDERS = ('compressor.finders.CompressorFinder',
                        'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder')
