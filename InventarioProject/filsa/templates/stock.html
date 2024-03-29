@@ -248,9 +248,7 @@
 
 </div>
 
-  
-
-    <hr>
+  <hr>
   </section>
 
 
@@ -291,6 +289,8 @@ if (checkbox === true) {
 
 }
 
+let product_code_list = []
+let product_name_list = []
 
 $(`#input-group-search-product`).autocomplete({
         source: '{% url "autocomplete-name" %}',
@@ -303,14 +303,17 @@ $(`#input-group-search-product`).autocomplete({
 
                 let product = ui.item.value
                 console.log('product',product)
+                product_name_list.push(product)
+                getProductData(product_code_list, product_name_list, code=false)
 
-                getProductData(product, code=false)
-
+                
         }})
 
+        
 $(`#input-group-search-code`).autocomplete({
         source: '{% url "autocomplete-name" %}',
         minLength:1,
+       
         select: function(event, ui) {
                       console.log('ui is', ui)
 
@@ -319,8 +322,11 @@ $(`#input-group-search-code`).autocomplete({
 
                 let product = ui.item.value
                 console.log('product',product)
+                product_code_list.push(product)
+               // getProductData(product,code=true)
+               getProductData(product_code_list, product_name_list, code=true)
 
-                getProductData(product,code=true)
+               $(`#input-group-search-code`).val('')
 
         }})
 
@@ -351,19 +357,27 @@ $('#supplier').change(function() {
 
  getData(warehouse_filter,category_filter,supplier_filter)})
 
-function getProductData(product,code) {
+ var token = $("input[name=csrfmiddlewaretoken]").val()
 
+ console.log('token is', token)
 
+function getProductData(productsbycode, productsbyname, code) {
+
+//console.log('product list in getProductData is', product)
+//console.log('code is',code)
+//var json_products = JSON.stringify(product)
 request_url = "{% url 'filterproducts' %}"  //+ warehouse_filter + '/' + category_filter + '/' + supplier_filter + '/';
 
 $.ajax({
-    type: "GET",
-    datatype:'json',
-    data: {
-        'product' : product, 
-        'code': code,
-    },
+    // type: "GET",
     url: request_url,
+    type: "POST",
+    
+    data: {'arrcodes[]': product_code_list,
+    'arrnames[]': product_name_list, 
+    'csrfmiddlewaretoken' : $("input[name=csrfmiddlewaretoken]").val(),
+    'code':code
+},
     success: function(data){
 
         console.log('data is', data)
@@ -371,8 +385,13 @@ $.ajax({
         console.log('data in hmtl',data.html_table)
     $('#productTable').html(data.html_table);
 
+    $(`#input-group-search-product`).val('');
+    $(`#input-group-search-code`).val('');
+
 }}
 )
+
+
     }
  
 

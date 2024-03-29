@@ -197,6 +197,12 @@ class Command(BaseCommand):
                         warehouse_product_model_juanico.deltaQuantity = 0
                         objects.append(warehouse_product_model_juanico)
 
+                    # if anaya_quantity == "" and crocker_quantity == "" and juanico_quantity == "":
+                    #     warehouse_product_model_juanico.product = Product.objects.get(product_id=product.product_id)
+                    #     warehouse_product_model_juanico.deltaQuantity = 0
+                    #     warehouse_product_model_juanico.quantity = 0
+                    #     warehouse_product_model_juanico.name = ''
+
                 except Exception as e:
                     print(e)
 

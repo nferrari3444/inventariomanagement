@@ -1079,6 +1079,11 @@ def filterProducts(request):
     productSelection = False
     is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
     page_num = request.GET.get('page')
+    prods_codes = request.POST.getlist('arrcodes[]')
+    prods_names = request.POST.getlist('arrnames[]')
+    print('prods_codes is', prods_codes)
+    print('prods_names is', prods_names)
+
     if is_ajax:
         print('is_ajax', is_ajax)
         data = dict()
@@ -1087,8 +1092,8 @@ def filterProducts(request):
         category = request.GET.get('category',None)
         supplier = request.GET.get('supplier',None)
     
-        product = request.GET.get('product',None)
-        codeSelection = request.GET.get('code',False)
+        #product = request.GET.get('product',None)
+        codeSelection = request.POST.get('code')
         print('codeSelection is', codeSelection)
 
         checkbox= request.GET.get('checkbox',None)
@@ -1096,8 +1101,8 @@ def filterProducts(request):
         if checkbox:
             #products = Product.objects.filter(inTransit=False)   
             productSelection = True              # Product.objects.select_related('warehouse').filter(inTransit=False)  
-            filter_data = Product.objects.filter(inTransit=False)
-            paginator = Paginator(filter_data, 20) # 6 employees per page
+            filter_data = Product.objects.all()
+            paginator = Paginator(filter_data, 10) # 6 employees per page
 
             page_num = request.GET.get('page')
             try:
@@ -1129,43 +1134,18 @@ def filterProducts(request):
             return JsonResponse(data)
         
     
-        print('product is',product)
+        #print('product is',product)
         
-        if product:
+        if prods_codes or prods_names: # product:
+            #codeSelection = True if request.POST.get('code') == 'true' else False
             productSelection = True
-          #  products = Product.objects.filter(name=product, inTransit=False)}
-            if product.isdigit() == True:
-                filter_data = Product.objects.filter(internalCode=product) #, inTransit=False)
-                print('code search in ajax request in view is', filter_data)
-            else :
-                
-                filter_data = Product.objects.filter(name= product) #, inTransit=False)
-                print('name search in ajax request in view is', filter_data)
+            #if codeSelection == True:
 
-            paginator = Paginator(filter_data, 20) # 6 employees per page
+            filter_data = Product.objects.filter(Q(internalCode__in=prods_codes) | Q(name__in= prods_names))
+            print('filter_data', filter_data)
 
-            page_num = request.GET.get('page')
-            try:
-                page_obj = paginator.page(page_num)
-            except PageNotAnInteger:
-                # if page is not an integer, deliver the first page
-                page_obj = paginator.page(1)
-            except EmptyPage:
-                # if the page is out of range, deliver the last page
-                page_obj = paginator.page(paginator.num_pages)
+            context = {'page_obj' : filter_data, 'product': productSelection}
 
-            # Se sustituye filter_data por page_obj
-            # context = {'products' : filter_data}
-            
-            context = {'page_obj' : page_obj, 'product': productSelection}
-    
-            productList = Product.objects.all().values('name').distinct()
-            categoryList = Product.objects.all().values('category').distinct()
-            supplierList = Product.objects.all().values('supplier').distinct()
-            warehouseList = WarehousesProduct.objects.all().values('name').distinct()
-        
-       # return render(request, 'stock.html',{'productList' : productList, 'supplierList':supplierList, 'warehouseList':warehouseList,   'categoryList':categoryList,  'page_obj': page_obj})
-    
             data['html_table'] =  render_to_string('inject_table.html',
                                  context,
                                  request = request
@@ -1173,6 +1153,47 @@ def filterProducts(request):
         
             #return render(request, 'stock.html', {'page_obj': page_obj})
             return JsonResponse(data)
+                                                      
+         # #  products = Product.objects.filter(name=product, inTransit=False)}
+        #    if product.isdigit() == True:
+        #        filter_data = Product.objects.filter(internalCode=product) #, inTransit=False)
+        #        print('code search in ajax request in view is', filter_data)
+        #    else :
+                
+        #        filter_data = Product.objects.filter(name= product) #, inTransit=False)
+        #        print('name search in ajax request in view is', filter_data)
+
+        #    paginator = Paginator(filter_data, 20) # 6 employees per page
+
+        #    page_num = request.GET.get('page')
+        #    try:
+        #        page_obj = paginator.page(page_num)
+        #    except PageNotAnInteger:
+                # if page is not an integer, deliver the first page
+        #        page_obj = paginator.page(1)
+        #    except EmptyPage:
+                # if the page is out of range, deliver the last page
+        #        page_obj = paginator.page(paginator.num_pages)
+
+            # Se sustituye filter_data por page_obj
+         #   # context = {'products' : filter_data}
+            
+         #   context = {'page_obj' : page_obj, 'product': productSelection}
+    
+            # productList = Product.objects.all().values('name').distinct()
+            # categoryList = Product.objects.all().values('category').distinct()
+            # supplierList = Product.objects.all().values('supplier').distinct()
+            # warehouseList = WarehousesProduct.objects.all().values('name').distinct()
+        
+       # return render(request, 'stock.html',{'productList' : productList, 'supplierList':supplierList, 'warehouseList':warehouseList,   'categoryList':categoryList,  'page_obj': page_obj})
+    
+       #     data['html_table'] =  render_to_string('inject_table.html',
+       #                          context,
+       #                          request = request
+       #                          )
+        
+            #return render(request, 'stock.html', {'page_obj': page_obj})
+       #     return JsonResponse(data)
         
         if category and category != 'Total Categorias':
             category_filter = True
@@ -1208,7 +1229,7 @@ def filterProducts(request):
 
     # data = serializers.serialize("json", Product.objects.filter(warehouse=warehouse, category=category, supplier=supplier).select_related('warehouse') )
         
-        paginator = Paginator(filter_data, 20) # 6 employees per page
+        paginator = Paginator(filter_data, 10) # 6 employees per page
 
         page_num = request.GET.get('page')
         try:
