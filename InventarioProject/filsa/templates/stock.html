@@ -2,6 +2,7 @@
 
 <head>
 {% load static %}
+{% load grouptag %}
 </head>
 
 {% block content %}
@@ -41,35 +42,30 @@
             </li>
      
 </div>
-        
-       
+{% csrf_token %}
         <div class="lg:ml-20 block inline-flex">
-        <form method='GET' action="{% url 'filterproducts' %}"  id='filters' class="ml-10 sm:ml-3 sm:block lg:inline-flex">
-            {% csrf_token %}
-            <!-- <label for="deposito" class="py-2 text-sm text-gray-700 dark:text-gray-200">Depositos</label> -->
-            <select  name="deposito" id="deposito" class="ml-5 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-              <option selected>Total Depositos</option>
-              {% for warehouse in warehouseList %}
-              <option value="{{warehouse.name}}">{{warehouse.name}}</option>
-              {% endfor %}
-            </select>
-        
-            <!-- <label for="category" class="mb-2 text-sm font-medium text-gray-900 dark:text-white">Categorías</label> -->
-            <select  name="categoria" id="categoria" class="ml-5 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-              <option selected>Total Categorias</option>
-              {% for category in categoryList %}
-              <option value="{{category.category}}">{{category.category}}</option>
-              {% endfor %}
-            </select>
-        
-            <!-- <label for="supplier" class="py-2 text-sm text-gray-700 dark:text-gray-200">Proveedor</label> -->
-            <select  name="supplier" id="supplier" class="w-60 ml-5 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-              <option selected>Total Proveedores</option>
-              {% for supplier in supplierList %}
-              <option value="{{supplier.supplier}}">{{supplier.supplier}}</option>
-              {% endfor %}
-            </select>
+        <form method='GET' action="{% url 'stock' %}"  id='filters' class="ml-10 sm:ml-3 sm:block lg:inline-flex">
+         
+            <div>
+            <label for="brand" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">{{ filter.form.name.label_tag }}</label>
+            {{ filterset.form.name }}
+        </div>
 
+        <div>
+        <label for="brand" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"> {{ filter.form.supplier.label_tag }} </label>
+{{filterset.form.supplier }}
+        
+    </div>
+
+        <div>
+
+            <label for="brand" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"> {{ filter.form.category.label_tag }}  </label>
+            {{ filterset.form.category }}
+        </div>
+           
+           
+            <input type="submit" />
+         
             
           
             </form>
@@ -84,6 +80,7 @@
                   Stock Deposito</button>
             </a>
 
+            
             <a href="{% url 'excel-export' dimension='all' %}" >
                 <button type="button" value="deposit" name='exportproducts' id="exportproducts" class="ml-20 sm:ml-10 px-4 text-white bg-green-700 inline-flex items-center hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
                 <svg class="w-6 h-6 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
@@ -102,6 +99,8 @@
 
 <!-- sm:col-span-2 -->
 <div class="w-full px-4 relative overflow-x-auto">
+    
+          
     <table  id="productTable" class="py-8 px-4 lg:py-16 text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
         <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
             <tr>
@@ -167,36 +166,92 @@
             </tr>
         </thead>
         <tbody>
-            {% for product in page_obj %}
+            {% for product in object_list %}
             <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
                 <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                    {{product.name}}
+                {% if 'name' in request.GET or 'supplier' in request.GET or 'category' in request.GET %}
+                
+             
+                {{product.product.name}}
+                
+                {% else %}
+                
+                {{product.name}}
+                
+                {% endif %}
+
                 </th>
                 <td class="px-3 py-2">
-                    {{product.barcode}}
+                {% if 'name' in request.GET or 'supplier' in request.GET or 'category' in request.GET %}
+                
+                {{product.product.barcode}}
+                {% else %}
+                
+                {{product.barcode}}
+                    
+                {% endif %}
+                
                 </td>
                 <td class="px-3 py-2">
-                    {{product.internalCode}}
+                
+                {% if 'name' in request.GET or 'supplier' in request.GET or 'category' in request.GET %}
+             
+                {{product.product.internalCode}}
+
+                {% else %}
+                
+                {{product.internalCode}}
+                    
+                {% endif %}
+                
+
                 </td>
                 
                 <td class="px-3 py-2">
-                    {{product.category}}
+                {% if 'name' in request.GET or 'supplier' in request.GET or 'category' in request.GET %}
+             
+                {{product.product.category}}
+                
+                {% else %}
+                
+                {{product.category}}
+                    
+                {% endif %}
+                
+
+                </td>
+
+                <td class="px-3 py-2">
+                {% if 'name' in request.GET or 'supplier' in request.GET or 'category' in request.GET %}
+             
+                {{product.product.supplier}}
+                
+                {% else %}
+                
+                {{product.supplier}}
+                    
+                {% endif %}
+
+
+                </td>
+
+                
+                <td class="px-3 py-2">
+                {% if 'name' in request.GET or 'supplier' in request.GET or 'category' in request.GET %}
+             
+                {{product.product.quantity}}
+
+                {% else %}
+                
+                {{product.quantity}}
+                    
+                {% endif %}
                 
                 </td>
 
                 <td class="px-3 py-2">
-                    {{product.supplier}}
-                
-                </td>
-
-                
-                <td class="px-3 py-2">
-                    {{product.quantity}}
-                
-                </td>
-
-                <td class="px-3 py-2">
-                    {{product.stockSecurity}}
+               
+                {{product.stockSecurity}}
                 
                 </td>
                 <td class="px-3 py-2">
@@ -229,24 +284,25 @@
         </div>
     </table>
 
-    <div id="pagination">
+    {% if is_paginated %}
     {% if page_obj.has_previous %}
-    <a href="?page=1" &laquo; class="text-white bg-green-400 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-1.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" >first</a>
-    
-    <a href="?page={{ page_obj.previous_page_number }}" class="text-white bg-green-400 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-1.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">previous</a>
-
-       
+      <a href="?{% param_replace page=1 %}">First</a>
+      {% if page_obj.previous_page_number != 1 %}
+        <a href="?{% param_replace page=page_obj.previous_page_number %}">Previous</a>
+      {% endif %}
     {% endif %}
-    <span class="current">
-        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
-    </span>
-
+  
+    Page {{ page_obj.number }} of {{ paginator.num_pages }}
+  
     {% if page_obj.has_next %}
-    <a href="?page={{ page_obj.next_page_number }}" class="text-white bg-green-400 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-1.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">next</a>
-    <a href="?page={{ page_obj.paginator.num_pages }}" class=" text-white bg-green-400 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-1.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">last &raquo;</a>
-{% endif %}
-
-</div>
+      {% if page_obj.next_page_number != paginator.num_pages %}
+        <a href="?{% param_replace page=page_obj.next_page_number %}">Next</a>
+      {% endif %}
+      <a href="?{% param_replace page=paginator.num_pages %}">Last</a>
+    {% endif %}
+  
+    <p>Objects {{ page_obj.start_index }}—{{ page_obj.end_index }}</p>
+  {% endif %}
 
   <hr>
   </section>
@@ -344,18 +400,21 @@ $(`#input-group-search-code`).autocomplete({
     console.log(this.value)
     warehouse_filter = this.value;
     
-    getData(warehouse_filter,category_filter,supplier_filter)})
+ //   getData(warehouse_filter,category_filter,supplier_filter)
+})
 
 $('#categoria').change(function() { 
     console.log(this.value)
  category_filter = this.value;
- getData(warehouse_filter,category_filter,supplier_filter)})
+// getData(warehouse_filter,category_filter,supplier_filter)
+})
 
 $('#supplier').change(function() { 
     console.log(this.value)
  supplier_filter = this.value;
 
- getData(warehouse_filter,category_filter,supplier_filter)})
+// getData(warehouse_filter,category_filter,supplier_filter)
+})
 
  var token = $("input[name=csrfmiddlewaretoken]").val()
 
@@ -384,17 +443,15 @@ $.ajax({
          $('#pagination').empty()
         console.log('data in hmtl',data.html_table)
     $('#productTable').html(data.html_table);
+    console.log(data.html_table.context)
 
     $(`#input-group-search-product`).val('');
     $(`#input-group-search-code`).val('');
 
 }}
 )
-
-
-    }
+}
  
-
 
 function getData(warehouse_filter,category_filter,supplier_filter) {
 request_url = "{% url 'filterproducts' %}"  //+ warehouse_filter + '/' + category_filter + '/' + supplier_filter + '/';

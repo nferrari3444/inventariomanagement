@@ -5,13 +5,13 @@ import numpy as np
 import pandas as pd
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.models import User
+from django_filters import rest_framework as filters
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.edit import FormView
 from django.db.models import Avg, Count, Exists, OuterRef
 from django.db.models import Count, F, Value, Q, Sum
 from django.shortcuts import get_object_or_404, redirect, render
-# from django.rest_framework import permissions
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
@@ -24,11 +24,12 @@ from datetime import datetime
 from django.core import serializers
 from django.views import generic
 from annoying.functions import get_object_or_None
-from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
+from django.http import HttpRequest, HttpResponseRedirect, JsonResponse, HttpResponse
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError, PermissionDenied
 from .forms import SignUpForm , InboundForm, OutboundOrderForm, CotizationForm, OutboundDeliveryForm, InboundReceptionForm, TransferForm, TransferReceptionForm, CustomSetPasswordForm
 from .models import CustomUser, StockMovements, DiffProducts, Product, WarehousesProduct, Tasks, Cotization
+from .filters import StockFilterSet
 from django.core.cache import cache
 from django.utils.http import urlsafe_base64_encode
 from django.core.mail import send_mail, BadHeaderError
@@ -933,7 +934,241 @@ class TaskListView(LoginRequiredMixin, generic.ListView):
         # Create any data and add it to the context
         context['tasks'] = self.tasks
         return context 
+
+class FilteredListView(ListView):
+    filterset_class = None
+
+    def get_queryset(self):
+        # Get the queryset however you usually would.  For example:
+        queryset = super().get_queryset()
+        queryset_stock = Product.objects.all()
+        queryset_warehouse = WarehousesProduct.objects.all()
+        # Then use the query parameters and the queryset to
+        # instantiate a filterset and save it as an attribute
+        # on the view instance for later.
+        print('request.GET in FilteredListView', self.request.GET)
+        warehouse = self.request.GET.get('name',None)
+        category = self.request.GET.get('category',None)
+        supplier = self.request.GET.get('supplier',None)
+        
+             
+        if None not in (warehouse,category,supplier):
+            self.filterset = self.filterset_class(self.request.GET, queryset=queryset_warehouse)
+        else:
+           self.filterset = self.filterset_class(self.request.GET, queryset=queryset_stock)
+
+        #self.filterset = self.filterset_class(self.request.GET, queryset=queryset)
+        # Return the filtered queryset
+        return self.filterset.qs.distinct()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        queryset = super().get_queryset()
+        # Pass the filterset to the template - it provides the form.
+        queryset_stock = Product.objects.all()
+        queryset_warehouse = WarehousesProduct.objects.all()
+
+        warehouse = self.request.GET.get('name',None)
+        category = self.request.GET.get('category',None)
+        supplier = self.request.GET.get('supplier',None)
+
+        print('warehouse isssss', warehouse)
+      
+        if None not in (warehouse,category,supplier):
+            self.filterset = self.filterset_class(self.request.GET, queryset=queryset_warehouse)
+        else:
+           self.filterset = self.filterset_class(self.request.GET, queryset=queryset_stock)
+
+        #self.filterset = self.filterset_class(self.request.GET, queryset=queryset)
+
+        context['filterset'] = self.filterset
+        return context
+
+
+class BookListView(FilteredListView):
+
+    queryset = Product.objects.all()
+    filterset_class = StockFilterSet
+    filter_backends = (filters.DjangoFilterBackend,)
+    paginate_by = 20
+    # paginate_by = 10
+   # model = Product
+
+    template_name = 'stock.html'
     
+    
+    def get_queryset(self):
+        warehouse = self.request.GET.get('name', None)
+        print('warehouse selected is', warehouse)
+        supplier = self.request.GET.get('supplier',None)
+        category = self.request.GET.get('category', None)
+        print('supplier selected is', supplier)
+
+       # queryset = super().get_queryset()
+       
+        if category:
+            category_filter = True
+            categoryList = [category]
+           # filter = WarehousesProduct.objects.select_related('product').filter(name__in= warehouseList, product__category__in= categoryList, product__supplier__in=supplierList )
+
+        else:
+            categoryList = Product.objects.all().values('category').distinct()
+           # filter = WarehousesProduct.objects.select_related('product').filter(name__in= warehouseList, product__category__in= categoryList, product__supplier__in=supplierList )
+
+
+        if supplier:
+            supplier_filter = True
+            supplierList = [supplier]
+           # filter = WarehousesProduct.objects.select_related('product').filter(name__in= warehouseList, product__category__in= categoryList, product__supplier__in=supplierList )
+
+        else:
+            supplierList = Product.objects.all().values('supplier').distinct()
+        #    filter = WarehousesProduct.objects.select_related('product').filter(name__in= warehouseList, product__category__in= categoryList, product__supplier__in=supplierList )
+
+
+        if warehouse:
+            warehouseList = [warehouse]
+         #   filter = WarehousesProduct.objects.select_related('product').filter(name__in= warehouseList, product__category__in= categoryList, product__supplier__in=supplierList )
+
+           
+        else:
+            warehouseList = WarehousesProduct.objects.values_list('name',flat=True).distinct()
+        #    filter = WarehousesProduct.objects.select_related('product').filter(name__in= warehouseList, product__category__in= categoryList, product__supplier__in=supplierList )
+
+        print('warehouse , category and supplier are {} {} {}'.format(warehouse,category,supplier))
+        if None not in (warehouse,category,supplier):
+            filter = WarehousesProduct.objects.select_related('product').filter(name__in= warehouseList, product__category__in= categoryList, product__supplier__in=supplierList )
+
+            
+        else:
+            filter = Product.objects.all()
+            
+        #filter = StockFilterSet(self.request.GET, queryset)
+        return filter #.qs
+
+    def get_context_data(self, **kwargs):
+        
+        warehouse = self.request.GET.get('name',None)
+        print('warehouse selected get_context_data is', warehouse)
+        supplier = self.request.GET.get('supplier')
+        print('supplier selected get_context_data is', supplier)
+        
+        context = super().get_context_data(**kwargs)
+        
+        #queryset = self.get_queryset()
+        #queryset = super().get_queryset()
+        warehouse = self.request.GET.get('name', None)
+        print('warehouse selected is', warehouse)
+        supplier = self.request.GET.get('supplier',None)
+        category = self.request.GET.get('category', None)
+        print('supplier selected is', supplier)
+
+       # queryset = super().get_queryset()
+       
+        if category:
+            category_filter = True
+            categoryList = [category]
+        else:
+            categoryList = Product.objects.all().values('category').distinct()
+
+        if supplier:
+            supplier_filter = True
+            supplierList = [supplier]
+        
+        else:
+            supplierList = Product.objects.all().values('supplier').distinct()
+
+        if warehouse:
+            warehouseList = [warehouse]
+           
+        else:
+            warehouseList = WarehousesProduct.objects.values_list('name',flat=True).distinct()
+          
+           
+        if None not in (warehouse,category,supplier):
+            filter = WarehousesProduct.objects.select_related('product').filter(name__in= warehouseList, product__category__in= categoryList, product__supplier__in=supplierList )
+
+           
+        else:
+            filter = Product.objects.all()
+           
+
+        #filter = StockFilterSet(self.request.GET, queryset)
+        context["filter"] = filter
+        return context #filter #.qs
+            
+        # filter = StockFilterSet(self.request.GET, queryset)
+        # context["filter"] = filter
+        # return context
+    
+        
+        #filter = StockFilterSet(self.request.GET, queryset)
+        
+    # f = StockFilterSet(queryset=Product.objects.all())
+
+    # print('llega aca con el checkbox')
+    
+    
+
+    # def get_context_data(self, *args, **kwargs):
+    #     # Call the base implementation first to get the context
+    #     #products_obj = Product.objects.all().values()
+       
+    #     context = super(BookListView, self).get_context_data(*args, **kwargs)
+
+    #     warehouse = self.request.GET.get('warehouse',None)
+    #     print('warehouse is', warehouse)
+    #     supplier = self.request.GET.get('supplier',None)
+    #     category = self.request.GET.get('category',None)
+
+    #     if category:
+    #         category_filter = True
+    #         categoryList = [category]
+    #     else:
+    #         categoryList = Product.objects.all().values('category').distinct()
+
+    #     if supplier:
+    #         supplier_filter = True
+    #         supplierList = [supplier]
+        
+    #     else:
+    #         supplierList = Product.objects.all().values('supplier').distinct()
+
+    #     if warehouse:
+    #         warehouse = WarehousesProduct.objects.get(name=warehouse)
+    #         warehouseList = WarehousesProduct.objects.get(name=warehouse)
+    #         # context.update({'products' : Product.objects.select_related('warehouse').filter(warehouse=warehouse, category ='Insumos', inTransit=False)}) #, supplier ='De Salt') 
+    #         context.update({'products': WarehousesProduct.objects.filter(name=warehouse) } )
+    #     else:
+    #         warehouseList = WarehousesProduct.objects.all()
+            
+    #         #context['products'] = Product.objects.select_related('warehouse').filter(category ='Insumos') #, supplier ='De Salt') 
+    #     context['products'] = Product.objects.all() #.filter(inTransit=False) #.filter(category__in=categoryList, supplier__in=supplierList)                   # Product.objects.all().select_related('warehouse').filter(inTransit=False) #.filter(category__in=categoryList, supplier__in=supplierList) 
+    #     f = StockFilterSet(self.request.GET, queryset=Product.objects.all())
+    #     print('categoryList', categoryList)
+    #     print('args', args)
+    #     print('kwargs in get_context_data', kwargs)
+    #     # Create any data and add it to the context
+        
+    #     context['productList'] = Product.objects.all().values('name').distinct()
+    #     context['categoryList'] = Product.objects.all().values('category').distinct()
+    #     context['supplierList'] = Product.objects.all().values('supplier').distinct()
+    #     context['warehouseList'] = WarehousesProduct.objects.all().values('name').distinct()
+        
+    #     print('context in get_context_data', context)
+    #     return context 
+
+    # def get_queryset(self):
+        
+    #     key = self.request.GET.get('name')
+    #     minp = self.request.GET.get('supplier')
+    #     maxp = self.request.GET.get('category')
+
+    #     #if is_valid_queryparam(key):
+    #     obj = WarehousesProduct.objects.filter(Q(name=key) | Q(product__supplier=minp) | Q(product__category=maxp))
+
+    #     return  obj #super().get_queryset()
+
 class StockListView(LoginRequiredMixin, generic.ListView):
     paginate_by = 10
     model = Product
@@ -941,11 +1176,12 @@ class StockListView(LoginRequiredMixin, generic.ListView):
     template_name = 'stock.html'
     
     print('llega aca con el checkbox')
-   
+    
 
     def get_context_data(self, *args, **kwargs):
         # Call the base implementation first to get the context
         #products_obj = Product.objects.all().values()
+       
         context = super(StockListView, self).get_context_data(*args, **kwargs)
 
         warehouse = self.request.GET.get('warehouse',None)
@@ -981,10 +1217,6 @@ class StockListView(LoginRequiredMixin, generic.ListView):
         print('kwargs in get_context_data', kwargs)
         # Create any data and add it to the context
         
-     
-        #Product.objects.all().values('name','barcode','internalCode','location',
-        #                                            'warehouse', 'category', 'supplier', 'quantity')
-
         context['productList'] = Product.objects.all().values('name').distinct()
         context['categoryList'] = Product.objects.all().values('category').distinct()
         context['supplierList'] = Product.objects.all().values('supplier').distinct()
@@ -992,85 +1224,6 @@ class StockListView(LoginRequiredMixin, generic.ListView):
         
         print('context in get_context_data', context)
         return context 
-       
-# def stockProducts(request):
-#     warehouse = request.GET.get('warehouse',None)
-#     category = request.GET.get('category',None)
-#     supplier = request.GET.get('supplier',None)
-
-#     product = request.GET.get('product',None)
-#     print('warehouse is', warehouse)
-#     checkbox= request.GET.get('checkbox',None)
-
-#     if category and category != 'Total Categorias':
-#         category_filter = True
-#         categoryList = [category]
-#     else:
-#         categoryList = Product.objects.all().values('category').distinct()
-
-#     if supplier and supplier != 'Total Proveedores':
-#         supplier_filter = True
-#         supplierList = [supplier]
-    
-#     else:
-#         supplierList = Product.objects.all().values('supplier').distinct()
-
-#     if warehouse and warehouse != 'Total Depositos':
-#         warehouse = Warehouses.objects.get(name=warehouse)
-#         filter_data = Product.objects.select_related('warehouse').filter(warehouse=warehouse, category__in =categoryList, supplier__in=supplierList, inTransit=False) 
-
-#         paginator = Paginator(filter_data, 20) # 6 employees per page
-
-#         page_num = request.GET.get('page')
-
-#         try:
-#             page_obj = paginator.page(page_num)
-#         except PageNotAnInteger:
-#             # if page is not an integer, deliver the first page
-#             page_obj = paginator.page(1)
-#         except EmptyPage:
-#             # if the page is out of range, deliver the last page
-#             page_obj = paginator.page(paginator.num_pages)
-
-#         # Se sustituye filter_data por page_obj
-#         # context = {'products' : filter_data}
-#         context = {'page_obj' : page_obj}
-
-#         productList = Product.objects.all().values('name').distinct()
-#         categoryList = Product.objects.all().values('category').distinct()
-#         supplierList = Product.objects.all().values('supplier').distinct()
-#         warehouseList = Warehouses.objects.all().values('name').distinct()
-
-#         return render(request, 'stock.html', {'productList' : productList, 'supplierList':supplierList, 'warehouseList':warehouseList,   'categoryList':categoryList,  'page_obj': page_obj})
-
-    
-#     else:
-#         filter_data = Product.objects.select_related('warehouse').filter(category__in =categoryList, supplier__in=supplierList, inTransit=False) 
-
-#     paginator = Paginator(filter_data, 20) # 6 employees per page
-
-#     page_num = request.GET.get('page')
-    
-#     try:
-#         page_obj = paginator.page(page_num)
-#     except PageNotAnInteger:
-#         # if page is not an integer, deliver the first page
-#         page_obj = paginator.page(1)
-#     except EmptyPage:
-#         # if the page is out of range, deliver the last page
-#         page_obj = paginator.page(paginator.num_pages)
-
-#     # Se sustituye filter_data por page_obj
-#     # context = {'products' : filter_data}
-#     context = {'page_obj' : page_obj}
-
-#     productList = Product.objects.all().values('name').distinct()
-#     categoryList = Product.objects.all().values('category').distinct()
-#     supplierList = Product.objects.all().values('supplier').distinct()
-#     warehouseList = Warehouses.objects.all().values('name').distinct()
-    
-#     return render(request, 'stock.html', {'productList' : productList, 'supplierList':supplierList, 'warehouseList':warehouseList,   'categoryList':categoryList,  'page_obj': page_obj})
-
 
 def filterProducts(request):
     
@@ -1085,9 +1238,9 @@ def filterProducts(request):
     print('prods_names is', prods_names)
 
     if is_ajax:
-        print('is_ajax', is_ajax)
+        
         data = dict()
-        print('llega acaaaaa')
+       
         warehouse = request.GET.get('warehouse',None)
         category = request.GET.get('category',None)
         supplier = request.GET.get('supplier',None)
@@ -1154,46 +1307,6 @@ def filterProducts(request):
             #return render(request, 'stock.html', {'page_obj': page_obj})
             return JsonResponse(data)
                                                       
-         # #  products = Product.objects.filter(name=product, inTransit=False)}
-        #    if product.isdigit() == True:
-        #        filter_data = Product.objects.filter(internalCode=product) #, inTransit=False)
-        #        print('code search in ajax request in view is', filter_data)
-        #    else :
-                
-        #        filter_data = Product.objects.filter(name= product) #, inTransit=False)
-        #        print('name search in ajax request in view is', filter_data)
-
-        #    paginator = Paginator(filter_data, 20) # 6 employees per page
-
-        #    page_num = request.GET.get('page')
-        #    try:
-        #        page_obj = paginator.page(page_num)
-        #    except PageNotAnInteger:
-                # if page is not an integer, deliver the first page
-        #        page_obj = paginator.page(1)
-        #    except EmptyPage:
-                # if the page is out of range, deliver the last page
-        #        page_obj = paginator.page(paginator.num_pages)
-
-            # Se sustituye filter_data por page_obj
-         #   # context = {'products' : filter_data}
-            
-         #   context = {'page_obj' : page_obj, 'product': productSelection}
-    
-            # productList = Product.objects.all().values('name').distinct()
-            # categoryList = Product.objects.all().values('category').distinct()
-            # supplierList = Product.objects.all().values('supplier').distinct()
-            # warehouseList = WarehousesProduct.objects.all().values('name').distinct()
-        
-       # return render(request, 'stock.html',{'productList' : productList, 'supplierList':supplierList, 'warehouseList':warehouseList,   'categoryList':categoryList,  'page_obj': page_obj})
-    
-       #     data['html_table'] =  render_to_string('inject_table.html',
-       #                          context,
-       #                          request = request
-       #                          )
-        
-            #return render(request, 'stock.html', {'page_obj': page_obj})
-       #     return JsonResponse(data)
         
         if category and category != 'Total Categorias':
             category_filter = True
@@ -1428,8 +1541,6 @@ def export_excel(request, dimension):
     print('requestGET')
     print('dimension is',dimension)
    
-    
-
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     response['Content-Disposition'] = 'attachment; filename="Inventario{}.xlsx"'.format(dimension)
 
