@@ -1,19 +1,21 @@
 {% extends '_base.html' %}
+{% load grouptag %}
+
 
 <head>
-{% load static %}
-{% load grouptag %}
+    {% load static %}
 </head>
 
 {% block content %}
 
-<div class="inline-flex items-center grid grid-cols-4 gap-2 sm:ml-20 lg:ml-40 py-2 px-8 max-w-2xl lg:py-8">
+<div class="inline-flex items-center grid grid-cols-4 gap-2 sm:ml-20 lg:ml-5 py-2 px-8 max-w-2xl lg:py-8">
     <!-- <button id="dropdownCheckboxProductButton" data-dropdown-toggle="dropdownProductCheckbox" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">Productos<svg class="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
         </svg>
         </button> -->
        
-        <button id="dropdownSearchButton" data-dropdown-toggle="dropdownSearch" data-dropdown-placement="bottom" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 inline-flex focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">Productos <svg class="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+        
+        <button id="dropdownSearchButton" data-dropdown-toggle="dropdownSearch" data-dropdown-placement="bottom" class="mt-4 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 inline-flex focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">Productos <svg class="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
             </svg>
             </button>
@@ -43,36 +45,37 @@
      
 </div>
 {% csrf_token %}
-        <div class="lg:ml-20 block inline-flex">
-        <form method='GET' action="{% url 'stock' %}"  id='filters' class="ml-10 sm:ml-3 sm:block lg:inline-flex">
+        <div class="lg:ml-5 block inline-flex">
+        <form method='GET' action="{% url 'stock' %}"  id='filters' class="ml-5 sm:ml-3 sm:block lg:inline-flex">
          
             <div>
-            <label for="brand" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">{{ filter.form.name.label_tag }}</label>
+                <label for="brand" class="block mb-1 text-center text-sm font-medium text-gray-900 dark:text-white">Depósito</label>
             {{ filterset.form.name }}
         </div>
 
         <div>
-        <label for="brand" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"> {{ filter.form.supplier.label_tag }} </label>
+        <label for="brand" class="block mb-1 text-center text-sm font-medium text-gray-900 dark:text-white"> Proveedor </label>
 {{filterset.form.supplier }}
         
     </div>
 
         <div>
 
-            <label for="brand" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"> {{ filter.form.category.label_tag }}  </label>
+            <label for="brand" class="block mb-1 text-center text-sm font-medium text-gray-900 dark:text-white">Categoría</label>
             {{ filterset.form.category }}
         </div>
            
            
-            <input type="submit" />
+       
+            <button  class="mt-4 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 inline-flex focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-2 py-1 text-center items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="submit" >Consultar</button>
          
             
           
             </form>
 
-            <div class="lg:inline-flex">
+            <div class="sm:mt-2 sm:block lg:inline-flex">
             <a href="{% url 'excel-export' dimension='deposit' %}" >
-                <button type="button" value="deposit" name='exportproducts' id="exportproducts" class="ml-20 sm:ml-10 px-4 text-white inline-flex items-center bg-green-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                <button type="button" value="deposit" name='exportproducts' id="exportproducts" class="ml-5 mb-2 sm:ml-5 px-4 text-white inline-flex items-center bg-green-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
                 <svg class="w-6 h-6 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M14.707 7.793a1 1 0 0 0-1.414 0L11 10.086V1.5a1 1 0 0 0-2 0v8.586L6.707 7.793a1 1 0 1 0-1.414 1.414l4 4a1 1 0 0 0 1.416 0l4-4a1 1 0 0 0-.002-1.414Z"/>
                     <path d="M18 12h-2.55l-2.975 2.975a3.5 3.5 0 0 1-4.95 0L4.55 12H2a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2Zm-3 5a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"/>
@@ -82,7 +85,7 @@
 
             
             <a href="{% url 'excel-export' dimension='all' %}" >
-                <button type="button" value="deposit" name='exportproducts' id="exportproducts" class="ml-20 sm:ml-10 px-4 text-white bg-green-700 inline-flex items-center hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                <button type="button" value="deposit" name='exportproducts' id="exportproducts" class="ml-5 sm:ml-5 px-4 text-white bg-green-700 inline-flex items-center hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
                 <svg class="w-6 h-6 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M14.707 7.793a1 1 0 0 0-1.414 0L11 10.086V1.5a1 1 0 0 0-2 0v8.586L6.707 7.793a1 1 0 1 0-1.414 1.414l4 4a1 1 0 0 0 1.416 0l4-4a1 1 0 0 0-.002-1.414Z"/>
                     <path d="M18 12h-2.55l-2.975 2.975a3.5 3.5 0 0 1-4.95 0L4.55 12H2a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2Zm-3 5a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"/>
@@ -123,6 +126,17 @@
   </svg></a>
                     </div>
                 </th>
+                {% if 'name' in request.GET %}
+                <th scope="col" class="px-3 py-2">
+                    <div class="flex items-center">
+                        Ubicacion
+                        <a href="#"><svg class="w-3 h-3 ms-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+    <path d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z"/>
+  </svg></a>
+                    </div>
+                </th>
+                {% endif %}
+
                 <th scope="col" class="px-3 py-2">
                     <div class="flex items-center">
                         Categoría
@@ -148,7 +162,7 @@
   </svg></a>
                     </div>
                 </th>
-
+                
                 <th scope="col" class="px-3 py-2">
                     <div class="flex items-center">
                         Stock Seguridad
@@ -206,8 +220,15 @@
                 
 
                 </td>
-                
-                <td class="px-3 py-2">
+            {% if 'name' in request.GET %}  
+            <td class="px-3 py-2">  
+                {{product.location}}
+            </td>
+            {% endif %}
+
+            
+            <td class="px-3 py-2">
+            
                 {% if 'name' in request.GET or 'supplier' in request.GET or 'category' in request.GET %}
              
                 {{product.product.category}}
@@ -239,7 +260,7 @@
                 <td class="px-3 py-2">
                 {% if 'name' in request.GET or 'supplier' in request.GET or 'category' in request.GET %}
              
-                {{product.product.quantity}}
+                {{product.quantity}}
 
                 {% else %}
                 
@@ -286,9 +307,9 @@
 
     {% if is_paginated %}
     {% if page_obj.has_previous %}
-      <a href="?{% param_replace page=1 %}">First</a>
+      <a href="?{% param_replace page=1 %}" class="text-white bg-green-400 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-1.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" >First</a>
       {% if page_obj.previous_page_number != 1 %}
-        <a href="?{% param_replace page=page_obj.previous_page_number %}">Previous</a>
+        <a href="?{% param_replace page=page_obj.previous_page_number %}" class="text-white bg-green-400 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-1.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" >Previous</a>
       {% endif %}
     {% endif %}
   
@@ -296,9 +317,9 @@
   
     {% if page_obj.has_next %}
       {% if page_obj.next_page_number != paginator.num_pages %}
-        <a href="?{% param_replace page=page_obj.next_page_number %}">Next</a>
+        <a href="?{% param_replace page=page_obj.next_page_number %}" class="text-white bg-green-400 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-1.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" >Next</a>
       {% endif %}
-      <a href="?{% param_replace page=paginator.num_pages %}">Last</a>
+      <a href="?{% param_replace page=paginator.num_pages %}" class="text-white bg-green-400 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-1.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" >Last</a>
     {% endif %}
   
     <p>Objects {{ page_obj.start_index }}—{{ page_obj.end_index }}</p>

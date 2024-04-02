@@ -146,7 +146,7 @@ class Command(BaseCommand):
             for row in reader:
                 #product_model = Product()
                 if row['Producto'] == '' or row['Producto'] == None:
-                    print('product {} is None or empty'.format(row['Producto']))
+                    print('product {} with code {} is None or empty'.format(row['Producto'], row['Codigo']))
                     continue
                 
                 i +=1  
@@ -157,8 +157,10 @@ class Command(BaseCommand):
                 #try:
 
                 try:
-                    print('producto antes del get is ', row['Producto'])
-                    product = Product.objects.get(name=row['Producto'])
+                    #print('producto antes del get is {} with internalCode {}'.format(row['Producto'], row['internalCode']))
+                    product_name = row['Producto'].strip()
+                    internalCode = row['Codigo']
+                    product = Product.objects.get(internalCode= internalCode)
                     
                     if anaya_quantity != '':
                         print('entra en anaya with quantity', anaya_quantity)
@@ -202,10 +204,14 @@ class Command(BaseCommand):
                         warehouse_product_model_without_stock.product = Product.objects.get(product_id=product.product_id)
                         warehouse_product_model_without_stock.deltaQuantity = 0
                         warehouse_product_model_without_stock.quantity = 0
-                        warehouse_product_model_without_stock.name = ''
+                        warehouse_product_model_without_stock.name = 'No Stock'
+                        objects.append(warehouse_product_model_without_stock)
 
                 except Exception as e:
                     print(e)
+                    print('producto no encontrado es {} con codigo {}'.format(row['Producto'], row['Codigo']))
+                    #if row['internalCode'] != '':
+                    #    print('producto no encontrado tiene codigo  {}'.format(row['internalCode']))
 
                 #objects.append(warehouse_product_model)
 

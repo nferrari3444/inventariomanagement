@@ -1036,7 +1036,7 @@ class BookListView(FilteredListView):
         #    filter = WarehousesProduct.objects.select_related('product').filter(name__in= warehouseList, product__category__in= categoryList, product__supplier__in=supplierList )
 
         print('warehouse , category and supplier are {} {} {}'.format(warehouse,category,supplier))
-        if None not in (warehouse,category,supplier):
+        if None not in (warehouse,category,supplier) :
             filter = WarehousesProduct.objects.select_related('product').filter(name__in= warehouseList, product__category__in= categoryList, product__supplier__in=supplierList )
 
             
@@ -1085,7 +1085,7 @@ class BookListView(FilteredListView):
             warehouseList = WarehousesProduct.objects.values_list('name',flat=True).distinct()
           
            
-        if None not in (warehouse,category,supplier):
+        if None not in (warehouse,category,supplier) :
             filter = WarehousesProduct.objects.select_related('product').filter(name__in= warehouseList, product__category__in= categoryList, product__supplier__in=supplierList )
 
            
@@ -1571,7 +1571,7 @@ def export_excel(request, dimension):
 
     elif dimension == 'all':
          # Write header row
-        header = ['Nombre', 'Codigo','CantidadTotal']
+        header = ['Nombre', 'Codigo','CantidadTotal', 'Categoría','Proveedor','Stock de Seguridad']
         for col_num, column_title in enumerate(header, 1):
             cell = worksheet.cell(row=1, column=col_num)
             cell.value = column_title
@@ -1580,7 +1580,7 @@ def export_excel(request, dimension):
         #firstquery = Product.objects.all().select_related('warehouse')
         #queryset = firstquery.values_list('name', 'internalCode','quantity')
  
-        queryset = Product.objects.values_list('name', 'internalCode', 'quantity').order_by('name') #.annotate(CantidadTotal=Sum('quantity'))
+        queryset = Product.objects.values_list('name', 'internalCode', 'quantity', 'category','supplier','stockSecurity').order_by('name') #.annotate(CantidadTotal=Sum('quantity'))
         #queryset = Product.objects.values('name','internalCode').order_by('name').annotate(=Sum('quantity'))
         #list(Product.objects.all().values('name', 'internalCode','quantity','warehouse__name','category','supplier','location','stockSecurity'))
 
