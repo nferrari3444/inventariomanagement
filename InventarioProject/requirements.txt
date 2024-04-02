@@ -9,6 +9,7 @@ django-compressor
 django-crontab
 django-import-export
 django-environ
+django-filter
 django-redis
 django-storages
 et-xmlfile
