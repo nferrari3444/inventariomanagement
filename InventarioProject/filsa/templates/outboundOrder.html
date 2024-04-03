@@ -272,6 +272,7 @@ $(`#cantidad_${form_count}`).change(function(e){
                     error: function(data){
                alert(data.responseJSON.error);
                 $(`#cantidad_${form_count -1}`).val("")
+                $(`#cantidad_${form_count }`).val("")
                }
 
         })
@@ -410,8 +411,6 @@ $(`#internalcode_${form_count}`).autocomplete({
     
     
     })
-    
-    
     
     
     //     console.log('hola hola')
