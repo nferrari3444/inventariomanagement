@@ -305,6 +305,7 @@
         </div>
     </table>
 
+    <div id="pagination">
     {% if is_paginated %}
     {% if page_obj.has_previous %}
       <a href="?{% param_replace page=1 %}" class="text-white bg-green-400 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-1.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" >First</a>
@@ -324,7 +325,7 @@
   
     <p>Objects {{ page_obj.start_index }}—{{ page_obj.end_index }}</p>
   {% endif %}
-
+</div>
   <hr>
   </section>
 
@@ -346,7 +347,7 @@ $.ajax({
 
         
         console.log('data in hmtl',data.html_table)
-        $('#pagination').empty()
+        //$('#pagination').empty()
         $('#productTable').html(data.html_table);
 
 }}
@@ -381,6 +382,7 @@ $(`#input-group-search-product`).autocomplete({
                 let product = ui.item.value
                 console.log('product',product)
                 product_name_list.push(product)
+                $('#pagination').empty()
                 getProductData(product_code_list, product_name_list, code=false)
 
                 
@@ -402,7 +404,7 @@ $(`#input-group-search-code`).autocomplete({
                 product_code_list.push(product)
                // getProductData(product,code=true)
                getProductData(product_code_list, product_name_list, code=true)
-
+               $('#pagination').empty()
                $(`#input-group-search-code`).val('')
 
         }})
@@ -461,7 +463,7 @@ $.ajax({
     success: function(data){
 
         console.log('data is', data)
-         $('#pagination').empty()
+       //  $('#pagination').empty()
         console.log('data in hmtl',data.html_table)
     $('#productTable').html(data.html_table);
     console.log(data.html_table.context)

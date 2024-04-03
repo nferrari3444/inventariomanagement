@@ -583,6 +583,8 @@ def inboundView(request):
             receptor = form.cleaned_data['receptor']
             warehouse = form.cleaned_data['warehouse']
             warehourse_inst = WarehousesProduct.objects.filter(name=warehouse).first()
+            print('warehouse_inst in inboundView is ', warehourse_inst)
+
             solicitante =  request.user
             department = form.cleaned_data['department']
         #     cantidad = form.cleaned_data['cantidad']
@@ -603,14 +605,15 @@ def inboundView(request):
 
                 product = form.cleaned_data['product_{}'.format(i)]
                 print('product in inbound view is {}'.format(product))
-                product_ = product.strip()
+                #product_ = product.strip()
                 quantity = form.cleaned_data['cantidad_{}'.format(i)]
-                productdb = Product.objects.get(name= product_)
+                productdb = Product.objects.get(name= product)
                 warehouseProduct = WarehousesProduct.objects.filter(product= productdb, name=warehouse)
 
                 if warehouseProduct.exists():                     #Product.objects.filter(name=product, warehouse=warehouse).exists():
-                    print('warehouse in line 430 is', warehouse)
-                    print('product in line 431 is', product)
+                    print('el producto {} ya existe en el deposito {}'.format(product, warehouse))
+                    # print('warehouse in line 430 is', warehouse)
+                    # print('product in line 431 is', product)
 
                     warehouseproduct_db =  WarehousesProduct.objects.get(product=productdb, name=warehouse)          #Product.objects.get(name= product, warehouse=warehouse)
                     
@@ -633,6 +636,13 @@ def inboundView(request):
                     #barcode = form.cleaned_data['barcode_{}'.format(i)]
                     #internalCode = form.cleaned_data['internalCode_{}'.format(i)]
                     cantidad = form.cleaned_data['cantidad_{}'.format(i)]
+                    
+                    productWarehouseNoStock = WarehousesProduct.objects.filter(product = productdb, name='No Stock')
+                    if productWarehouseNoStock.exists():                    
+                        print('Se elimina el producto {} en el deposito No Stock'.format(productWarehouseNoStock))
+                        productWarehouseNoStock.delete()
+                    
+                    print('el producto {} no existe en el deposito {}'.format(product, warehouse))
                     #newproduct_db = Product.objects.create(name=product, barcode=barcode,internalCode=internalCode,quantity=0, 
                     
                     #                       warehouse= warehouse_obj, deltaQuantity=0, stockSecurity= stockSecurity, inTransit=True)
@@ -739,7 +749,9 @@ def inboundReceptionView(request, requested_id):
                 diffQuantity = int(quantity) - int(netQuantity)
                 newproduct = Product.objects.get(name= product.warehouseProduct.product.name) #, warehouse=warehouse)
                 productWarehouse = WarehousesProduct.objects.get(product=newproduct, name=warehouse)
-
+                
+                
+                print('El nuevo producto a recibir es {} en el deposito {}'.format(product.warehouseProduct.product.name, warehouse))
                 productToUpdate= Product.objects.filter(product_id= newproduct.product_id) #, warehouse=warehouse)
             
                 print('productToUpdate is:', productToUpdate)
@@ -749,8 +761,15 @@ def inboundReceptionView(request, requested_id):
 
                 productWarehouseToUpdate = WarehousesProduct.objects.filter(product= newproduct, name=warehouse)
                 
-                productWarehouseToUpdate.update(quantity = F('quantity') + netQuantity, deltaQuantity= F('deltaQuantity') - diffQuantity)
+                # Si el producto tiene inTransit=True, entonces el producto no estaba anteriormente en ningun deposito y se creo en InboundView en el 
+                # deposito correspondiente con la cantidad ingresada. 
+                if productWarehouseToUpdate[0].inTransit == True:
+                    productWarehouseToUpdate.update(quantity = netQuantity, deltaQuantity= F('deltaQuantity') - diffQuantity, inTransit=False)
 
+                else:
+                    productWarehouseToUpdate.update(quantity = F('quantity') + netQuantity, deltaQuantity= F('deltaQuantity') - diffQuantity)
+
+                print('Se actualizó el producto {} en la tabla de productos así como en la tabal de warehouseProduct {} en el deposito {}'.format(productToUpdate, productWarehouseToUpdate,warehouse))
                 newProduct = StockMovements(warehouseProduct = productWarehouse,         #newproduct, 
                              actionType = actionType,
                                          cantidad= quantity, cantidadNeta=netQuantity, task = task )

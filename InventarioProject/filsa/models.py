@@ -54,6 +54,11 @@ class Cotization(models.Model):
 
 # Tabla de Productos
 class Product(models.Model):
+      
+    class Meta:
+      verbose_name = 'Stock Productos vs Seguridad'
+      verbose_name_plural = 'Stock Productos vs Seguridad'
+    
     CATEGORIES = [('Tubos', 'Tubos'),
                   ('Tornillos', 'Tornillos'),
                   ('Accesorios','Accesorios'),
