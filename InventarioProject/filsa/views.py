@@ -961,7 +961,7 @@ class FilteredListView(ListView):
         # Get the queryset however you usually would.  For example:
         queryset = super().get_queryset()
         queryset_stock = Product.objects.all()
-        queryset_warehouse = WarehousesProduct.objects.all()
+        queryset_warehouse = WarehousesProduct.objects.all().order_by('product__internalCode')
         # Then use the query parameters and the queryset to
         # instantiate a filterset and save it as an attribute
         # on the view instance for later.
@@ -985,7 +985,7 @@ class FilteredListView(ListView):
         queryset = super().get_queryset()
         # Pass the filterset to the template - it provides the form.
         queryset_stock = Product.objects.all()
-        queryset_warehouse = WarehousesProduct.objects.all()
+        queryset_warehouse = WarehousesProduct.objects.all().order_by('product__internalCode')
 
         warehouse = self.request.GET.get('name',None)
         category = self.request.GET.get('category',None)
@@ -1004,7 +1004,7 @@ class FilteredListView(ListView):
         return context
 
 
-class BookListView(FilteredListView):
+class StockListView(FilteredListView):
 
     queryset = Product.objects.all()
     filterset_class = StockFilterSet
@@ -1056,7 +1056,7 @@ class BookListView(FilteredListView):
 
         print('warehouse , category and supplier are {} {} {}'.format(warehouse,category,supplier))
         if None not in (warehouse,category,supplier) :
-            filter = WarehousesProduct.objects.select_related('product').filter(name__in= warehouseList, product__category__in= categoryList, product__supplier__in=supplierList )
+            filter = WarehousesProduct.objects.select_related('product').filter(name__in= warehouseList, product__category__in= categoryList, product__supplier__in=supplierList ).order_by('product__internalCode')
 
             
         else:
@@ -1105,7 +1105,7 @@ class BookListView(FilteredListView):
           
            
         if None not in (warehouse,category,supplier) :
-            filter = WarehousesProduct.objects.select_related('product').filter(name__in= warehouseList, product__category__in= categoryList, product__supplier__in=supplierList )
+            filter = WarehousesProduct.objects.select_related('product').filter(name__in= warehouseList, product__category__in= categoryList, product__supplier__in=supplierList ).order_by('product__internalCode')
 
            
         else:
@@ -1188,61 +1188,61 @@ class BookListView(FilteredListView):
 
     #     return  obj #super().get_queryset()
 
-class StockListView(LoginRequiredMixin, generic.ListView):
-    paginate_by = 10
-    model = Product
+# class StockListView(LoginRequiredMixin, generic.ListView):
+#     paginate_by = 10
+#     model = Product
     
-    template_name = 'stock.html'
+#     template_name = 'stock.html'
     
-    print('llega aca con el checkbox')
+#     print('llega aca con el checkbox')
     
 
-    def get_context_data(self, *args, **kwargs):
-        # Call the base implementation first to get the context
-        #products_obj = Product.objects.all().values()
+#     def get_context_data(self, *args, **kwargs):
+#         # Call the base implementation first to get the context
+#         #products_obj = Product.objects.all().values()
        
-        context = super(StockListView, self).get_context_data(*args, **kwargs)
+#         context = super(StockListView, self).get_context_data(*args, **kwargs)
 
-        warehouse = self.request.GET.get('warehouse',None)
-        print('warehouse is', warehouse)
-        supplier = self.request.GET.get('supplier',None)
-        category = self.request.GET.get('category',None)
+#         warehouse = self.request.GET.get('warehouse',None)
+#         print('warehouse is', warehouse)
+#         supplier = self.request.GET.get('supplier',None)
+#         category = self.request.GET.get('category',None)
 
-        if category:
-            category_filter = True
-            categoryList = [category]
-        else:
-            categoryList = Product.objects.all().values('category').distinct()
+#         if category:
+#             category_filter = True
+#             categoryList = [category]
+#         else:
+#             categoryList = Product.objects.all().values('category').distinct()
 
-        if supplier:
-            supplier_filter = True
-            supplierList = [supplier]
+#         if supplier:
+#             supplier_filter = True
+#             supplierList = [supplier]
         
-        else:
-            supplierList = Product.objects.all().values('supplier').distinct()
+#         else:
+#             supplierList = Product.objects.all().values('supplier').distinct()
 
-        if warehouse:
-            warehouse = WarehousesProduct.objects.get(name=warehouse)
-            warehouseList = WarehousesProduct.objects.get(name=warehouse)
-            # context.update({'products' : Product.objects.select_related('warehouse').filter(warehouse=warehouse, category ='Insumos', inTransit=False)}) #, supplier ='De Salt') 
-            context.update({'products': WarehousesProduct.objects.filter(name=warehouse) } )
-        else:
-            warehouseList = WarehousesProduct.objects.all()
+#         if warehouse:
+#             warehouse = WarehousesProduct.objects.get(name=warehouse)
+#             warehouseList = WarehousesProduct.objects.get(name=warehouse)
+#             # context.update({'products' : Product.objects.select_related('warehouse').filter(warehouse=warehouse, category ='Insumos', inTransit=False)}) #, supplier ='De Salt') 
+#             context.update({'products': WarehousesProduct.objects.filter(name=warehouse) } )
+#         else:
+#             warehouseList = WarehousesProduct.objects.all()
             
-            #context['products'] = Product.objects.select_related('warehouse').filter(category ='Insumos') #, supplier ='De Salt') 
-        context['products'] = Product.objects.all() #.filter(inTransit=False) #.filter(category__in=categoryList, supplier__in=supplierList)                   # Product.objects.all().select_related('warehouse').filter(inTransit=False) #.filter(category__in=categoryList, supplier__in=supplierList) 
-        print('categoryList', categoryList)
-        print('args', args)
-        print('kwargs in get_context_data', kwargs)
-        # Create any data and add it to the context
+#             #context['products'] = Product.objects.select_related('warehouse').filter(category ='Insumos') #, supplier ='De Salt') 
+#         context['products'] = Product.objects.all() #.filter(inTransit=False) #.filter(category__in=categoryList, supplier__in=supplierList)                   # Product.objects.all().select_related('warehouse').filter(inTransit=False) #.filter(category__in=categoryList, supplier__in=supplierList) 
+#         print('categoryList', categoryList)
+#         print('args', args)
+#         print('kwargs in get_context_data', kwargs)
+#         # Create any data and add it to the context
         
-        context['productList'] = Product.objects.all().values('name').distinct()
-        context['categoryList'] = Product.objects.all().values('category').distinct()
-        context['supplierList'] = Product.objects.all().values('supplier').distinct()
-        context['warehouseList'] = WarehousesProduct.objects.all().values('name').distinct()
+#         context['productList'] = Product.objects.all().values('name').distinct()
+#         context['categoryList'] = Product.objects.all().values('category').distinct()
+#         context['supplierList'] = Product.objects.all().values('supplier').distinct()
+#         context['warehouseList'] = WarehousesProduct.objects.all().values('name').distinct()
         
-        print('context in get_context_data', context)
-        return context 
+#         print('context in get_context_data', context)
+#         return context 
 
 def filterProducts(request):
     
@@ -1578,7 +1578,7 @@ def export_excel(request, dimension):
         # Write data rows
         #firstquery = Product.objects.all().select_related('warehouse')
         firstquery = WarehousesProduct.objects.all()
-        queryset = firstquery.values_list('product__name', 'product__internalCode','quantity','name','product__category','product__supplier','location','product__stockSecurity')
+        queryset = firstquery.values_list('product__name', 'product__internalCode','quantity','name','product__category','product__supplier','location','product__stockSecurity').order_by('product__internalCode')
  
         #list(Product.objects.all().values('name', 'internalCode','quantity','warehouse__name','category','supplier','location','stockSecurity'))
 
@@ -1599,7 +1599,7 @@ def export_excel(request, dimension):
         #firstquery = Product.objects.all().select_related('warehouse')
         #queryset = firstquery.values_list('name', 'internalCode','quantity')
  
-        queryset = Product.objects.values_list('name', 'internalCode', 'quantity', 'category','supplier','stockSecurity').order_by('name') #.annotate(CantidadTotal=Sum('quantity'))
+        queryset = Product.objects.values_list('name', 'internalCode', 'quantity', 'category','supplier','stockSecurity').order_by('internalCode') #.annotate(CantidadTotal=Sum('quantity'))
         #queryset = Product.objects.values('name','internalCode').order_by('name').annotate(=Sum('quantity'))
         #list(Product.objects.all().values('name', 'internalCode','quantity','warehouse__name','category','supplier','location','stockSecurity'))
 

@@ -38,7 +38,7 @@ urlpatterns = [
    # <int:productId>/<str:warehouse>/$
     path('product/$', getProductWarehouse, name='productwarehouse'),
     #path('stock/', StockListView.as_view(), name='stock'),
-    path('stock/', BookListView.as_view(), name='stock'),
+    path('stock/', StockListView.as_view(), name='stock'),
     path('products-filter/$', filterProducts, name='filterproducts'),
     path('login/', Login, name='login'),
     path('accounts/login/', Login, name='login'),
