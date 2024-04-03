@@ -1074,20 +1074,16 @@ input[type="range"]::-ms-fill-lower {
   margin-inline-end: 0.5rem;
 }
 
-.ml-10 {
-  margin-left: 2.5rem;
-}
-
 .ml-2 {
   margin-left: 0.5rem;
 }
 
-.ml-20 {
-  margin-left: 5rem;
-}
-
 .ml-3 {
   margin-left: 0.75rem;
+}
+
+.ml-5 {
+  margin-left: 1.25rem;
 }
 
 .mr-2 {
@@ -1126,8 +1122,12 @@ input[type="range"]::-ms-fill-lower {
   margin-top: 1rem;
 }
 
-.ml-5 {
-  margin-left: 1.25rem;
+.ml-4 {
+  margin-left: 1rem;
+}
+
+.ml-6 {
+  margin-left: 1.5rem;
 }
 
 .block {
@@ -1252,10 +1252,6 @@ input[type="range"]::-ms-fill-lower {
 
 .w-full {
   width: 100%;
-}
-
-.w-20 {
-  width: 5rem;
 }
 
 .max-w-2xl {
@@ -1680,6 +1676,11 @@ input[type="range"]::-ms-fill-lower {
 .text-3xl {
   font-size: 1.875rem;
   line-height: 2.25rem;
+}
+
+.text-4xl {
+  font-size: 2.25rem;
+  line-height: 2.5rem;
 }
 
 .text-base {
@@ -2211,10 +2212,6 @@ input[type="range"]::-ms-fill-lower {
     grid-column: span 2 / span 2;
   }
 
-  .sm\:ml-10 {
-    margin-left: 2.5rem;
-  }
-
   .sm\:ml-20 {
     margin-left: 5rem;
   }
@@ -2223,8 +2220,16 @@ input[type="range"]::-ms-fill-lower {
     margin-left: 0.75rem;
   }
 
+  .sm\:ml-5 {
+    margin-left: 1.25rem;
+  }
+
   .sm\:mr-0 {
     margin-right: 0px;
+  }
+
+  .sm\:mt-2 {
+    margin-top: 0.5rem;
   }
 
   .sm\:mt-3 {
@@ -2235,24 +2240,16 @@ input[type="range"]::-ms-fill-lower {
     margin-top: 1.5rem;
   }
 
-  .sm\:ml-0 {
-    margin-left: 0px;
-  }
-
-  .sm\:mt-2 {
-    margin-top: 0.5rem;
-  }
-
-  .sm\:ml-5 {
-    margin-left: 1.25rem;
-  }
-
   .sm\:block {
     display: block;
   }
 
   .sm\:max-w-md {
     max-width: 28rem;
+  }
+
+  .sm\:grid-cols-1 {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
   }
 
   .sm\:grid-cols-2 {
@@ -2355,6 +2352,11 @@ input[type="range"]::-ms-fill-lower {
     line-height: 2.25rem;
   }
 
+  .md\:text-5xl {
+    font-size: 3rem;
+    line-height: 1;
+  }
+
   .md\:hover\:text-blue-700:hover {
     --tw-text-opacity: 1;
     color: rgb(26 86 219 / var(--tw-text-opacity));
@@ -2376,12 +2378,12 @@ input[type="range"]::-ms-fill-lower {
 }
 
 @media (min-width: 1024px) {
-  .lg\:ml-20 {
-    margin-left: 5rem;
-  }
-
   .lg\:ml-40 {
     margin-left: 10rem;
+  }
+
+  .lg\:ml-5 {
+    margin-left: 1.25rem;
   }
 
   .lg\:mr-10 {
@@ -2390,14 +2392,6 @@ input[type="range"]::-ms-fill-lower {
 
   .lg\:mt-5 {
     margin-top: 1.25rem;
-  }
-
-  .lg\:ml-10 {
-    margin-left: 2.5rem;
-  }
-
-  .lg\:ml-5 {
-    margin-left: 1.25rem;
   }
 
   .lg\:inline-flex {
@@ -2422,6 +2416,11 @@ input[type="range"]::-ms-fill-lower {
   .lg\:text-4xl {
     font-size: 2.25rem;
     line-height: 2.5rem;
+  }
+
+  .lg\:text-6xl {
+    font-size: 3.75rem;
+    line-height: 1;
   }
 
   .lg\:text-xl {
