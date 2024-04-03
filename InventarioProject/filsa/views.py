@@ -1004,7 +1004,7 @@ class FilteredListView(ListView):
         return context
 
 
-class StockListView(FilteredListView):
+class StockListView(LoginRequiredMixin, FilteredListView, generic.ListView):
 
     queryset = Product.objects.all()
     filterset_class = StockFilterSet
