@@ -1,7 +1,7 @@
 from django.urls import path, include
 from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
-from .views import home,  Login, Logout, Register, filterProducts, getProductWarehouse, BookListView,  newCotization, inboundView, getProducts, getProduct, getProductsNames, transferView,  transferReceptionView, transferConfirmedView, outboundDeliveryView, outboundOrderView, outboundConfirmedView, finishTask, inboundReceptionView, inboundConfirmedView, cotizationView, TaskListView, StockListView, StockHistoryView, cotizationDelete, export_excel
+from .views import home,  Login, Logout, Register, filterProducts, getProductWarehouse, StockListView,  newCotization, inboundView, getProducts, getProduct, getProductsNames, transferView,  transferReceptionView, transferConfirmedView, outboundDeliveryView, outboundOrderView, outboundConfirmedView, finishTask, inboundReceptionView, inboundConfirmedView, cotizationView, TaskListView,  StockHistoryView, cotizationDelete, export_excel
 from django.contrib.auth.views import (
     LogoutView, 
     PasswordResetView, 
