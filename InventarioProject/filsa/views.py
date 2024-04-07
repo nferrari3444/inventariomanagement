@@ -217,12 +217,38 @@ def getProductWarehouse(request): #, productId, warehouse):
     productId = request.GET.get('productId',None)
     warehouse = request.GET.get('warehouse',None)
     quantity_input = request.GET.get('cantidad',None)
-
+    print('warehouse is', warehouse)
+    print('productId is', productId)
     product = Product.objects.filter(product_id=productId)
    
     #product = Product.objects.filter(name=product_name)
+    quantity = product[0].quantity
+    if quantity == 0:
+        response =  JsonResponse({'error': 'El producto {} no tiene Stock Disponible '.format(product[0].name)})
+        response.status_code = 403
+        return response
 
-    
+    if product[0].hasOffer != None:
+        product_name = product[0].name
+        
+        quantityOffer = product[0].quantityOffer
+        stockSecurity = product[0].stockSecurity
+
+        if quantity - quantityOffer < stockSecurity * 1.1:
+            response =  JsonResponse({'error': 'El producto {} tiene cotización de Oferta y se encuentra cerca del Stock de Seguridad. El stock se encuentra reservado '.format(product_name)})
+            response.status_code = 403
+            return response
+        else:
+            response =  JsonResponse({'error': 'El producto {} tiene cotización de Oferta y se encuentra cerca del Stock de Seguridad. El stock se encuentra reservado '.format(product_name)})
+            response.status_code = 403
+            return response
+
+        print('el producto está en Oferta de cotizacion')
+
+    if warehouse == None or warehouse == '' :
+        response = JsonResponse({'error': "Seleccionar un deposito para continuar"})
+        response.status_code = 403
+        return response
     
     if quantity_input:
         product_obj = Product.objects.get(product_id=productId)
@@ -240,29 +266,10 @@ def getProductWarehouse(request): #, productId, warehouse):
 
 
     print('product has offer', product[0].hasOffer)
-    quantity = product[0].quantity
-    if product[0].hasOffer != None:
-        product_name = product[0].name
-        
-        quantityOffer = product[0].quantityOffer
-        stockSecurity = product[0].stockSecurity
-
-        if quantity - quantityOffer < stockSecurity * 1.1:
-            response =  JsonResponse({'error': 'El producto {} tiene cotización de Oferta y se encuentra cerca del Stock de Seguridad. El stock se encuentra reservado '.format(product_name)})
-            response.status_code = 403
-            return response
-        else:
-            response =  JsonResponse({'error': 'El producto {} tiene cotización de Oferta y se encuentra cerca del Stock de Seguridad. El stock se encuentra reservado '.format(product_name)})
-            response.status_code = 403
-            return response
-
-        print('el producto está en Oferta de cotizacion')
+   
+   
     
-    if quantity == 0:
-        response =  JsonResponse({'error': 'El producto {} no tiene Stock Disponible '.format(product[0].name)})
-        response.status_code = 403
-        return response
-
+   
     try:
         
         product = Product.objects.get(product_id=productId) #, warehouse= Warehouses.objects.get(name=warehouse))
@@ -282,7 +289,7 @@ def getProductWarehouse(request): #, productId, warehouse):
         return JsonResponse({'product': list(product_warehouse)})
     except WarehousesProduct.DoesNotExist:
         print('da error en la vista')
-        response =  JsonResponse({'error': 'El Producto ingresado no se encuentra en el Deposito {} o tiene Stock 0'.format(warehouse)})
+        response =  JsonResponse({'error': 'El Producto ingresado no se encuentra en el Deposito {}'.format(warehouse)})
         response.status_code = 403
         return response
     
@@ -329,7 +336,7 @@ def transferView(request):
             task = Tasks.objects.create(date= date, receptor= receptor, warehouseProduct= warehourse_inst, issuer=solicitante,
                                         motivoIngreso=motivoIngreso,  actionType=actionType, department=department)
             
-            for i in range(0,int(numberOfProducts)):
+            for i in range(1,int(numberOfProducts) + 1):
 
                 product = form.cleaned_data['product_{}'.format(i)]
                 print('product in inbound view is {}'.format(product))
@@ -601,7 +608,7 @@ def inboundView(request):
                                         motivoIngreso=motivoIngreso,  actionType=actionType, department=department)
             
             
-            for i in range(0,int(numberOfProducts)):
+            for i in range(1,int(numberOfProducts) + 1):
 
                 product = form.cleaned_data['product_{}'.format(i)]
                 print('product in inbound view is {}'.format(product))
@@ -868,7 +875,7 @@ def outboundOrderView(request):
                                         motivoEgreso=motivoEgreso,  actionType=actionType, department=department)
             
             print('form cleaned data', form.cleaned_data)
-            for i in range(0,int(numberOfProducts) ):
+            for i in range(1,int(numberOfProducts) + 1 ):
 
 
                 product = form.cleaned_data['producto_{}'.format(i)]
@@ -1274,7 +1281,7 @@ def filterProducts(request):
             #products = Product.objects.filter(inTransit=False)   
             productSelection = True              # Product.objects.select_related('warehouse').filter(inTransit=False)  
             filter_data = Product.objects.all()
-            paginator = Paginator(filter_data, 10) # 6 employees per page
+            paginator = Paginator(filter_data, 20) # 6 employees per page
 
             page_num = request.GET.get('page')
             try:
@@ -1361,7 +1368,7 @@ def filterProducts(request):
 
     # data = serializers.serialize("json", Product.objects.filter(warehouse=warehouse, category=category, supplier=supplier).select_related('warehouse') )
         
-        paginator = Paginator(filter_data, 10) # 6 employees per page
+        paginator = Paginator(filter_data, 20) # 6 employees per page
 
         page_num = request.GET.get('page')
         try:

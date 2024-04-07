@@ -64,7 +64,7 @@ class TransferForm(forms.ModelForm):
         
        # self.fields['extra_field_count'] = 
 
-        for index in range(0, int(extra_fields) ):
+        for index in range(1, int(extra_fields) + 1 ):
             print('index in line 73 is {}'.format(index))
             self.fields['product_{index}'.format(index=index)] =   forms.CharField()
             
@@ -211,7 +211,7 @@ class InboundForm(forms.ModelForm):
        # self.fields['extra_field_count'] = 
         self.fields['issuer'].initial = user
         self.fields['issuer'].widget.attrs.update({'class':'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500', 'disabled': True})
-        for index in range(0, int(extra_fields) ):
+        for index in range(1, int(extra_fields) + 1):
             print('index in line 73 is {}'.format(index))
             self.fields['product_{index}'.format(index=index)] =   forms.CharField()
             
@@ -356,7 +356,7 @@ class OutboundOrderForm(forms.ModelForm):
         #self.fields['issuer'].widget.value_from_datadict = lambda *args: self.instance.user
     # self.fields['extra_field_count'] = 
 
-        for index in range(0, int(extra_fields) ):
+        for index in range(1, int(extra_fields) + 1 ):
             self.fields['producto_{index}'.format(index=index)] =   forms.CharField()             
             #self.fields['barcode_{index}'.format(index=index)] = forms.CharField()
             self.fields['internalCode_{index}'.format(index=index)] = forms.CharField()
@@ -366,7 +366,7 @@ class OutboundOrderForm(forms.ModelForm):
         extra_fields = self.cleaned_data['extra_field_count']
         warehouse = self.cleaned_data['warehouse']
 
-        for index in range(0, int(extra_fields)):
+        for index in range(1, int(extra_fields) + 1 ):
             product = self.cleaned_data['producto_{index}'.format(index=index)]
             print('product warehouse is ')
             product_db = Product.objects.filter(name = product)

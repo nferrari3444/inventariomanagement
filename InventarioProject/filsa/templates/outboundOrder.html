@@ -165,7 +165,8 @@
     let form_count = Number($("[name=extra_field_count]").val());
 
     //let warehouse = $("[name= warehouse]").val()
- 
+    console.log('form_count init', form_count)
+
     var product = $(`#productname_${form_count}`).val()
     console.log('product is', product)
 
@@ -182,102 +183,141 @@
     console.log('warehouse selected is', warehouse)
 });
 
-    
-    $("#add-product").click(function(event) {
-        
-        var warehouse = $("#warehouse option:selected" ).val()
-        console.log('warehouse is', this.warehouse)
-        event.preventDefault()
-    // get extra form count so we know what index to use for the next item
-        console.log(event.target.value)
-       
-        var table = document.getElementById('productTable')
-        var lastRow = table.rows[ table.rows.length - 1 ];
-        var product = lastRow.cells[0].firstElementChild
-        var quantity = lastRow.cells[3].firstElementChild
-        
-        console.log('product first Round', product)
-        console.log('quantity first Round', quantity)
-    
-    
-        if (form_count >0) {
-            console.log('form_count', form_count)
-    
-            var table = document.getElementById('productTable')
-        var lastRow = table.rows[ table.rows.length - 1 ];
-        var product = lastRow.cells[0].firstElementChild.value
-        var quantity = lastRow.cells[3].firstElementChild.value
-        
-        console.log('product second Round', product)
-        console.log('quantity second Round', quantity)
-    
-        if (product === '') {
-    
-            alert('Ingresar un Nuevo Producto')
-            return
-        }
-    
-        if (quantity === '') {
-    
-        alert('Ingresar la cantidad a vender del Producto')
-                return
-        }
-    
-        }
-    
-    
-        var newRow = document.getElementById('productTable').insertRow();
-    
-        
-        var newCell = newRow.insertCell();
-    
-        newCell.innerHTML=  `<tr><td><input type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"  type="text" id="productname_${form_count}" name="producto_${form_count}" placeholder="producto" required></td></tr>`;
-    
-        newCell = newRow.insertCell();
-        newCell.innerHTML=`<tr><td><input type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" type='text' id="barcode_${form_count}" name="barcode_${form_count}" placeholder="barcode"></td></tr>`;
-    
-        newCell = newRow.insertCell();
-        newCell.innerHTML=`<tr><td><input type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" type='text' id="internalcode_${form_count}" name="internalCode_${form_count}" placeholder="internalCode" required></td></tr>`;
-    
-        newCell = newRow.insertCell();
-        newCell.innerHTML= `<tr><td><input type = "number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" type='text' id="cantidad_${form_count}" name="cantidad_${form_count}" placeholder="cantidad" required></td></tr>`; 
-        
 
-$(`#cantidad_${form_count}`).change(function(e){
+function checkQuantity(){
 
-            console.log('e is', e)
-            var product = $(`[name='producto_${form_count -1}']`).val()
-            var cantidad = $(`[name='cantidad_${form_count -1}']`).val()
+    
+// $(`#cantidad_${form_count}`).change(function(e){
 
-            var dataLS = JSON.parse(localStorage.getItem('products'))
 
-            var productId = dataLS[product]
+var cantidad = $(`#cantidad_${form_count}`).val()
+var product = $(`#productname_${form_count}`).val()
+var warehouse = $("#warehouse option:selected" ).val()
+//console.log('e is', e)
+//var product = $(`[name='producto_${form_count -1}']`).val()
+//var cantidad = $(`[name='cantidad_${form_count -1}']`).val()
 
-            console.log('cantidad in front end is', cantidad)
-            console.log('product in front end is', product)
-            request_url = "{% url 'productwarehouse' %}" 
-            //request_url = '/product/' + productId + '/' + warehouse;
+var dataLS = JSON.parse(localStorage.getItem('products'))
+
+var productId = dataLS[product]
+
+console.log('cantidad in front end is', cantidad)
+
+console.log('product in front end is', product)
+console.log('warehouse is', warehouse)
+
+request_url = "{% url 'productwarehouse' %}" 
+//request_url = '/product/' + productId + '/' + warehouse;
+    $.ajax({
+        url: request_url,
+        type: "GET",
+        data: {
+        'productId' : productId,
+        'warehouse' : warehouse ,
+        'cantidad' : cantidad, 
+            },
+        success: function(data){
+            console.log('only data',data)
+            addNewRow()
+        },
+
+        error: function(data){
+   alert(data.responseJSON.error);
+    $(`#cantidad_${form_count}`).val("")
+    $(`#cantidad_${form_count }`).val("")
+    
+   }
+
+})
+}
+
+//) 
+
+
+//}
+
+function addNewRow(){
+
+    form_count ++;
+    
+    $("[name=extra_field_count]").val(form_count);
+
+    
+    var warehouse = $("#warehouse option:selected" ).val()
+    console.log('form count after new row', form_count)
+    var newRow = document.getElementById('productTable').insertRow();
+    
+        
+    var newCell = newRow.insertCell();
+
+    newCell.innerHTML=  `<tr><td><input type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"  type="text" id="productname_${form_count}" name="producto_${form_count}" placeholder="producto" required></td></tr>`;
+
+    newCell = newRow.insertCell();
+    newCell.innerHTML=`<tr><td><input type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" type='text' id="barcode_${form_count}" name="barcode_${form_count}" placeholder="barcode"></td></tr>`;
+
+    newCell = newRow.insertCell();
+    newCell.innerHTML=`<tr><td><input type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" type='text' id="internalcode_${form_count}" name="internalCode_${form_count}" placeholder="internalCode" required></td></tr>`;
+
+    newCell = newRow.insertCell();
+    newCell.innerHTML= `<tr><td><input type = "number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" type='text' id="cantidad_${form_count}" name="cantidad_${form_count}" placeholder="cantidad" required></td></tr>`; 
+    
+    $(`#internalcode_${form_count}`).autocomplete({
+        source: '{% url "autocomplete-name" %}',
+    
+        minLength: 2,
+        select: function(event, ui) {
+                      console.log(ui)
+                      console.log('event is',event)
+                 $(`#internalccode_${form_count}`).val(ui.item.value)
+
+                let code = ui.item.value
+                console.log('code', code)
+                var dataLS = JSON.parse(localStorage.getItem('codes'))
+
+                // console.log('dataLS', dataLS)
+
+                // console.log('productSelected', dataLS[String(product)])
+
+                var productId = dataLS[code]
+                var warehouse = $("#warehouse option:selected" ).val()
+                console.log('productId in front end ',productId)
+
+                request_url = "{% url 'productwarehouse' %}" 
+                // request_url = '/product/' + productId + '/' + warehouse;
                 $.ajax({
                     url: request_url,
-                    type: "GET",
                     data: {
                     'productId' : productId,
-                    'warehouse' : warehouse ,
-                    'cantidad' : cantidad, 
+                    'warehouse' : warehouse 
                         },
+
                     success: function(data){
                         console.log('only data',data)
-                    },
+                        console.log('data.codes',data.codes)
+                    let barcode = data.product[0][0]
+                    let product = data.product[0][2]
+                     console.log(barcode)
 
-                    error: function(data){
+                     console.log(product)
+                     console.log('form_count is', form_count)
+                    $(`#barcode_${form_count}`).val(barcode)
+                    $(`#productname_${form_count}`).val(product)
+//             $('productname').attr('')
+           },
+
+           error: function(data){
                alert(data.responseJSON.error);
-                $(`#cantidad_${form_count -1}`).val("")
-                $(`#cantidad_${form_count }`).val("")
-               }
 
-        })
-    }) 
-        
+               $(`#internalcode_${form_count}`).val("")
+               $(`#barcode_${form_count}`).val("")
+                $(`#productname_${form_count}`).val("")
+
+               }
+                
+        });
+
+    }})
+
     $(`#productname_${form_count}`).autocomplete({
             source: '{% url "autocomplete-name" %}',
             minLength:1,
@@ -315,91 +355,105 @@ $(`#cantidad_${form_count}`).change(function(e){
     
                          console.log(internalCode)
                          console.log('form_count is', form_count)
-                        $(`#barcode_${form_count -1}`).val(barcode)
-                        $(`#internalcode_${form_count -1 }`).val(internalCode)
+                        $(`#barcode_${form_count}`).val(barcode)
+                        $(`#internalcode_${form_count}`).val(internalCode)
     //             $('productname').attr('')
                },
                
            error: function(data){
                alert(data.responseJSON.error);
 
-               $(`#internalcode_${form_count -1}`).val("")
-               $(`#barcode_${form_count -1}`).val("")
-                $(`#productname_${form_count -1 }`).val("")
+               $(`#internalcode_${form_count}`).val("")
+               $(`#barcode_${form_count}`).val("")
+                $(`#productname_${form_count}`).val("")
                 
                }
                 
             });
     
         }})
+
+}
+
+$("#add-product").click(function(event) {
+
+       
+        var warehouse = $("#warehouse option:selected" ).val()
+        console.log('warehouse is', this.warehouse)
+        event.preventDefault()
+    // get extra form count so we know what index to use for the next item
+        console.log(event.target.value)
+       
+        var table = document.getElementById('productTable')
+        var lastRow = table.rows[ table.rows.length - 1 ];
+        var product = lastRow.cells[0].firstElementChild
+        var quantity = lastRow.cells[3].firstElementChild
+        
+        console.log('product first Round', product)
+        console.log('quantity first Round', quantity)
     
+        if (form_count === 0){
+
+            addNewRow()
+            return
+        }
+
+        if (form_count >0) {
+            console.log('form_count', form_count)
     
-$(`#internalcode_${form_count}`).autocomplete({
-        source: '{% url "autocomplete-name" %}',
+            var table = document.getElementById('productTable')
+        var lastRow = table.rows[ table.rows.length - 1 ];
+        var product = lastRow.cells[0].firstElementChild.value
+        var quantity = lastRow.cells[3].firstElementChild.value
+        
+        console.log('product second Round', product)
+        console.log('quantity second Round', quantity)
     
-        minLength: 2,
-        select: function(event, ui) {
-                      console.log(ui)
-                      console.log('event is',event)
-                 $(`#internalccode_${form_count}`).val(ui.item.value)
-
-                let code = ui.item.value
-                console.log('code', code)
-                var dataLS = JSON.parse(localStorage.getItem('codes'))
-
-                // console.log('dataLS', dataLS)
-
-                // console.log('productSelected', dataLS[String(product)])
-
-                var productId = dataLS[code]
-                var warehouse = $("#warehouse option:selected" ).val()
-                console.log('productId',productId)
-
-                request_url = "{% url 'productwarehouse' %}" 
-                // request_url = '/product/' + productId + '/' + warehouse;
-                $.ajax({
-                    url: request_url,
-                    data: {
-                    'productId' : productId,
-                    'warehouse' : warehouse 
-                        },
-
-                    success: function(data){
-                        console.log('only data',data)
-                        console.log('data.codes',data.codes)
-                    let barcode = data.product[0][0]
-                    let product = data.product[0][2]
-                     console.log(barcode)
-
-                     console.log(product)
-                     console.log('form_count is', form_count)
-                    $(`#barcode_${form_count -1}`).val(barcode)
-                    $(`#productname_${form_count -1 }`).val(product)
-//             $('productname').attr('')
-           },
-
-           error: function(data){
-               alert(data.responseJSON.error);
-
-               $(`#internalcode_${form_count -1}`).val("")
-               $(`#barcode_${form_count -1}`).val("")
-                $(`#productname_${form_count -1 }`).val("")
-
-               }
-                
-        });
-
-    }})
-
-        form_count ++;
+        if (product === '') {
     
-        $("[name=extra_field_count]").val(form_count);
+            alert('Ingresar un Nuevo Producto')
+            return
+        }
+    
+        if (quantity === '') {
+    
+        alert('Ingresar la cantidad a vender del Producto')
+                return
+        }
+
+        checkQuantity()
+        
+        //console.log('quantityCheck response', quantityCheck)
+        // console.log('quantityCheck error', quantityCheck)
+
+        }
+    
+console.log('form count previous to product code autocomplete', form_count)
+
+
     
     })
+
+        // if (form_count > 0) {
+
+        //     var product = lastRow.cells[0].firstElementChild.value
+        // var quantity = lastRow.cells[3].firstElementChild.value
+        
+       
+        // }
+        
+
+       
+ //   })
     
     $("#remove-product").click(function(event) {
     
         event.preventDefault()
+
+        if (form_count === 0) {
+
+            return
+        }
         var table = document.getElementById('productTable')
         var lastRow = table.rows[ table.rows.length - 1 ];
     

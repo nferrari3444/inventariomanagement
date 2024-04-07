@@ -315,6 +315,11 @@ $(`#internalcode_${form_count}`).autocomplete({
 $("#remove-product").click(function(event) {
 
     event.preventDefault()
+
+    if (form_count === 0) {
+
+        return  
+    }
     var table = document.getElementById('productTable')
     var lastRow = table.rows[ table.rows.length - 1 ];
 

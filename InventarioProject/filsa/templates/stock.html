@@ -24,14 +24,20 @@
             <div class="p-3">
               <label for="input-group-search" class="sr-only">Search</label>
               <div class="relative">
-                <div class="absolute inset-y-0 rtl:inset-r-0 start-0 flex items-center ps-3 pointer-events-none">
-                  <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
-                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
-                  </svg>
-                </div>
+              
                 <input type="text" id="input-group-search-product" class="block w-full p-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Nombre del Producto">
-                <input type="number" id="input-group-search-code" class="block w-full p-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Codigo del Producto">
-              </div>
+                <div class="absolute inset-y-0 rtl:inset-r-0 start-0 flex items-center ps-3 pointer-events-none">
+                    <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                      </svg>
+                </div>
+                <input type="number" id="input-group-search-code" class="block w-full mt-2 p-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Codigo del Producto">
+                  <div class="absolute inset-y-0 rtl:inset-r-0 start-0 flex items-center ps-3 pointer-events-none">
+                    <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                      </svg>
+                </div>
+            </div>
             </div>
 
         <!-- Dropdown menu -->
@@ -73,7 +79,7 @@
           
             </form>
 
-            <div class="sm:mt-2 sm:block lg:inline-flex">
+            <div class="sm:mt-4 sm:block lg:inline-flex">
             <a href="{% url 'excel-export' dimension='deposit' %}" >
                 <button type="button" value="deposit" name='exportproducts' id="exportproducts" class="ml-5 mb-2 sm:ml-5 px-4 text-white inline-flex items-center bg-green-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
                 <svg class="w-6 h-6 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
@@ -308,22 +314,22 @@
     <div id="pagination">
     {% if is_paginated %}
     {% if page_obj.has_previous %}
-      <a href="?{% param_replace page=1 %}" class="text-white bg-green-400 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-1.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" >First</a>
+      <a href="?{% param_replace page=1 %}" class="text-white bg-green-400 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-1.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" >Primera</a>
       {% if page_obj.previous_page_number != 1 %}
-        <a href="?{% param_replace page=page_obj.previous_page_number %}" class="text-white bg-green-400 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-1.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" >Previous</a>
+        <a href="?{% param_replace page=page_obj.previous_page_number %}" class="text-white bg-green-400 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-1.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" >Anterior</a>
       {% endif %}
     {% endif %}
   
-    Page {{ page_obj.number }} of {{ paginator.num_pages }}
+    Pagina {{ page_obj.number }} de {{ paginator.num_pages }}
   
     {% if page_obj.has_next %}
       {% if page_obj.next_page_number != paginator.num_pages %}
-        <a href="?{% param_replace page=page_obj.next_page_number %}" class="text-white bg-green-400 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-1.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" >Next</a>
+        <a href="?{% param_replace page=page_obj.next_page_number %}" class="text-white bg-green-400 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-1.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" >Siguiente</a>
       {% endif %}
-      <a href="?{% param_replace page=paginator.num_pages %}" class="text-white bg-green-400 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-1.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" >Last</a>
+      <a href="?{% param_replace page=paginator.num_pages %}" class="text-white bg-green-400 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-1.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" >Ultima</a>
     {% endif %}
   
-    <p>Objects {{ page_obj.start_index }}—{{ page_obj.end_index }}</p>
+    <p>Productos {{ page_obj.start_index }}—{{ page_obj.end_index }}</p>
   {% endif %}
 </div>
   <hr>
@@ -347,7 +353,12 @@ $.ajax({
 
         
         console.log('data in hmtl',data.html_table)
-        //$('#pagination').empty()
+        $('#pagination').empty()
+
+        $(`#supplier`).val('')
+        $(`#categoria`).val('')
+        $(`#deposito`).val('')
+        
         $('#productTable').html(data.html_table);
 
 }}

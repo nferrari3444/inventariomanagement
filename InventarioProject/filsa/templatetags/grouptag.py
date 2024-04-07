@@ -28,13 +28,18 @@ def param_replace(context, **kwargs):
     """
     d = context['request'].GET.copy()
     print('d in context request is',d)
-
+    print('kwars is', kwargs.items())
     for k, v in kwargs.items():
-        print('k in kwargs.items is', k)
-        print('v in kwargs.items is', v)
+        #print('k in kwargs.items is', k)
+        #print('v in kwargs.items is', v)
         d[k] = v
     #for k in [k for k, v in d.items() if not v]:
      #   del d[k]
+        #print('k is',k)
+        #print('v is', v)
+
+        #print('d.items is', d.items()) 
+    
     return d.urlencode()
 
 @register.filter
