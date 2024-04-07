@@ -327,9 +327,9 @@ def transferView(request):
             print('number of Products in form is {}'.format(numberOfProducts))
             datalist = []
             
-            products_list = [form.cleaned_data['product_{}'.format(i)] for i in range(0,int(numberOfProducts))]
-            print('products_list is {}'.format(products_list))
-            print('products_list exists:')
+            #products_list = [form.cleaned_data['product_{}'.format(i)] for i in range(0,int(numberOfProducts))]
+            #print('products_list is {}'.format(products_list))
+            #print('products_list exists:')
             
             print('Product that not exist in database are:')    
             #  warehouse= warehouse_out,
