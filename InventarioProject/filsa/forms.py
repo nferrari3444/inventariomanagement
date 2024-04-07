@@ -76,7 +76,7 @@ class TransferForm(forms.ModelForm):
         extra_fields = self.cleaned_data['extra_field_count']
         warehouse = self.cleaned_data['warehouse']
 
-        for index in range(0, int(extra_fields)):
+        for index in range(1, int(extra_fields) + 1):
             
             product = self.cleaned_data['product_{index}'.format(index=index)]
             if  WarehousesProduct.objects.filter(product__name=product, name=warehouse).exists():  #Product.objects.filter(name = product, warehouse=warehouse).exists():
