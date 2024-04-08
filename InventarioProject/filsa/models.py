@@ -194,6 +194,6 @@ class DiffProducts(models.Model):
      
    # product = models.ForeignKey(Product, on_delete=models.CASCADE)
     warehouseProduct = models.ForeignKey(WarehousesProduct, on_delete= models.CASCADE, blank=True, null=True)
-    totalPurchase = models.FloatField()
-    totalQuantity = models.FloatField()
-    productDiff = models.IntegerField()
+    totalPurchase = models.FloatField(verbose_name="Total Comprado")
+    totalQuantity = models.FloatField(verbose_name="Cantidad Neta")
+    productDiff = models.IntegerField(verbose_name="Diferencia")

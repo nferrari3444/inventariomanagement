@@ -188,6 +188,9 @@ class AdminProductDiff(ExportActionMixin, admin.ModelAdmin):
     def product(self, obj):
         return obj.warehouseProduct.product.name
     
+    @admin.display(description='Total Comprado')
+    def totalPruchase(self, obj):
+        return obj.totalPurchase
     
     # def receipt_amount(self, request):
     #     current_receipt_purchase_amounts = StockMovements.objects.filter(WarehousesProduct = request.id).values_list('price', flat = True)
