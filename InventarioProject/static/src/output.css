@@ -2224,20 +2224,16 @@ input[type="range"]::-ms-fill-lower {
     margin-right: 0px;
   }
 
-  .sm\:mt-2 {
-    margin-top: 0.5rem;
-  }
-
   .sm\:mt-3 {
     margin-top: 0.75rem;
   }
 
-  .sm\:mt-6 {
-    margin-top: 1.5rem;
-  }
-
   .sm\:mt-4 {
     margin-top: 1rem;
+  }
+
+  .sm\:mt-6 {
+    margin-top: 1.5rem;
   }
 
   .sm\:block {

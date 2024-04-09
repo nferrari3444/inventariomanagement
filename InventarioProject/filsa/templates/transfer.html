@@ -1,4 +1,5 @@
 {% extends '_base.html' %}
+{% load grouptag %}
 
 <head>
 {% load static %}
@@ -6,7 +7,6 @@
 </head>
 
 {% block content %}
-
 
 
 {% if form.errors %}
@@ -80,8 +80,14 @@
 
                 
             <div class="max-w-4xl mt-10">
+
+                {% if formInvalid == False %}
             <table id="productTable" class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                
+               
                 <thead class="text-xs text-gray-700 uppercase bg-green-100 dark:bg-gray-700 dark:text-gray-400">
+                
+             
                     <tr>
                         <th scope="col-span-2" class="px-6 py-3">
                             Producto
@@ -97,32 +103,67 @@
                         </th>
                     </tr>
                 </thead>
-                <tbody>
-                    <!-- <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                         
-                           
-                             <label for="productname" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"></label>
-                            <input type="text" id="productname" +   class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="John" required> 
+            {% else %}
+            <table id="productTable" class="py-8 px-4 max-w-4xl text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+          
+            <thead class="text-xs text-gray-700 uppercase bg-green-100 dark:bg-gray-700 dark:text-gray-400">
+                
+            <tr>
                             
+                <th scope="col" class="px-6 py-3">Producto</th>
+                <th scope="col" class="px-6 py-3">Codigo</th>
+                <th scope="col" class="px-6 py-3">Cantidad</th>
+            </tr>
+        </thead>
+
+       
+
+                <tbody class="">
+
+               
+
+               
+                    {% for field in form.visible_fields %}
+                    
+                  
+
+                
+                    <tr class="inline-flex bg-gray-200 border-b dark:bg-gray-800 dark:border-gray-700">
+                    {% if 'Product'  in field.label_tag %}
+                    
+                    <td class="inline-flex"><input type="text" name="product_{{ forloop.counter0 }}" value="{{field.value}}"  class="inline-flex bg-gray-150 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"  id="" name="" placeholder="" disabled></td>
+                
+               
+
+                    {% elif 'Internalcode' in field.label_tag %}
+                    
+                    <td class="inline-flex py-4"><input type="text" name="internalCode_{{ forloop.counter0 }}" value="{{field.value}}"  class="inline-flex bg-gray-150 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" id="" name="" placeholder="" disabled></td>
+
+
+                    {% elif 'Cantidad' in field.label_tag  %}
+
+                    <td class="inline-flex px-6 py-4"><input type="number" name="cantidad_{{ forloop.counter0 }}" value="{{field.value}}"  class="inline-flex bg-gray-150 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" id="" name="" placeholder="" disabled></td>             
+
+                  {% endif %}
+                     
+                       
                         
-                        </th>
-                        <td class="px-6 py-4">
-                            <input type="text" id="barcode" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="John" required>
-                        </td>
-                        <td class="px-6 py-4">
-                            <input type="text" id="internal-code" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="John" required>
-                        </td>
-                        <td class="px-6 py-4">
-                            {{form.cantidad}}
-                        </td>
+                    </tr>  
+
+                     
+                       
+                       
+                  {% endfor %}
+
+               
+                    
 
                         
 
-                    </tr> -->
+                    </tr> 
                  
                 </tbody>
-             
+                {% endif %}
             </table>
             <td class="px-6 py-4">
                 <button  id="add-product" class="inline-flex items-center px-3 py-1.5 mt-2 sm:mt-6 text-sm font-medium text-center text-white bg-primary-700 rounded-lg focus:ring-4 focus:ring-primary-200 dark:focus:ring-primary-900 hover:bg-primary-800">
@@ -160,7 +201,7 @@
         </div>
             
             
-            <button type="submit" id='nuevoIngreso' class="inline-flex items-center px-5 py-2.5 mt-4 sm:mt-6 text-sm font-medium text-center text-white bg-primary-700 rounded-lg focus:ring-4 focus:ring-primary-200 dark:focus:ring-primary-900 hover:bg-primary-800">
+            <button type="submit"  id='nuevoIngreso' class="inline-flex items-center px-5 py-2.5 mt-4 sm:mt-6 text-sm font-medium text-center text-white bg-primary-700 rounded-lg focus:ring-4 focus:ring-primary-200 dark:focus:ring-primary-900 hover:bg-primary-800">
                 Solicitar Transferencia
             </button>
         </div>
@@ -176,6 +217,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/datepicker.min.js"></script>
 
 
+
+
 <script>
 
 $('#warehouse').on('change', function() {
@@ -184,7 +227,13 @@ $('#warehouse').on('change', function() {
 });
 
 let form_count = Number($("[name=extra_field_count]").val());
-console.log('form_count is ', form_count)
+console.log('form_count iss ', form_count)
+
+var cantidad = $(`#cantidad_${form_count -1 }`).val()
+
+console.log('cantidad is',cantidad)
+
+
 
 function checkQuantity(){
 
@@ -218,20 +267,77 @@ request_url = "{% url 'productwarehouse' %}"
         'warehouse' : warehouse ,
         'cantidad' : cantidad, 
             },
-        success: function(data){
+        success: function(data, status, xhr){
             console.log('only data',data)
-            addNewRow()
+            console.log('status in ajax is', xhr.status)
+            if (xhr.status === 200) {
+                addNewRow()
+            }
+           
+                
+            
+           
         },
 
         error: function(data){
    alert(data.responseJSON.error);
     $(`#cantidad_${form_count}`).val("")
     $(`#cantidad_${form_count }`).val("")
+    return
     
    }
 
 })
 }
+
+function checkQuantityLast(){
+
+    
+// $(`#cantidad_${form_count}`).change(function(e){
+
+
+var cantidad = $(`#cantidad_${form_count}`).val()
+var product = $(`#productname_${form_count}`).val()
+var warehouse = $("#warehouse option:selected" ).val()
+
+
+var dataLS = JSON.parse(localStorage.getItem('products'))
+
+var productId = dataLS[product]
+
+console.log('cantidad in front end is', cantidad)
+
+console.log('product in front end is', product)
+console.log('warehouse is', warehouse)
+
+request_url = "{% url 'productwarehouse' %}" 
+//request_url = '/product/' + productId + '/' + warehouse;
+    $.ajax({
+        url: request_url,
+        type: "GET",
+        data: {
+        'productId' : productId,
+        'warehouse' : warehouse ,
+        'cantidad' : cantidad, 
+            },
+        success: function(data){
+            console.log('only data',data)
+                
+        },
+
+        error: function(data){
+   alert(data.responseJSON.error);
+    $(`#cantidad_${form_count}`).val("")
+    $(`#cantidad_${form_count }`).val("")
+    return false
+    
+   }
+
+})
+}
+
+
+// checkQuantity()
 
 function addNewRow(){
 
@@ -242,6 +348,9 @@ $("[name=extra_field_count]").val(form_count);
 
 var warehouse = $("#warehouse option:selected" ).val()
 console.log('form count after new row', form_count)
+
+
+
 var newRow = document.getElementById('productTable').insertRow();
 
     
@@ -257,6 +366,9 @@ newCell.innerHTML=`<tr><td><input type="text" class="bg-gray-50 border border-gr
 
 newCell = newRow.insertCell();
 newCell.innerHTML= `<tr><td><input type = "number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" type='text' id="cantidad_${form_count}" name="cantidad_${form_count}" placeholder="cantidad" required></td></tr>`; 
+
+$('#productTable tbody').append(newRow);
+
 
 $(`#internalcode_${form_count}`).autocomplete({
     source: '{% url "autocomplete-name" %}',
@@ -370,7 +482,16 @@ $(`#productname_${form_count}`).autocomplete({
 
     }})
 
+// $(`#cantidad_${form_count}`).change(function() {
+
+// console.log('hola holaeee')
+// checkQuantity()
+// });
+   
 }
+
+
+
 
 
 $("#add-product").click(function(event) {
@@ -453,28 +574,72 @@ $("#remove-product").click(function(event) {
 
 
 //     console.log('hola hola')
-   $.ajax({
-            url: `/products/`,
-        type: 'get', 
-        success: function(data) {
-            // console.log(data.products)
 
-            // console.log('llega aca')
+ function openLoader(event) {
 
-            // console.log(data.products)
+//     var cantidad = $(`#cantidad_${form_count}`).val()
+// var product = $(`#productname_${form_count}`).val()
+// var warehouse = $("#warehouse option:selected" ).val()
 
-            localStorage.setItem('products', JSON.stringify(data.products))
-          //  for (let i = 0 ; i< data.products.length ; i++) {
-               
-          //  $("#productname").append(`<option value=${data.products[i][0]}>`+ data.products[i][1] +'</option>');
-
-        }
-    })
     
-function openLoader() {
-    document.getElementById("loader").style.display = "block";
+    // event.preventDefault()
+// var dataLS = JSON.parse(localStorage.getItem('products'))
+
+// var productId = dataLS[product]
+
+
+//     request_url = "{% url 'productwarehouse' %}" 
+// //request_url = '/product/' + productId + '/' + warehouse;
+//  var ajaxreq =  $.ajax({
+//         url: request_url,
+//         type: "GET",
+//         data: {
+//         'productId' : productId,
+//         'warehouse' : warehouse ,
+//         'cantidad' : cantidad, 
+//             },
+//         success: function(data){
+//             console.log('only data',data)
+//             $("#forms").submit(function (e) {
+//               return true
+//     })
+           
+//         },
+
+//         error: function(data){
+//    alert(data.responseJSON.error);
+//     $(`#cantidad_${form_count}`).val("")
+//     $(`#cantidad_${form_count }`).val("")
+//             console.log('form error')
+//      $("#forms").submit(function (e) {
+//         e.preventDefault()
+//          return false
+//      })
+    
+//     //return false
+    
+//    }
+
+// })
+
+
+// console.log('ajaxcheck status is ', ajaxreq.status)
+// if (ajaxreq.status !== 200){
+
+//     $("#forms").submit(function (e) {
+//         return false
+//     })
+
+    
+
+// } 
+
+document.getElementById("loader").style.display = "block";
 
 }
+
+
+ 
 
 </script>
 

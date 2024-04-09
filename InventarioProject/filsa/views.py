@@ -307,9 +307,10 @@ def transferView(request):
     # if this is a POST request we need to process the form data
     if request.method == "POST":
         # # create a form instance and populate it with data from the request:
-        form = TransferForm(request.POST, user = request.user, extra = request.POST.get('extra_field_count'))
+        form = TransferForm(request.POST, user = request.user, extra = request.POST.get('extra_field_count'), invalidForm=False)
         # # check whether it's valid:
       #  print('form is valid', form.is_valid())
+        print('request POST', request.POST)
        
         if form.is_valid():
       
@@ -340,12 +341,15 @@ def transferView(request):
 
                 product = form.cleaned_data['product_{}'.format(i)]
                 print('product in inbound view is {}'.format(product))
+                internalCode = form.cleaned_data['internalCode_{}'.format(i)]
                 
                 # if Product.objects.filter(name__in=product, warehouse=warehouse_out).exists() != True:
                 #     messages.error(request, 'El producto seleccionado {} no se encuentra en el deposito {}. Dar de alta el producto en el deposito para continuar'.format(product,warehouse_out), extra_tags='transfer')
                 #     return redirect('/transfer/')
                     
-                productdb = Product.objects.get(name= product)  #, warehouse= warehouse_out)
+                # Se modifica el objecto del producto. En lugar de buscar por nombre, se busca por internal Code
+                productdb = Product.objects.get(internalCode = internalCode)
+                #productdb = Product.objects.get(name= product)  #, warehouse= warehouse_out)
                 warehouseProductdb = WarehousesProduct.objects.get(product=productdb, name=warehouse_out)
               
                 quantity = form.cleaned_data['cantidad_{}'.format(i)]
@@ -409,12 +413,16 @@ def transferView(request):
             return redirect('/tasks/')
             #return HttpResponseRedirect("/inbound/")
 
+        else:
+            print('request POST in invalid FOrm',request.POST)
+            form = TransferForm(request.POST, user = request.user, extra = request.POST.get('extra_field_count'), invalidForm=True)
+            return render(request, "transfer.html", {"form": form, "formInvalid" : True}) #
     # if a GET (or any other method) we'll create a blank form
     else:
         
-        form = TransferForm(user=request.user)
+        form = TransferForm(user=request.user, invalidForm=False)
 
-    return render(request, "transfer.html", {"form": form}) #, "products" :productNames})
+    return render(request, "transfer.html", {"form": form, "formInvalid": False}) #, "products" :productNames})
 
 @login_required
 def transferReceptionView(request, requested_id):
@@ -454,6 +462,7 @@ def transferReceptionView(request, requested_id):
             issuer = form.cleaned_data['issuer']
             receptor = form.cleaned_data['receptor']
             warehouse = form.cleaned_data['warehouse']
+            print('warehouse in form is', warehouse)
             actionType = 'Confirma Transferencia'
             observations = form.cleaned_data['observations']
             deliveryDate = datetime.now().date()
@@ -467,6 +476,7 @@ def transferReceptionView(request, requested_id):
             taskupdated = Tasks.objects.filter(task_id = requested_id).values_list('receptor', 'issuer','status', 'motivoIngreso','motivoEgreso','warehouseProduct__name','actionType')
             print('taskupdated in view is ', taskupdated)
             task = Tasks.objects.get(task_id=requested_id)
+            form.fields['warehouse'] = warehouse
             #warehouseInTransit = Warehouses.objects.get(name='En Transito') 
             for i , product in enumerate(products):
                 form.fields['producto_{}'.format(i)] = product.warehouseProduct.product.name                     #product.product.name
@@ -611,10 +621,13 @@ def inboundView(request):
             for i in range(1,int(numberOfProducts) + 1):
 
                 product = form.cleaned_data['product_{}'.format(i)]
+                internalCode = form.cleaned_data['internalCode_{}'.format(i)]
+
                 print('product in inbound view is {}'.format(product))
+                print('internalCode in inbound view is {}'.format(internalCode))
                 #product_ = product.strip()
                 quantity = form.cleaned_data['cantidad_{}'.format(i)]
-                productdb = Product.objects.get(name= product)
+                productdb = Product.objects.get(internalCode= internalCode)
                 warehouseProduct = WarehousesProduct.objects.filter(product= productdb, name=warehouse)
 
                 if warehouseProduct.exists():                     #Product.objects.filter(name=product, warehouse=warehouse).exists():
@@ -754,7 +767,7 @@ def inboundReceptionView(request, requested_id):
                 
                 quantity = form.fields['cantidad_{}'.format(i)]
                 diffQuantity = int(quantity) - int(netQuantity)
-                newproduct = Product.objects.get(name= product.warehouseProduct.product.name) #, warehouse=warehouse)
+                newproduct = Product.objects.get(internalCode= product.warehouseProduct.product.internalCode) #, warehouse=warehouse)
                 productWarehouse = WarehousesProduct.objects.get(product=newproduct, name=warehouse)
                 
                 
@@ -823,8 +836,11 @@ def transferConfirmedView(request, requested_id):
     #print('pendingRequest product is:', pendingRequest.product)
     # confirmedTask = get_object_or_None(Tasks, pk=requested_id)
     confirmedTask = Tasks.objects.filter(task_id=requested_id, status='Confirmed')
-
-    return render(request, 'transferConfirmed.html', { 'task': confirmedTask[0] })
+    firstTask = Tasks.objects.filter(task_id= requested_id).first()
+    firstMovement = firstTask.stockmovements_set.all().filter(actionType='Transferencia').first()
+    depositoSalida = firstMovement.warehouseProduct.name
+    depositoEntrada = StockMovements.objects.filter(task__task_id=requested_id).last().warehouseProduct.name
+    return render(request, 'transferConfirmed.html', { 'task': confirmedTask[0] ,'warehouseIn': depositoEntrada})
 
 
 @login_required

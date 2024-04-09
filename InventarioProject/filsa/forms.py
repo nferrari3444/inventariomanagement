@@ -55,6 +55,9 @@ class TransferForm(forms.ModelForm):
         extra_fields = kwargs.pop('extra',0)
         print('extra_fields line 64', extra_fields)
         user = kwargs.pop('user')
+        print('args in tranfer from invalid', *args)
+        form_data = args
+        invalidForm = kwargs.pop('invalidForm')
         super(TransferForm, self).__init__(*args, **kwargs)
         self.fields['extra_field_count'].initial = extra_fields
         self.fields['department'].widget.attrs.update({'class':'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500'})
@@ -62,8 +65,6 @@ class TransferForm(forms.ModelForm):
         self.fields['issuer'].initial = user
         self.fields['issuer'].widget.attrs.update({'class':'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500', 'disabled': True})
         
-       # self.fields['extra_field_count'] = 
-
         for index in range(1, int(extra_fields) + 1 ):
             print('index in line 73 is {}'.format(index))
             self.fields['product_{index}'.format(index=index)] =   forms.CharField()
@@ -71,17 +72,49 @@ class TransferForm(forms.ModelForm):
             #self.fields['barcode_{index}'.format(index=index)] = forms.CharField()
             self.fields['internalCode_{index}'.format(index=index)] = forms.CharField()
             self.fields['cantidad_{index}'.format(index=index)] = forms.IntegerField()
+        
+
+       # self.fields['extra_field_count'] = 
+        if invalidForm == True:
+            for index in range(1, int(extra_fields) + 1 ):
+                #self.fields['product_{index}'.format(index=index)] =   args[0]['product_{index}'.format(index=index)]
+            
+                # #self.fields['barcode_{index}'.format(index=index)] = forms.CharField()
+                #self.fields['internalCode_{index}'.format(index=index)] = args[0]['internalCode_{index}'.format(index=index)]
+                #self.fields['cantidad_{index}'.format(index=index)] = args[0]['cantidad_{index}'.format(index=index)]
+                print('product is', args[0]['product_{index}'.format(index=index)])
+                print('internalCode is', args[0]['internalCode_{index}'.format(index=index)])
+                print('cantidad is', args[0]['cantidad_{index}'.format(index=index)])
+        
+
+            
+            # for key, value in args[0].items():
+            #     print('key and value in args items are')
+            #     print(key, value)
+            # print('kwargs in tranfer from invalid', **kwargs)
+            # index = 1
+            # print('form invalid en form.py')
+            # self.fields['product_{index}'.format(index=index)] =   forms.CharField()
+            
+            #self.fields['barcode_{index}'.format(index=index)] = forms.CharField()
+            # self.fields['internalCode_{index}'.format(index=index)] = forms.CharField()
+            # self.fields['cantidad_{index}'.format(index=index)] = forms.IntegerField()
+
+        
+
 
     def clean(self):
         extra_fields = self.cleaned_data['extra_field_count']
         warehouse = self.cleaned_data['warehouse']
-
+        self.data = self.data.copy()
+        
         for index in range(1, int(extra_fields) + 1):
             
             product = self.cleaned_data['product_{index}'.format(index=index)]
+            internalCode = self.cleaned_data['internalCode_{index}'.format(index=index)]
             if  WarehousesProduct.objects.filter(product__name=product, name=warehouse).exists():  #Product.objects.filter(name = product, warehouse=warehouse).exists():
 
-                product_db = Product.objects.get(name = product)
+                product_db = Product.objects.get(internalCode = internalCode)
                 product_stock = product_db.quantity
                 stockSecurity = product_db.stockSecurity
                 print('product in method is {}'.format(product))
@@ -92,9 +125,15 @@ class TransferForm(forms.ModelForm):
                 quantity = self.cleaned_data['cantidad_{index}'.format(index=index)]
                 if product_stock - quantity < stockSecurity:
                     raise ValidationError("La cantidad ingresada por {} del producto {} genera stock por debajo del Stock de Seguridad que es {}".format(quantity, product , stockSecurity))
+
             else:
                 raise ValidationError('El Producto {} no se encuentra en el deposito {}'.format(product,warehouse))
+
+            # self.data['product_{index}'.format(index=index)] = self.cleaned_data['product_{index}'.format(index=index)]
+            # self.data['internalCode_{index}'.format(index=index)] = self.cleaned_data['internalCode_{index}'.format(index=index)]
             
+            #return self.cleaned_data['product_{index}'.format(index=index)]
+          
             #if(quantity > item.inventory):
                 
            #     
@@ -111,6 +150,8 @@ class TransferReceptionForm(forms.ModelForm):
 
                                          'style': 'max-width: auto;',
                                      }), empty_label='-------------', to_field_name='name')
+
+    warehouseSalida = forms.CharField()
 
     class Meta:
         model = Tasks
@@ -144,9 +185,14 @@ class TransferReceptionForm(forms.ModelForm):
         self.fields['issuer'].widget.attrs.update({'class':'bg-gray-100 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 flex w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500', 'disabled':True }) #    .widget.value_from_datadict = self.instance.issuer
         self.fields['date'].widget.attrs.update({'class':'bg-gray-100 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 flex w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500', 'disabled':True }) #    .widget.value_from_datadict = self.instance.issuer
         
+        self.fields['warehouseSalida'].widget.attrs.update({'class':'bg-gray-100 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 flex w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500', 'disabled':True })
+        
         self.fields['department'].widget.value_from_datadict = lambda *args: self.instance.department
         self.fields['date'].widget.value_from_datadict = lambda *args: self.instance.date
-        # self.fields['warehouse'].widget.value_from_datadict = lambda *args: self.instance.warehouse
+        #self.fields['warehouseSalida'].widget.value_from_datadict = lambda *args: self.instance.warehouse
+        #self.fields['warehouseSalida'].initial = self.instance.warehouseProduct.name
+        self.fields['warehouseSalida'].widget.value_from_datadict = lambda *args: self.instance.warehouseProduct.name
+        self.fields['warehouseSalida'].initial =  self.instance.warehouseProduct.name
         self.fields['receptor'].widget.value_from_datadict = lambda *args: self.instance.receptor
         # self.fields['issuer'].widget.value_from_datadict = lambda *args: self.instance.issuer
         #self.fields['issuer'].initial = user

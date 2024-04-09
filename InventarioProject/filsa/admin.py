@@ -70,7 +70,7 @@ class FaltanteFilter(SimpleListFilter):
         elif self.value() == "no":
             return queryset.exclude(cantidad__gt = F('cantidadNeta')).filter(actionType='Confirma Ingreso')
         else:
-            return queryset.filter(actionType='Confirma Ingreso')
+            return queryset#.filter(actionType='Confirma Ingreso')
         
 class AdminStockMovements(ExportActionMixin, admin.ModelAdmin):
     list_display = ["date", "producto", "internalCode", "faltante", "Ingreso", "warehouse", "cantidad","cantidadNeta", "diferencia"]

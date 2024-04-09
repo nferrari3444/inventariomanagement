@@ -49,3 +49,10 @@ def has_group(user, group_name):
 # Antes estaba este condicional para mostrar los items de la navbar
 #{% if request.user|has_group:"Administrador" %} 
 #{% endif %}
+
+
+@register.filter('startswith')
+def startswith(text, starts):
+    if isinstance(text, str):
+        return text.startswith(starts)
+    return False
