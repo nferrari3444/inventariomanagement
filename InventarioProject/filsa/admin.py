@@ -142,7 +142,7 @@ class StockSecurity(ExportActionMixin, admin.ModelAdmin):
     
     def oferta(self, obj):
         if obj.hasOffer:
-            return obj.hasOffer.cotization.customer
+            return obj.hasOffer.customer
         else:
             return ''
         
