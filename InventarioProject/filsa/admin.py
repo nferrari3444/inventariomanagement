@@ -66,11 +66,11 @@ class FaltanteFilter(SimpleListFilter):
 
     def queryset(self, request, queryset):
         if self.value() == "yes":
-            return queryset.filter(cantidad__gt = F('cantidadNeta')).filter(actionType='Confirma Ingreso')
+            return queryset.filter(cantidad__gt = F('cantidadNeta')).filter(Q(actionType='Confirma Ingreso') | Q(actionType= 'Confirma Transferencia'))
         elif self.value() == "no":
-            return queryset.exclude(cantidad__gt = F('cantidadNeta')).filter(actionType='Confirma Ingreso')
+            return queryset.exclude(cantidad__gt = F('cantidadNeta')).filter(Q(actionType='Confirma Ingreso') | Q(actionType= 'Confirma Transferencia'))
         else:
-            return queryset#.filter(actionType='Confirma Ingreso')
+            return queryset.filter(Q(actionType='Confirma Ingreso') | Q(actionType='Confirma Transferencia'))
         
 class AdminStockMovements(ExportActionMixin, admin.ModelAdmin):
     list_display = ["date", "producto", "internalCode", "faltante", "Ingreso", "warehouse", "cantidad","cantidadNeta", "diferencia"]
@@ -113,7 +113,7 @@ class AdminStockMovements(ExportActionMixin, admin.ModelAdmin):
             return obj.cantidad - obj.cantidadNeta  
 
     def faltante(self,obj):
-        if obj.actionType == 'Confirma Ingreso':
+        if obj.actionType == 'Confirma Ingreso' or obj.actionType == 'Confirma Transferencia':
             return obj.cantidad == obj.cantidadNeta
             
         
