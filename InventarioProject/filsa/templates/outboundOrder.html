@@ -95,39 +95,18 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <!-- <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                                <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                 
-                                   
-                                     <label for="productname" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"></label>
-                                    <input type="text" id="productname" +   class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="John" required> 
-                                    
-                                
-                                </th>
-                                <td class="px-6 py-4">
-                                    <input type="text" id="barcode" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="John" required>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <input type="text" id="internal-code" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="John" required>
-                                </td>
-                                <td class="px-6 py-4">
-                                    {{form.cantidad}}
-                                </td>
-        
-                                
-        
-                            </tr> -->
+                            
                          
                         </tbody>
                      
                     </table>
                     <td class="px-6 py-4">
                         <button  id="add-product" class="inline-flex items-center px-3 py-1.5 mt-2 sm:mt-6 text-sm font-medium text-center text-white bg-primary-700 rounded-lg focus:ring-4 focus:ring-primary-200 dark:focus:ring-primary-900 hover:bg-primary-800">
-                            Add New Product
+                            Nuevo Producto
                          </button>
         
                          <button  id="remove-product" class="inline-flex items-center px-3 py-1.5 mt-2 sm:mt-6 text-sm font-medium text-center text-white bg-primary-700 rounded-lg focus:ring-4 focus:ring-primary-200 dark:focus:ring-primary-900 hover:bg-primary-800">
-                            Remove Product
+                            Eliminar Producto
                          </button>
         
                     </td>
@@ -231,10 +210,55 @@ request_url = "{% url 'productwarehouse' %}"
 })
 }
 
-//) 
+
+function checkQuantityLast(){
+
+    
+// $(`#cantidad_${form_count}`).change(function(e){
 
 
-//}
+var cantidad = $(`#cantidad_${form_count}`).val()
+var product = $(`#productname_${form_count}`).val()
+var warehouse = $("#warehouse option:selected" ).val()
+
+
+var dataLS = JSON.parse(localStorage.getItem('products'))
+
+var productId = dataLS[product]
+
+console.log('cantidad in front end is', cantidad)
+
+console.log('product in front end is', product)
+console.log('warehouse is', warehouse)
+
+request_url = "{% url 'productwarehouse' %}" 
+//request_url = '/product/' + productId + '/' + warehouse;
+    $.ajax({
+        url: request_url,
+        type: "GET",
+        data: {
+        'productId' : productId,
+        'warehouse' : warehouse ,
+        'cantidad' : cantidad, 
+            },
+        success: function(data){
+            console.log('only data',data)
+
+            console.log('removebutton')
+            $(`#validarcantidad_${form_count}`).remove()
+            $(':input[type="submit"]').prop('disabled', false).css('opacity',1);
+        },
+
+        error: function(data){
+   alert(data.responseJSON.error);
+    $(`#cantidad_${form_count}`).val("")
+    $(`#cantidad_${form_count }`).val("")
+    return false
+    
+   }
+
+})
+}
 
 function addNewRow(){
 
@@ -259,8 +283,17 @@ function addNewRow(){
     newCell.innerHTML=`<tr><td><input type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" type='text' id="internalcode_${form_count}" name="internalCode_${form_count}" placeholder="internalCode" required></td></tr>`;
 
     newCell = newRow.insertCell();
-    newCell.innerHTML= `<tr><td><input type = "number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" type='text' id="cantidad_${form_count}" name="cantidad_${form_count}" placeholder="cantidad" required></td></tr>`; 
+    newCell.innerHTML= `<tr><td><input type = "number" class="inline-flex bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" type='text' id="cantidad_${form_count}" name="cantidad_${form_count}" placeholder="cantidad" required></td></tr>`; 
     
+    newCell = newRow.insertCell();
+    newCell.innerHTML = `<tr><td>
+    <button type="button" id="validarcantidad_${form_count}" onclick='checkQuantityLast()' class="text-white bg-green-500 hover:bg-green-800 focus:outline-none focus:ring-4 focus:ring-green-300 font-medium rounded-full text-xs px-2 py-1 text-center me-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Validar <br/>Cantidad</button>
+
+               
+    </td></tr>`
+
+$('#productTable tbody').append(newRow);
+
     $(`#internalcode_${form_count}`).autocomplete({
         source: '{% url "autocomplete-name" %}',
     
@@ -268,7 +301,7 @@ function addNewRow(){
         select: function(event, ui) {
                       console.log(ui)
                       console.log('event is',event)
-                 $(`#internalccode_${form_count}`).val(ui.item.value)
+                 $(`#internalcode_${form_count}`).val(ui.item.value)
 
                 let code = ui.item.value
                 console.log('code', code)
@@ -293,7 +326,14 @@ function addNewRow(){
 
                     success: function(data){
                         console.log('only data',data)
+                        console.log('message is', data.message)
+
                         console.log('data.codes',data.codes)
+                    if (data.message) {
+
+                        alert(data.message)
+                    }
+                    
                     let barcode = data.product[0][0]
                     let product = data.product[0][2]
                      console.log(barcode)
@@ -352,8 +392,13 @@ function addNewRow(){
                         let barcode = data.product[0][0]
                         let internalCode = data.product[0][1]
                          console.log(barcode)
-    
-                         console.log(internalCode)
+                        
+                         if (data.message) {
+
+                            alert(data.message)
+                        }
+                        
+                        console.log(internalCode)
                          console.log('form_count is', form_count)
                         $(`#barcode_${form_count}`).val(barcode)
                         $(`#internalcode_${form_count}`).val(internalCode)
@@ -372,6 +417,9 @@ function addNewRow(){
             });
     
         }})
+
+$(`#validarcantidad_${form_count - 1}`).remove()
+$(':input[type="submit"]').prop('disabled', true).css('opacity',0.5);
 
 }
 

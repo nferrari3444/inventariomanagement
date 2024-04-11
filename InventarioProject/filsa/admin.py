@@ -66,14 +66,14 @@ class FaltanteFilter(SimpleListFilter):
 
     def queryset(self, request, queryset):
         if self.value() == "yes":
-            return queryset.filter(cantidad__gt = F('cantidadNeta')).filter(Q(actionType='Confirma Ingreso') | Q(actionType= 'Confirma Transferencia'))
+            return queryset.filter(cantidad__gt = F('cantidadNeta')).filter(Q(actionType='Confirma Ingreso') | Q(actionType= 'Confirma Transferencia') | Q(actionType='Confirma Egreso'))
         elif self.value() == "no":
-            return queryset.exclude(cantidad__gt = F('cantidadNeta')).filter(Q(actionType='Confirma Ingreso') | Q(actionType= 'Confirma Transferencia'))
+            return queryset.exclude(cantidad__gt = F('cantidadNeta')).filter(Q(actionType='Confirma Ingreso') | Q(actionType= 'Confirma Transferencia') | Q(actionType='Confirma Egreso'))
         else:
-            return queryset.filter(Q(actionType='Confirma Ingreso') | Q(actionType='Confirma Transferencia'))
+            return queryset.filter(Q(actionType='Confirma Ingreso') | Q(actionType='Confirma Transferencia') | Q(actionType='Confirma Egreso'))
         
 class AdminStockMovements(ExportActionMixin, admin.ModelAdmin):
-    list_display = ["date", "producto", "internalCode", "faltante", "Ingreso", "warehouse", "cantidad","cantidadNeta", "diferencia"]
+    list_display = ["Ingreso", "date", "producto", "internalCode", "faltante",  "warehouse", "cantidad","cantidadNeta", "diferencia"]
     list_select_related = ["warehouseProduct"]
     list_filter = [FaltanteFilter]
     search_fields = ["warehouseProduct__product__name", "warehouseProduct__product__internalCode"]
@@ -84,9 +84,14 @@ class AdminStockMovements(ExportActionMixin, admin.ModelAdmin):
     def internalCode(self, obj):
         return obj.warehouseProduct.product.internalCode
     
-    @admin.display(ordering='task__motivoIngreso', description='Tipo Ingreso')
+    @admin.display(ordering='task__motivoIngreso', description='Movimiento')
     def Ingreso(self, obj):
-        return obj.task.motivoIngreso
+        print('motivo ingreso', obj.task.motivoIngreso)
+        print('motivo Egreso', obj.task.motivoEgreso)
+        if obj.task.motivoIngreso:
+            return obj.task.motivoIngreso
+        else:
+            return obj.task.motivoEgreso
     
     @admin.display(ordering='task__deliveryDate', description='Fecha')
     def date(self, obj):
@@ -100,20 +105,14 @@ class AdminStockMovements(ExportActionMixin, admin.ModelAdmin):
     @admin.display(description='Producto')
     def producto(self, obj):
         return obj.warehouseProduct.product.name
-    
-
-    # def motivoIngreso(self, obj):
-    #     return obj.task.name
-    # get_name.admin_order_field  = 'author'  #Allows column order sorting
-    # get_name.short_description = 'Author Name'  #Renames column head
 
     
     def diferencia(self, obj):
-        if obj.actionType == "Confirma Ingreso":
+        if ((obj.actionType == "Confirma Ingreso") or (obj.actionType == "Confirma Egreso") or (obj.actionType == "Confirma Transferencia")):
             return obj.cantidad - obj.cantidadNeta  
 
     def faltante(self,obj):
-        if obj.actionType == 'Confirma Ingreso' or obj.actionType == 'Confirma Transferencia':
+        if ((obj.actionType == 'Confirma Ingreso') or (obj.actionType == 'Confirma Transferencia') or (obj.actionType == "Confirma Egreso")):
             return obj.cantidad == obj.cantidadNeta
             
         
@@ -124,7 +123,7 @@ class StockSecurity(ExportActionMixin, admin.ModelAdmin):
 
     products = Product.objects.filter(quantity__lt = F('stockSecurity') * 1.1)
 
-    list_display = ["status_order", "name", "internalCode", "status_product",  "quantity", "stockSecurity", "oferta"]
+    list_display = ["internalCode", "name", "status_order",  "status_product",  "quantity", "stockSecurity", "oferta"]
 
     list_filter = [StatusProducto, Offer]
     search_fields = ["name", "internalCode"]
@@ -188,32 +187,72 @@ class AdminProductDiff(ExportActionMixin, admin.ModelAdmin):
     def product(self, obj):
         return obj.warehouseProduct.product.name
     
-    @admin.display(description='Total Comprado')
+    @admin.display(description='Cantidad')
     def totalPruchase(self, obj):
         return obj.totalPurchase
-    
-    # def receipt_amount(self, request):
-    #     current_receipt_purchase_amounts = StockMovements.objects.filter(WarehousesProduct = request.id).values_list('price', flat = True)
-    #     total_amount = sum(current_receipt_purchase_amounts)
-    #     return total_amount
-    # receipt_amount.short_description = 'Receipt Amount'
 
     @admin.display(description='Deposito')
     def warehouse(self, obj):
         return obj.warehouseProduct.name
     
-    # def product_history(self, obj):
-    #     link = reverse("admin:filsa_stockmovements", args=[obj.product.product_id])
-    #     return format_html('<a href="{}">{}</a>', link, obj.product)
+  
 
-    # product_history.short_description = "Product History"
 
+class AdminProductWarehouse(ExportActionMixin, admin.ModelAdmin):
+ 
+    list_display = ["product", "name",  "quantity", "internalCode", "barcode", "quantityTotal","category","supplier"]
+    list_select_related = ["product"]
+
+    #search_fields = ["product", "product__name"]
+
+    @admin.display(description='Deposito')
+    def name(self, obj):
+        return obj.name
+    
+    @admin.display(description='Producto')
+    def product(self, obj):
+        return obj.product.name
+
+    @admin.display(description='Cantidad en Deposito')
+    def quantity(self, obj):
+        return obj.quantity
+    
+    @admin.display(description='Codigo')
+    def internalCode(self, obj):
+        return obj.product.internalCode
+    
+    @admin.display(description='Codigo de Barras')
+    def barcode(self, obj):
+        return obj.product.barcode
+    
+    @admin.display(description='Cantidad Total')
+    def quantityTotal(self, obj):
+        return obj.product.quantity
+    
+    @admin.display(description='Categoria')
+    def category(self, obj):
+        return obj.product.category
+    
+    @admin.display(description='Proveedor')
+    def supplier(self, obj):
+        return obj.product.supplier
+    
+class UsersData(ExportActionMixin, admin.ModelAdmin):
+ 
+    list_display = ["username", "email",  "departamento", "role"]
+
+    @admin.display(description='Departamento')
+    def departamento(self, obj):
+        return obj.departamento
+    
+    @admin.display(description='Rol')
+    def role(self, obj):
+        return obj.role
     
 
-admin.site.register(WarehousesProduct)
 
+admin.site.register(WarehousesProduct, AdminProductWarehouse)
 admin.site.register(Product,StockSecurity)
-# admin.site.register(StockSecurity)
+admin.site.register(CustomUser, UsersData)
 admin.site.register(StockMovements,AdminStockMovements)
 admin.site.register(DiffProducts, AdminProductDiff)
-admin.site.register(CustomUser)

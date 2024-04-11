@@ -220,13 +220,33 @@ def getProductWarehouse(request): #, productId, warehouse):
     print('warehouse is', warehouse)
     print('productId is', productId)
     product = Product.objects.filter(product_id=productId)
-   
+    
+    
+    
     #product = Product.objects.filter(name=product_name)
     quantity = product[0].quantity
     if quantity == 0:
         response =  JsonResponse({'error': 'El producto {} no tiene Stock Disponible '.format(product[0].name)})
         response.status_code = 403
         return response
+
+    if quantity_input:
+        product_obj = Product.objects.get(product_id=productId)
+        product_warehouse =  WarehousesProduct.objects.get(product=product_obj, name=warehouse)
+        product_name = product_warehouse.product.name
+        stock_warehouse_quantity = product_warehouse.quantity
+
+        if stock_warehouse_quantity < int(quantity_input):
+            print('product_name is {}'.format(product_name))
+            print('cantidad en deposito {}'.format(stock_warehouse_quantity))
+            print('cantidad ingresada {}'.format(quantity_input))
+
+            response =  JsonResponse({'error': 'La cantidad ingresada del producto {} es mayor a la cantidad en stock en el deposito {} '.format(product_name, warehouse)})
+            response.status_code = 403
+            return response
+
+    
+        print('quantity input is', quantity_input)
 
     if product[0].hasOffer != None:
         product_name = product[0].name
@@ -235,41 +255,33 @@ def getProductWarehouse(request): #, productId, warehouse):
         stockSecurity = product[0].stockSecurity
 
         if quantity - quantityOffer < stockSecurity * 1.1:
-            response =  JsonResponse({'error': 'El producto {} tiene cotización de Oferta y se encuentra cerca del Stock de Seguridad. El stock se encuentra reservado '.format(product_name)})
-            response.status_code = 403
-            return response
-        else:
-            response =  JsonResponse({'error': 'El producto {} tiene cotización de Oferta y se encuentra cerca del Stock de Seguridad. El stock se encuentra reservado '.format(product_name)})
-            response.status_code = 403
-            return response
+            product = Product.objects.filter(product_id=productId).values_list('barcode', 'internalCode', 'name',  'category','supplier','quantity', 'hasOffer' )
+            #response =  JsonResponse({'error': 'El producto {} tiene cotización de Oferta y se encuentra cerca del Stock de Seguridad. El stock se encuentra reservado '.format(product_name)})
+            #response =  JsonResponse({'success': 'El producto {} tiene cotización de Oferta y se encuentra cerca del Stock de Seguridad. El stock se encuentra reservado '.format(product_name)})
 
-        print('el producto está en Oferta de cotizacion')
+            return JsonResponse({'product': list(product), 'message': 'El producto {} tiene cotización de Oferta y queda por debajo del Stock de Seguridad.'.format(product_name)})
+            #response.status_code = 403
+            #return response
+        else:
+            print('el producto está en Oferta de cotizacion')
+            print('product is', product)
+
+            #product_warehouse = WarehousesProduct.objects.filter(product=product, name= warehouse).values_list('product__barcode','product__internalCode', 'product__name','name','location','product__category','product__supplier','quantity', 'product__hasOffer')
+
+            product = Product.objects.filter(product_id=productId).values_list('barcode', 'internalCode', 'name',  'category','supplier','quantity', 'hasOffer' )
+
+            return JsonResponse({'product': list(product), 'message': 'El producto {} tiene cotización de Oferta.'.format(product_name)})
+            #response =  JsonResponse({)
+            #response.status_code = 403
+            #return response
+
+    
 
     if warehouse == None or warehouse == '' :
         response = JsonResponse({'error': "Seleccionar un deposito para continuar"})
         response.status_code = 403
         return response
     
-    if quantity_input:
-        product_obj = Product.objects.get(product_id=productId)
-        product_warehouse =  WarehousesProduct.objects.get(product=product_obj, name=warehouse)
-        product_name = product_warehouse.product.name
-        stock_warehouse_quantity = product_warehouse.quantity
-
-        if stock_warehouse_quantity < int(quantity_input):
-            response =  JsonResponse({'error': 'La cantidad ingresada del producto {} es mayor a la cantidad en stock en el deposito {} '.format(product_name, warehouse)})
-            response.status_code = 403
-            return response
-
-    
-        print('quantity input is', quantity_input)
-
-
-    print('product has offer', product[0].hasOffer)
-   
-   
-    
-   
     try:
         
         product = Product.objects.get(product_id=productId) #, warehouse= Warehouses.objects.get(name=warehouse))
@@ -292,6 +304,12 @@ def getProductWarehouse(request): #, productId, warehouse):
         response =  JsonResponse({'error': 'El Producto ingresado no se encuentra en el Deposito {}'.format(warehouse)})
         response.status_code = 403
         return response
+
+    print('product has offer', product[0].hasOffer)
+   
+   
+    
+   
     
     
 
@@ -895,12 +913,14 @@ def outboundOrderView(request):
 
 
                 product = form.cleaned_data['producto_{}'.format(i)]
-                product_db = Product.objects.get(name= product)
+                internalCode = form.cleaned_data['internalCode_{}'.format(i)]
+
+                product_db = Product.objects.get(internalCode= internalCode)
                 productWarehouse_db = WarehousesProduct.objects.get(product= product_db, name=warehouse)
                 # nuevoIngreso.barcode = form.cleaned_data['barcode_{}'.format(i)]
                 # nuevoIngreso.internalCode = form.cleaned_data['internalCode_{}'.format(i)]
                 quantity = form.cleaned_data['cantidad_{}'.format(i)]
-
+               
                 print('product is:', product)
                 print('quantity is:', quantity)
                 # newProduct = StockMovements()
@@ -911,7 +931,8 @@ def outboundOrderView(request):
                 newProduct = StockMovements(warehouseProduct = productWarehouse_db, 
                              actionType = actionType,
                                          cantidad= quantity, task = task )
-           
+
+               
                 datalist.append(newProduct)
                 print('new_product is:', datalist)
 
@@ -1418,7 +1439,6 @@ def filterProducts(request):
         #return render(request, 'stock.html', {'productList' : productList, 'supplierList':supplierList, 'warehouseList':warehouseList,   'categoryList':categoryList,   'page_obj': page_obj})
         
     
-  
 
 @login_required
 def outboundDeliveryView(request, requested_id):
@@ -1498,6 +1518,7 @@ def outboundDeliveryView(request, requested_id):
                 
                 productWarehouseToUpdate.update(quantity = F('quantity') - netQuantity, deltaQuantity= F('deltaQuantity') + diffQuantity)
 
+
                 #newProduct = StockMovements()
 
                 #newProduct.product = newproduct
@@ -1509,6 +1530,15 @@ def outboundDeliveryView(request, requested_id):
                 newProduct = StockMovements(warehouseProduct = productWarehouse_db, 
                               actionType = actionType,
                                           cantidad= quantity, cantidadNeta=netQuantity, task = task )
+                
+                if diffQuantity > 0 and motivoEgreso in('Ventas','Planta de Armado'):
+                    if DiffProducts.objects.filter(warehouseProduct=productWarehouse_db).exists(): #, warehouse= warehouse).exists():
+                        
+                        DiffProducts.objects.filter(warehouseProduct= productWarehouse_db).update(totalPurchase= F('totalPurchase') + quantity, totalQuantity= F('totalQuantity') + netQuantity, productDiff= F('productDiff') + diffQuantity) #), warehouse=warehouse).update(totalPurchase= F('totalPurchase') + quantity, totalQuantity= F('totalQuantity') + netQuantity, productDiff= F('productDiff') + diffQuantity)
+
+                    else:
+                        
+                        DiffProducts.objects.create(warehouseProduct= productWarehouse_db,  totalPurchase=quantity, totalQuantity= netQuantity, productDiff= diffQuantity)
                 
                 datalist.append(newProduct)
             #print('new_product is:', datalist)

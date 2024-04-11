@@ -6,28 +6,33 @@ from .managers import CustomUserManager
 
 class CustomUser( AbstractBaseUser , PermissionsMixin ):
     
-    ROLES = [('Operator', 'Operator'),
-             ('Logistic','Logistic'),
-             ('Supervisor','Supervisor')]
+    class Meta:
+        verbose_name = 'Usuarios'
+        verbose_name_plural = 'Usuarios'
+
+    # ROLES = [('Operator', 'Operator'),
+    #          ('Logistic','Logistic'),
+    #          ('Supervisor','Supervisor')]
     
-    DEPARTMENT = [('Ventas','Ventas'),
+    # DEPARTMENT = [('Ventas','Ventas'),
                 
-                ('Dirección', 'Dirección'),
-                ('Administración', 'Administración'),
-                ('Taller', 'Taller'),
-                ('Logística','Logística')
-                ]
+    #             ('Dirección', 'Dirección'),
+    #             ('Administración', 'Administración'),
+    #             ('Taller', 'Taller'),
+    #             ('Logística','Logística')
+    #             ]
   
     
-    username = models.CharField(max_length=40)
+    username = models.CharField(max_length=40, verbose_name="Usuario")
     password = models.CharField(max_length=100)
     email = models.EmailField(max_length=40, blank=False, unique=True, 
                               default='', error_messages =
                                 {'required': 'Please provide your email address.',
-                  'unique': 'An account with this email exist'},)
+                  'unique': 'An account with this email exist'}, verbose_name="Correo")
     
-    departamento = models.CharField(max_length=30, choices = DEPARTMENT, default='Sales')
-    role = models.CharField(max_length=40, choices=ROLES, blank=True, null=True)
+    # 11-04-2024 Se le sacan los atributos de choices a departamento y role
+    departamento = models.CharField(max_length=30,  default='Sales', verbose_name="Departamento")
+    role = models.CharField(max_length=40,  blank=True, null=True, verbose_name= "Rol")
     
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
@@ -97,10 +102,15 @@ class Product(models.Model):
     
 # Create your models here.
 class WarehousesProduct(models.Model):
-    name = models.CharField(max_length=100)
-    product = models.ForeignKey(Product, on_delete = models.CASCADE,  blank=True, null=True )
-    quantity = models.FloatField(default=0)
-    location = models.CharField(max_length=100, default='')
+    
+    class Meta:
+        verbose_name = 'Productos en Deposito'
+        verbose_name_plural = 'Productos en Deposito'
+
+    name = models.CharField(max_length=100, verbose_name="Deposito")
+    product = models.ForeignKey(Product, on_delete = models.CASCADE,  blank=True, null=True, verbose_name="Producto" )
+    quantity = models.FloatField(default=0, verbose_name="Cantidad en Deposito")
+    location = models.CharField(max_length=100, default='', blank=True, null=True, verbose_name="Ubicacion")
     deltaQuantity = models.FloatField()
     inTransit = models.BooleanField(default=False)
 
@@ -194,6 +204,6 @@ class DiffProducts(models.Model):
      
    # product = models.ForeignKey(Product, on_delete=models.CASCADE)
     warehouseProduct = models.ForeignKey(WarehousesProduct, on_delete= models.CASCADE, blank=True, null=True)
-    totalPurchase = models.FloatField(verbose_name="Total Comprado")
+    totalPurchase = models.FloatField(verbose_name="Cantidad")
     totalQuantity = models.FloatField(verbose_name="Cantidad Neta")
     productDiff = models.IntegerField(verbose_name="Diferencia")

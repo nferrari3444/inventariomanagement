@@ -31,7 +31,7 @@ class TransferForm(forms.ModelForm):
                                          'style': 'max-width: auto;',
                                      }), empty_label='-------------', to_field_name='username')
 
-    warehouse = forms.ModelChoiceField(queryset=WarehousesProduct.objects.values_list('name', flat=True ).exclude(name='No Stock').distinct()
+    warehouse = forms.ModelChoiceField(queryset=WarehousesProduct.objects.values_list('name', flat=True ).exclude(name='No Stock').exclude(name='En Transito').distinct()
                                       ,widget=forms.Select(attrs={
                                          'class': "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500",
                                         'id':'warehouse',
@@ -100,9 +100,6 @@ class TransferForm(forms.ModelForm):
             # self.fields['internalCode_{index}'.format(index=index)] = forms.CharField()
             # self.fields['cantidad_{index}'.format(index=index)] = forms.IntegerField()
 
-        
-
-
     def clean(self):
         extra_fields = self.cleaned_data['extra_field_count']
         warehouse = self.cleaned_data['warehouse']
@@ -112,31 +109,25 @@ class TransferForm(forms.ModelForm):
             
             product = self.cleaned_data['product_{index}'.format(index=index)]
             internalCode = self.cleaned_data['internalCode_{index}'.format(index=index)]
-            if  WarehousesProduct.objects.filter(product__name=product, name=warehouse).exists():  #Product.objects.filter(name = product, warehouse=warehouse).exists():
+            productStockInWarehouse = WarehousesProduct.objects.filter(product__internalCode= internalCode, name=warehouse)
+            #if  WarehousesProduct.objects.filter(product__name=product, name=warehouse).exists():  #Product.objects.filter(name = product, warehouse=warehouse).exists():
 
-                product_db = Product.objects.get(internalCode = internalCode)
-                product_stock = product_db.quantity
-                stockSecurity = product_db.stockSecurity
-                print('product in method is {}'.format(product))
-                print('product in stock is {}'.format(product_stock))
-                print('product stockSecurity is {}'.format(stockSecurity))
-                print('product_db in clean method is {}'.format(product_db))
+            product_db = Product.objects.get(internalCode = internalCode)
+            product_stock = product_db.quantity
+            stockSecurity = product_db.stockSecurity
+            print('product in method is {}'.format(product))
+            print('product in stock is {}'.format(product_stock))
+            print('product stockSecurity is {}'.format(stockSecurity))
+            print('product_db in clean method is {}'.format(product_db))
 
-                quantity = self.cleaned_data['cantidad_{index}'.format(index=index)]
-                if product_stock - quantity < stockSecurity:
-                    raise ValidationError("La cantidad ingresada por {} del producto {} genera stock por debajo del Stock de Seguridad que es {}".format(quantity, product , stockSecurity))
+            quantity_warehouse = productStockInWarehouse[0].quantity
+            quantity = self.cleaned_data['cantidad_{index}'.format(index=index)]
+            if quantity_warehouse - quantity < 0:
+                raise ValidationError("La cantidad ingresada por {} del producto {} , es mayor a la cantidad en stock de {} en el deposito {}".format(quantity, product , productStockInWarehouse, warehouse))
 
-            else:
-                raise ValidationError('El Producto {} no se encuentra en el deposito {}'.format(product,warehouse))
+            #else:
+            #    raise ValidationError('El Producto {} no se encuentra en el deposito {}'.format(product,warehouse))
 
-            # self.data['product_{index}'.format(index=index)] = self.cleaned_data['product_{index}'.format(index=index)]
-            # self.data['internalCode_{index}'.format(index=index)] = self.cleaned_data['internalCode_{index}'.format(index=index)]
-            
-            #return self.cleaned_data['product_{index}'.format(index=index)]
-          
-            #if(quantity > item.inventory):
-                
-           #     
 class TransferReceptionForm(forms.ModelForm):
     extra_field_count = forms.CharField(widget=forms.HiddenInput())
     observations = forms.CharField(widget=forms.Textarea(attrs={"rows":"5", "class" : "block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" ,"placeholder":"Your description here"}))
@@ -227,7 +218,7 @@ class InboundForm(forms.ModelForm):
                                          'style': 'max-width: auto;',
                                      }), empty_label='-------------', to_field_name='username')
 
-    warehouse = forms.ModelChoiceField(queryset=WarehousesProduct.objects.values_list('name', flat=True).exclude(name='No Stock').distinct()
+    warehouse = forms.ModelChoiceField(queryset=WarehousesProduct.objects.values_list('name', flat=True).exclude(name='No Stock').exclude(name='En Transito').distinct()
                                       ,widget=forms.Select(attrs={
                                                  
                                          'class': "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500",
@@ -353,7 +344,7 @@ class OutboundOrderForm(forms.ModelForm):
     
     extra_field_count = forms.CharField(widget=forms.HiddenInput())
      
-    warehouse = forms.ModelChoiceField(queryset=WarehousesProduct.objects.values_list('name', flat=True).exclude(name='No Stock').distinct()
+    warehouse = forms.ModelChoiceField(queryset=WarehousesProduct.objects.values_list('name', flat=True).exclude(name='No Stock').exclude(name='En Transito').distinct()
                                       ,widget=forms.Select(attrs={
                                          'class': "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500",
                                          'id':'warehouse',
@@ -414,27 +405,33 @@ class OutboundOrderForm(forms.ModelForm):
 
         for index in range(1, int(extra_fields) + 1 ):
             product = self.cleaned_data['producto_{index}'.format(index=index)]
+            internalCode = self.cleaned_data['internalCode_{index}'.format(index=index)]
             print('product warehouse is ')
-            product_db = Product.objects.filter(name = product)
+            product_db = Product.objects.filter(internalCode = internalCode)
 
+            productStockInWarehouse = WarehousesProduct.objects.filter(product__internalCode= internalCode, name=warehouse)
             #product = self.cleaned_data['producto_{index}'.format(index=index)]
-            if  WarehousesProduct.objects.filter(product__name= product, name=warehouse).exists():            #Product.objects.filter(name = product, warehouse=warehouse).exists():
+            #if  WarehousesProduct.objects.filter(product__name= product, name=warehouse).exists():            #Product.objects.filter(name = product, warehouse=warehouse).exists():
 
-                product_db = Product.objects.get(name = product)
-                productWarehouse_db = WarehousesProduct.objects.get(product = product_db, name = warehouse)
-                product_stock = productWarehouse_db.quantity
-                stockSecurity = product_db.stockSecurity
-                print('product in method is {}'.format(product))
-                print('product in stock is {}'.format(product_stock))
-                print('product stockSecurity is {}'.format(stockSecurity))
-                print('product_db in clean method is {}'.format(product_db))
+            product_db = Product.objects.get(name = product)
+            productWarehouse_db = WarehousesProduct.objects.get(product = product_db, name = warehouse)
+            product_stock = productWarehouse_db.quantity
+            stockSecurity = product_db.stockSecurity
+            print('product in method is {}'.format(product))
+            print('product in stock is {}'.format(product_stock))
+            print('product stockSecurity is {}'.format(stockSecurity))
+            print('product_db in clean method is {}'.format(product_db))
 
-                quantity = self.cleaned_data['cantidad_{index}'.format(index=index)]
-                if  quantity > product_stock:
-                    raise ValidationError("La cantidad ingresada por {} del producto {} supera la cantidad en stock en el deposito {}".format(quantity, product , warehouse))
-            else:
-                raise ValidationError('El producto {} no se encuentra en el deposito {}'.format(product,warehouse))
-   
+            quantity = self.cleaned_data['cantidad_{index}'.format(index=index)]
+            quantity_warehouse = productStockInWarehouse[0].quantity
+            if quantity_warehouse - quantity < 0:
+                raise ValidationError("La cantidad ingresada por {} del producto {} , es mayor a la cantidad en stock de {} en el deposito {}".format(quantity, product , productStockInWarehouse, warehouse))
+
+            #if  quantity > product_stock:
+            #    raise ValidationError("La cantidad ingresada por {} del producto {} supera la cantidad en stock en el deposito {}".format(quantity, product , warehouse))
+        #else:
+        #    raise ValidationError('El producto {} no se encuentra en el deposito {}'.format(product,warehouse))
+
     def save(self, *args, **kwargs):
       
         meal = super(OutboundOrderForm, self).save(*args, **kwargs)
