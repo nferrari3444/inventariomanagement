@@ -532,7 +532,7 @@ $("#remove-product").click(function(event) {
     lastRow.remove()
     form_count --;
     $("[name=extra_field_count]").val(form_count);
-
+    $(':input[type="submit"]').prop('disabled', false).css('opacity',1);
 })
 
 
