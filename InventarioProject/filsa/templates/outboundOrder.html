@@ -218,14 +218,25 @@ request_url = "{% url 'productwarehouse' %}"
 
 function checkQuantityLast(){
 
-    
 // $(`#cantidad_${form_count}`).change(function(e){
-
 
 var cantidad = $(`#cantidad_${form_count}`).val()
 var product = $(`#productname_${form_count}`).val()
 var warehouse = $("#warehouse option:selected" ).val()
 
+
+    if (product === '') {
+
+        alert('Ingresar un Nuevo Producto')
+            return
+    }
+
+    if (cantidad === '') {
+
+    alert('Ingresar la cantidad a transferir del Producto')
+        return
+    
+    }
 
 var dataLS = JSON.parse(localStorage.getItem('products'))
 
@@ -333,7 +344,8 @@ $('#productTable tbody').append(newRow);
                     url: request_url,
                     data: {
                     'productId' : productId,
-                    'warehouse' : warehouse 
+                    'warehouse' : warehouse ,
+                    'cotizationCheck': 'cotization'
                         },
 
                     success: function(data){
@@ -396,7 +408,8 @@ $('#productTable tbody').append(newRow);
 
                         data: {
                     'productId' : productId,
-                    'warehouse' : warehouse 
+                    'warehouse' : warehouse ,
+                    'cotizationCheck': 'cotization'
                         },
 
                         success: function(data){

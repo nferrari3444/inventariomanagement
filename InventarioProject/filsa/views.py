@@ -217,8 +217,11 @@ def getProductWarehouse(request): #, productId, warehouse):
     productId = request.GET.get('productId',None)
     warehouse = request.GET.get('warehouse',None)
     quantity_input = request.GET.get('cantidad',None)
+
+    cotizationCheck = request.GET.get('cotizationCheck',None)
     print('warehouse is', warehouse)
     print('productId is', productId)
+    print('cotizationCheck', cotizationCheck)
     product = Product.objects.filter(product_id=productId)
     product_obj = Product.objects.get(product_id=productId)
     stockSecurity = product[0].stockSecurity
@@ -266,7 +269,7 @@ def getProductWarehouse(request): #, productId, warehouse):
     
         print('quantity input is', quantity_input)
 
-    if product[0].hasOffer != None:
+    if product[0].hasOffer != None and cotizationCheck:
         product_name = product[0].name
         
         quantityOffer = product[0].quantityOffer

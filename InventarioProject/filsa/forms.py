@@ -40,8 +40,6 @@ class TransferForm(forms.ModelForm):
                                          'style': 'max-width: auto;',
                                      }), empty_label='-------------', to_field_name='name')
 
-    
-    
     class Meta:
         model = Tasks
         fields = ['issuer','receptor','department','date']

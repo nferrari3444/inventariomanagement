@@ -234,13 +234,24 @@ request_url = "{% url 'productwarehouse' %}"
 }
 
 function checkQuantityLast(){
-
     
 // $(`#cantidad_${form_count}`).change(function(e){
+    var cantidad = $(`#cantidad_${form_count}`).val()
+    var product = $(`#productname_${form_count}`).val()
+    
+    if (product === '') {
 
+        alert('Ingresar un Nuevo Producto')
+            return
+    }
 
-var cantidad = $(`#cantidad_${form_count}`).val()
-var product = $(`#productname_${form_count}`).val()
+    if (cantidad === '') {
+
+    alert('Ingresar la cantidad a transferir del Producto')
+        return
+    
+    }
+
 var warehouse = $("#warehouse option:selected" ).val()
 
 
@@ -357,7 +368,8 @@ $(`#internalcode_${form_count}`).autocomplete({
                 url: request_url,
                 data: {
                 'productId' : productId,
-                'warehouse' : warehouse 
+                'warehouse' : warehouse ,
+                'cotizationCheck': 'cotization'
                     },
 
                 success: function(data){
@@ -419,7 +431,8 @@ $(`#productname_${form_count}`).autocomplete({
 
                     data: {
                 'productId' : productId,
-                'warehouse' : warehouse 
+                'warehouse' : warehouse ,
+                'cotizationCheck': 'cotization'
                     },
 
                     success: function(data){
@@ -464,9 +477,6 @@ $(':input[type="submit"]').prop('disabled', true).css('opacity',0.5);
 ;
    
 }
-
-
-
 
 
 $("#add-product").click(function(event) {
