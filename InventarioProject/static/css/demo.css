@@ -23,6 +23,7 @@ body{
    font-size: 18pt;
    padding-bottom: 15px;
 
+
 }
 .intro p{
    font-size: 14px;
@@ -71,6 +72,16 @@ a.btn:hover{
    content: "\f004";
 
 
+}
+
+.w-32 {
+
+   width: 8rem;
+}
+
+.w-36 {
+
+   width: 9rem;
 }
 .credit a{
    color: #333;

@@ -220,15 +220,29 @@ def getProductWarehouse(request): #, productId, warehouse):
     print('warehouse is', warehouse)
     print('productId is', productId)
     product = Product.objects.filter(product_id=productId)
+    product_obj = Product.objects.get(product_id=productId)
+    stockSecurity = product[0].stockSecurity
+
+    if warehouse == None or warehouse == '' :
+        response = JsonResponse({'error': "Seleccionar un deposito para continuar"})
+        response.status_code = 403
+        return response
     
-    
-    
-    #product = Product.objects.filter(name=product_name)
+      #product = Product.objects.filter(name=product_name)
     quantity = product[0].quantity
     if quantity == 0:
         response =  JsonResponse({'error': 'El producto {} no tiene Stock Disponible '.format(product[0].name)})
         response.status_code = 403
         return response
+
+    
+    if WarehousesProduct.objects.filter(product=product_obj, name=warehouse).exists() != True :
+        print('da error en la vista')
+        response =  JsonResponse({'error': 'El Producto ingresado no se encuentra en el Deposito {}'.format(warehouse)})
+        response.status_code = 403
+        return response
+
+  
 
     if quantity_input:
         product_obj = Product.objects.get(product_id=productId)
@@ -236,7 +250,7 @@ def getProductWarehouse(request): #, productId, warehouse):
         product_name = product_warehouse.product.name
         stock_warehouse_quantity = product_warehouse.quantity
 
-        if stock_warehouse_quantity < int(quantity_input):
+        if int(stock_warehouse_quantity) < int(quantity_input):
             print('product_name is {}'.format(product_name))
             print('cantidad en deposito {}'.format(stock_warehouse_quantity))
             print('cantidad ingresada {}'.format(quantity_input))
@@ -244,6 +258,10 @@ def getProductWarehouse(request): #, productId, warehouse):
             response =  JsonResponse({'error': 'La cantidad ingresada del producto {} es mayor a la cantidad en stock en el deposito {} '.format(product_name, warehouse)})
             response.status_code = 403
             return response
+        
+        if (quantity - int(quantity_input)) < stockSecurity:
+            return JsonResponse({'message': 'La cantidad ingresada de {} deja al producto {} por debajo de su stock de Seguridad.'.format(quantity_input,product_name)})
+
 
     
         print('quantity input is', quantity_input)
@@ -252,7 +270,7 @@ def getProductWarehouse(request): #, productId, warehouse):
         product_name = product[0].name
         
         quantityOffer = product[0].quantityOffer
-        stockSecurity = product[0].stockSecurity
+        
 
         if quantity - quantityOffer < stockSecurity * 1.1:
             product = Product.objects.filter(product_id=productId).values_list('barcode', 'internalCode', 'name',  'category','supplier','quantity', 'hasOffer' )
@@ -275,13 +293,6 @@ def getProductWarehouse(request): #, productId, warehouse):
             #response.status_code = 403
             #return response
 
-    
-
-    if warehouse == None or warehouse == '' :
-        response = JsonResponse({'error': "Seleccionar un deposito para continuar"})
-        response.status_code = 403
-        return response
-    
     try:
         
         product = Product.objects.get(product_id=productId) #, warehouse= Warehouses.objects.get(name=warehouse))
@@ -304,7 +315,7 @@ def getProductWarehouse(request): #, productId, warehouse):
         response =  JsonResponse({'error': 'El Producto ingresado no se encuentra en el Deposito {}'.format(warehouse)})
         response.status_code = 403
         return response
-
+    
     print('product has offer', product[0].hasOffer)
    
    
@@ -1013,9 +1024,10 @@ class FilteredListView(ListView):
         warehouse = self.request.GET.get('name',None)
         category = self.request.GET.get('category',None)
         supplier = self.request.GET.get('supplier',None)
+        location = self.request.GET.get('location',None)
         
              
-        if None not in (warehouse,category,supplier):
+        if None not in (warehouse,category,supplier,location):
             self.filterset = self.filterset_class(self.request.GET, queryset=queryset_warehouse)
         else:
            self.filterset = self.filterset_class(self.request.GET, queryset=queryset_stock)
@@ -1034,10 +1046,11 @@ class FilteredListView(ListView):
         warehouse = self.request.GET.get('name',None)
         category = self.request.GET.get('category',None)
         supplier = self.request.GET.get('supplier',None)
+        location = self.request.GET.get('location',None)
 
         print('warehouse isssss', warehouse)
       
-        if None not in (warehouse,category,supplier):
+        if None not in (warehouse,category,supplier, location):
             self.filterset = self.filterset_class(self.request.GET, queryset=queryset_warehouse)
         else:
            self.filterset = self.filterset_class(self.request.GET, queryset=queryset_stock)
@@ -1065,6 +1078,7 @@ class StockListView(LoginRequiredMixin, FilteredListView, generic.ListView):
         print('warehouse selected is', warehouse)
         supplier = self.request.GET.get('supplier',None)
         category = self.request.GET.get('category', None)
+        location = self.request.GET.get('location', None)
         print('supplier selected is', supplier)
 
        # queryset = super().get_queryset()
@@ -1075,9 +1089,13 @@ class StockListView(LoginRequiredMixin, FilteredListView, generic.ListView):
            # filter = WarehousesProduct.objects.select_related('product').filter(name__in= warehouseList, product__category__in= categoryList, product__supplier__in=supplierList )
 
         else:
-            categoryList = Product.objects.all().values('category').distinct()
+            categoryList = Product.objects.all().values('category').distinct().order_by('category')
            # filter = WarehousesProduct.objects.select_related('product').filter(name__in= warehouseList, product__category__in= categoryList, product__supplier__in=supplierList )
 
+        if location:
+            locationList = [location]
+        else:
+            locationList = WarehousesProduct.objects.values_list('location',flat=True).distinct().order_by('location')
 
         if supplier:
             supplier_filter = True
@@ -1085,7 +1103,7 @@ class StockListView(LoginRequiredMixin, FilteredListView, generic.ListView):
            # filter = WarehousesProduct.objects.select_related('product').filter(name__in= warehouseList, product__category__in= categoryList, product__supplier__in=supplierList )
 
         else:
-            supplierList = Product.objects.all().values('supplier').distinct()
+            supplierList = Product.objects.all().values('supplier').distinct().order_by('supplier')
         #    filter = WarehousesProduct.objects.select_related('product').filter(name__in= warehouseList, product__category__in= categoryList, product__supplier__in=supplierList )
 
 
@@ -1095,12 +1113,12 @@ class StockListView(LoginRequiredMixin, FilteredListView, generic.ListView):
 
            
         else:
-            warehouseList = WarehousesProduct.objects.values_list('name',flat=True).distinct()
+            warehouseList = WarehousesProduct.objects.values_list('name',flat=True).distinct().order_by('name')
         #    filter = WarehousesProduct.objects.select_related('product').filter(name__in= warehouseList, product__category__in= categoryList, product__supplier__in=supplierList )
 
         print('warehouse , category and supplier are {} {} {}'.format(warehouse,category,supplier))
-        if None not in (warehouse,category,supplier) :
-            filter = WarehousesProduct.objects.select_related('product').filter(name__in= warehouseList, product__category__in= categoryList, product__supplier__in=supplierList ).order_by('product__internalCode')
+        if None not in (warehouse,category,supplier, location) :
+            filter = WarehousesProduct.objects.select_related('product').filter(name__in= warehouseList, location__in= locationList, product__category__in= categoryList, product__supplier__in=supplierList ).order_by('product__internalCode')
 
             
         else:
@@ -1124,6 +1142,7 @@ class StockListView(LoginRequiredMixin, FilteredListView, generic.ListView):
         print('warehouse selected is', warehouse)
         supplier = self.request.GET.get('supplier',None)
         category = self.request.GET.get('category', None)
+        location = self.request.GET.get('location', None)
         print('supplier selected is', supplier)
 
        # queryset = super().get_queryset()
@@ -1132,23 +1151,30 @@ class StockListView(LoginRequiredMixin, FilteredListView, generic.ListView):
             category_filter = True
             categoryList = [category]
         else:
-            categoryList = Product.objects.all().values('category').distinct()
+            categoryList = Product.objects.all().values('category').distinct().order_by('category')
+
+        
+        if location:
+            locationList = [location]
+        else:
+            locationList = WarehousesProduct.objects.values_list('location',flat=True).distinct().order_by('location')
+
 
         if supplier:
             supplier_filter = True
             supplierList = [supplier]
         
         else:
-            supplierList = Product.objects.all().values('supplier').distinct()
+            supplierList = Product.objects.all().values('supplier').distinct().order_by('supplier')
 
         if warehouse:
             warehouseList = [warehouse]
            
         else:
-            warehouseList = WarehousesProduct.objects.values_list('name',flat=True).distinct()
+            warehouseList = WarehousesProduct.objects.values_list('name',flat=True).distinct().order_by('name')
           
            
-        if None not in (warehouse,category,supplier) :
+        if None not in (warehouse,category,supplier, location) :
             filter = WarehousesProduct.objects.select_related('product').filter(name__in= warehouseList, product__category__in= categoryList, product__supplier__in=supplierList ).order_by('product__internalCode')
 
            
