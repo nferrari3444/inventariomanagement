@@ -562,68 +562,31 @@ $("#remove-product").click(function(event) {
 
  function openLoader(event) {
 
-//     var cantidad = $(`#cantidad_${form_count}`).val()
-// var product = $(`#productname_${form_count}`).val()
-// var warehouse = $("#warehouse option:selected" ).val()
-
-    
-    // event.preventDefault()
-// var dataLS = JSON.parse(localStorage.getItem('products'))
-
-// var productId = dataLS[product]
-
-
-//     request_url = "{% url 'productwarehouse' %}" 
-// //request_url = '/product/' + productId + '/' + warehouse;
-//  var ajaxreq =  $.ajax({
-//         url: request_url,
-//         type: "GET",
-//         data: {
-//         'productId' : productId,
-//         'warehouse' : warehouse ,
-//         'cantidad' : cantidad, 
-//             },
-//         success: function(data){
-//             console.log('only data',data)
-//             $("#forms").submit(function (e) {
-//               return true
-//     })
-           
-//         },
-
-//         error: function(data){
-//    alert(data.responseJSON.error);
-//     $(`#cantidad_${form_count}`).val("")
-//     $(`#cantidad_${form_count }`).val("")
-//             console.log('form error')
-//      $("#forms").submit(function (e) {
-//         e.preventDefault()
-//          return false
-//      })
-    
-//     //return false
-    
-//    }
-
-// })
-
-
-// console.log('ajaxcheck status is ', ajaxreq.status)
-// if (ajaxreq.status !== 200){
-
-//     $("#forms").submit(function (e) {
-//         return false
-//     })
-
-    
-
-// } 
-
 document.getElementById("loader").style.display = "block";
 
 }
 
-
+$.ajax({
+                url: `/products/`,
+            type: 'get', 
+            success: function(data) {
+                // console.log(data.products)
+    
+                // console.log('llega aca')
+    
+                // console.log(data.products)
+    
+                localStorage.setItem('products', JSON.stringify(data.products))
+                localStorage.setItem('codes', JSON.stringify(data.codes))
+                localStorage.setItem('warehouses', JSON.stringify(data.warehouses))
+                localStorage.setItem('categories', JSON.stringify(data.categories))
+                localStorage.setItem('supplier', JSON.stringify(data.supplier))
+              //  for (let i = 0 ; i< data.products.length ; i++) {
+                   
+              //  $("#productname").append(`<option value=${data.products[i][0]}>`+ data.products[i][1] +'</option>');
+    
+            }
+        })
  
 
 </script>

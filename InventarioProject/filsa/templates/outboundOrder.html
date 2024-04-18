@@ -553,6 +553,10 @@ console.log('form count previous to product code autocomplete', form_count)
                 // console.log(data.products)
     
                 localStorage.setItem('products', JSON.stringify(data.products))
+                localStorage.setItem('codes', JSON.stringify(data.codes))
+                localStorage.setItem('warehouses', JSON.stringify(data.warehouses))
+                localStorage.setItem('categories', JSON.stringify(data.categories))
+                localStorage.setItem('supplier', JSON.stringify(data.supplier))
               //  for (let i = 0 ; i< data.products.length ; i++) {
                    
               //  $("#productname").append(`<option value=${data.products[i][0]}>`+ data.products[i][1] +'</option>');
