@@ -10,19 +10,6 @@ class CustomUser( AbstractBaseUser , PermissionsMixin ):
         verbose_name = 'Usuarios'
         verbose_name_plural = 'Usuarios'
 
-    # ROLES = [('Operator', 'Operator'),
-    #          ('Logistic','Logistic'),
-    #          ('Supervisor','Supervisor')]
-    
-    # DEPARTMENT = [('Ventas','Ventas'),
-                
-    #             ('Dirección', 'Dirección'),
-    #             ('Administración', 'Administración'),
-    #             ('Taller', 'Taller'),
-    #             ('Logística','Logística')
-    #             ]
-  
-    
     username = models.CharField(max_length=40, verbose_name="Usuario")
     password = models.CharField(max_length=100)
     email = models.EmailField(max_length=40, blank=False, unique=True, 
@@ -37,11 +24,6 @@ class CustomUser( AbstractBaseUser , PermissionsMixin ):
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
-
-    # @property
-    # def is_active(self):
-    #     return self.active
-    
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
@@ -93,13 +75,6 @@ class Product(models.Model):
     def __str__(self):
         return self.name
 
-
-    # def get_total_stock(self):
-    #     stock = 0
-    #     for product in Product.objects.all():
-    #         stock += product.quantity
-    #     return stock
-    
 # Create your models here.
 class WarehousesProduct(models.Model):
     
@@ -159,7 +134,9 @@ class Tasks(models.Model):
     #warehouse = models.ForeignKey(Warehouses, on_delete= models.CASCADE, blank=True, null=True)
     warehouseProduct = models.ForeignKey(WarehousesProduct, on_delete= models.CASCADE, blank=True, null=True)
     actionType = models.CharField(max_length=20,  default='Inbound')
-    observations = models.CharField(max_length=500, null=True, blank= True)
+    observationsSolicitud = models.CharField(max_length=500, null=True, blank= True)
+    observationsConfirma = models.CharField(max_length=500, null=True, blank= True)
+
    # date = models.DateField(verbose_name=u"Fecha")
 #deliveryDate = models.DateField(verbose_name=u"Fecha", default = '1970-01-01')
 #actionType = models.CharField(max_length=20,  default='Inbound')

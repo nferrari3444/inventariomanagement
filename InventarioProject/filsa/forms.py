@@ -40,9 +40,11 @@ class TransferForm(forms.ModelForm):
                                          'style': 'max-width: auto;',
                                      }), empty_label='-------------', to_field_name='name')
 
+    observationsSolicitud = forms.CharField(required=False, widget=forms.Textarea(attrs={'rows':4, 'class': "block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" , 'placeholder': "Observaciones..."}))
+
     class Meta:
         model = Tasks
-        fields = ['issuer','receptor','department','date']
+        fields = ['issuer','receptor','department','date','observationsSolicitud']
         widgets = {
             'date': forms.DateInput(attrs={'type': 'date'})
         }
@@ -62,7 +64,8 @@ class TransferForm(forms.ModelForm):
         self.fields['date'].widget.attrs.update({'class':'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500'})
         self.fields['issuer'].initial = user
         self.fields['issuer'].widget.attrs.update({'class':'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500', 'disabled': True})
-        
+       
+
         for index in range(1, int(extra_fields) + 1 ):
             print('index in line 73 is {}'.format(index))
             self.fields['product_{index}'.format(index=index)] =   forms.CharField()
@@ -86,18 +89,7 @@ class TransferForm(forms.ModelForm):
         
 
             
-            # for key, value in args[0].items():
-            #     print('key and value in args items are')
-            #     print(key, value)
-            # print('kwargs in tranfer from invalid', **kwargs)
-            # index = 1
-            # print('form invalid en form.py')
-            # self.fields['product_{index}'.format(index=index)] =   forms.CharField()
-            
-            #self.fields['barcode_{index}'.format(index=index)] = forms.CharField()
-            # self.fields['internalCode_{index}'.format(index=index)] = forms.CharField()
-            # self.fields['cantidad_{index}'.format(index=index)] = forms.IntegerField()
-
+        
     def clean(self):
         extra_fields = self.cleaned_data['extra_field_count']
         warehouse = self.cleaned_data['warehouse']
@@ -121,14 +113,14 @@ class TransferForm(forms.ModelForm):
             quantity_warehouse = productStockInWarehouse[0].quantity
             quantity = self.cleaned_data['cantidad_{index}'.format(index=index)]
             if quantity_warehouse - quantity < 0:
-                raise ValidationError("La cantidad ingresada por {} del producto {} , es mayor a la cantidad en stock de {} en el deposito {}".format(quantity, product , productStockInWarehouse, warehouse))
+                raise ValidationError("La cantidad ingresada por {} del producto {} , es mayor a la cantidad en stock de {} en el deposito {}".format(quantity, product , quantity_warehouse, warehouse))
 
             #else:
             #    raise ValidationError('El Producto {} no se encuentra en el deposito {}'.format(product,warehouse))
 
 class TransferReceptionForm(forms.ModelForm):
     extra_field_count = forms.CharField(widget=forms.HiddenInput())
-    observations = forms.CharField(widget=forms.Textarea(attrs={"rows":"5", "class" : "block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" ,"placeholder":"Your description here"}))
+    observationsConfirma = forms.CharField(required=False, widget=forms.Textarea(attrs={"rows":"5", "class" : "block p-2.5 w-full mt-2 text-sm text-gray-900 bg-white-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" ,"placeholder":"Your description here"}))
     
     
     warehouse = forms.ModelChoiceField(queryset=WarehousesProduct.objects.values_list('name', flat=True ).exclude(name='No Stock').distinct()
@@ -141,12 +133,13 @@ class TransferReceptionForm(forms.ModelForm):
                                      }), empty_label='-------------', to_field_name='name')
 
     warehouseSalida = forms.CharField()
+    observationsSolicitud = forms.CharField(required=False)
 
     class Meta:
         model = Tasks
         # fields = ['product','department','issuer', 'motivoEgreso', 'cantidad', 'date',
         #           'receptor', 'cantidadEntregada', 'deliveryDate', 'warehouse']
-        fields = ['department','issuer', 'date', 'receptor', 'observations'] #, 'task']
+        fields = ['department','issuer', 'date', 'receptor', 'observationsConfirma'] #, 'task']
    
     def __init__(self, *args, **kwargs):
         
@@ -175,6 +168,7 @@ class TransferReceptionForm(forms.ModelForm):
         self.fields['date'].widget.attrs.update({'class':'bg-gray-100 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 flex w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500', 'disabled':True }) #    .widget.value_from_datadict = self.instance.issuer
         
         self.fields['warehouseSalida'].widget.attrs.update({'class':'bg-gray-100 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 flex w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500', 'disabled':True })
+        self.fields['observationsSolicitud'].widget.attrs.update({'class': "block p-2.5 w-full text-sm text-gray-900 bg-gray-100 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" , 'disabled': True })
         
         self.fields['department'].widget.value_from_datadict = lambda *args: self.instance.department
         self.fields['date'].widget.value_from_datadict = lambda *args: self.instance.date
@@ -182,6 +176,9 @@ class TransferReceptionForm(forms.ModelForm):
         #self.fields['warehouseSalida'].initial = self.instance.warehouseProduct.name
         self.fields['warehouseSalida'].widget.value_from_datadict = lambda *args: self.instance.warehouseProduct.name
         self.fields['warehouseSalida'].initial =  self.instance.warehouseProduct.name
+        self.fields['observationsSolicitud'].widget.value_from_datadict = lambda *args: self.instance.observationsSolicitud
+
+        self.fields['observationsSolicitud'].initial = lambda *args: self.instance.observationsSolicitud
         self.fields['receptor'].widget.value_from_datadict = lambda *args: self.instance.receptor
         # self.fields['issuer'].widget.value_from_datadict = lambda *args: self.instance.issuer
         #self.fields['issuer'].initial = user
@@ -223,11 +220,11 @@ class InboundForm(forms.ModelForm):
                                          'style': 'max-width: auto;',
                                      }), empty_label='-------------', to_field_name='name')
 
+    observationsSolicitud = forms.CharField(required=False, widget=forms.Textarea(attrs={'rows':4, 'class': "block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" , 'placeholder': "Observaciones..."}))
 
-    
     class Meta:
         model = Tasks
-        fields = ['motivoIngreso','issuer', 'receptor', 'department' , 'date']
+        fields = ['motivoIngreso','issuer', 'receptor', 'department' , 'date', 'observationsSolicitud']
         widgets = {
             'date': forms.DateInput(attrs={'type': 'date'})
         }
@@ -256,7 +253,7 @@ class InboundForm(forms.ModelForm):
    
 class InboundReceptionForm(forms.ModelForm):
     extra_field_count = forms.CharField(widget=forms.HiddenInput())
-    observations = forms.CharField(widget=forms.Textarea(attrs={"rows":"5", "class" : "block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" ,"placeholder":"Your description here"}))
+    observationsConfirma = forms.CharField(required=False, widget=forms.Textarea(attrs={"rows":"5", "class" : "block p-2.5 w-full text-sm text-gray-900 bg-white-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" ,"placeholder":"Your description here"}))
 
     warehouse = forms.ModelChoiceField(queryset=WarehousesProduct.objects.values_list('name', flat=True).distinct()
                                       ,widget=forms.Select(attrs={
@@ -265,12 +262,14 @@ class InboundReceptionForm(forms.ModelForm):
                                          'style': 'max-width: auto;',
                                      }), empty_label='-------------', to_field_name='name')
 
+    observationsSolicitud = forms.CharField(required=False)
+
     class Meta:
         model = Tasks
         # fields = ['product','department','issuer', 'motivoEgreso', 'cantidad', 'date',
         #           'receptor', 'cantidadEntregada', 'deliveryDate', 'warehouse']
 #       fields = ['department','issuer', 'motivoIngreso', 'date', 'receptor', 'warehouse','observations'] #, 'task']
-        fields = ['department','issuer', 'motivoIngreso', 'date', 'receptor','observations'] #, 'task']
+        fields = ['department','issuer', 'motivoIngreso', 'date', 'receptor','observationsConfirma'] #, 'task']
     
     def __init__(self, *args, **kwargs):
         
@@ -297,7 +296,9 @@ class InboundReceptionForm(forms.ModelForm):
         self.fields['warehouse'].widget.attrs.update({'class':'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 flex w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500', 'disabled':True })      #.widget.value_from_datadict = self.instance.warehouse
         self.fields['issuer'].widget.attrs.update({'class':'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 flex w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500', 'disabled':True }) #    .widget.value_from_datadict = self.instance.issuer
         self.fields['date'].widget.attrs.update({'class':'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 flex w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500', 'disabled':True }) #    .widget.value_from_datadict = self.instance.issuer
-        
+        self.fields['observationsSolicitud'].widget.attrs.update({'class': "block p-2.5 w-full text-sm text-gray-900 bg-gray-100 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" , 'disabled': True })
+
+
         self.fields['department'].widget.value_from_datadict = lambda *args: self.instance.department
         self.fields['motivoIngreso'].widget.value_from_datadict = lambda *args: self.instance.motivoIngreso
         self.fields['date'].widget.value_from_datadict = lambda *args: self.instance.date
@@ -305,6 +306,7 @@ class InboundReceptionForm(forms.ModelForm):
         self.fields['warehouse'].initial =  self.instance.warehouseProduct.name
         self.fields['receptor'].widget.value_from_datadict = lambda *args: self.instance.receptor
         self.fields['issuer'].widget.value_from_datadict = lambda *args: self.instance.issuer
+        self.fields['observationsSolicitud'].initial = lambda *args: self.instance.observationsSolicitud
 
         for i , product in enumerate(products):
             print('product in form loop is {} for i {}'.format(product.warehouseProduct.product.name,i))
@@ -357,6 +359,8 @@ class OutboundOrderForm(forms.ModelForm):
                                           'style': 'max-width: auto;',
                                       }), empty_label='-------------', to_field_name=  'username')
     
+    observationsSolicitud = forms.CharField(required=False, widget=forms.Textarea(attrs={'rows':4, 'class': "block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" , 'placeholder': "Observaciones..."}))
+
     class Meta:
         model = Tasks
         # fields = ['product','department','issuer', 'motivoEgreso', 'cantidad', 'date']
@@ -423,7 +427,7 @@ class OutboundOrderForm(forms.ModelForm):
             quantity = self.cleaned_data['cantidad_{index}'.format(index=index)]
             quantity_warehouse = productStockInWarehouse[0].quantity
             if quantity_warehouse - quantity < 0:
-                raise ValidationError("La cantidad ingresada por {} del producto {} , es mayor a la cantidad en stock de {} en el deposito {}".format(quantity, product , productStockInWarehouse, warehouse))
+                raise ValidationError("La cantidad ingresada por {} del producto {} , es mayor a la cantidad en stock de {} en el deposito {}".format(quantity, product , quantity_warehouse, warehouse))
 
             #if  quantity > product_stock:
             #    raise ValidationError("La cantidad ingresada por {} del producto {} supera la cantidad en stock en el deposito {}".format(quantity, product , warehouse))
@@ -439,16 +443,12 @@ class OutboundOrderForm(forms.ModelForm):
 class OutboundDeliveryForm(forms.ModelForm):
     extra_field_count = forms.CharField(widget=forms.HiddenInput())
   
-    observations = forms.CharField(widget=forms.Textarea(attrs={"rows":"5", "class" : "block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" ,"placeholder":"Your description here"}))
+    observationsConfirma = forms.CharField(required=False, widget=forms.Textarea(attrs={"rows":"5", "class" : "block p-2.5 w-full text-sm text-gray-900 bg-white-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" ,"placeholder":"Your description here"}))
     
     warehouse = forms.CharField()  
-    # forms.ModelChoiceField(queryset=WarehousesProduct.objects.values_list('name', flat=True).distinct()
-    #                                   ,widget=forms.Select(attrs={
-                                                 
-    #                                      'class': "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500",
-    #                                      'style': 'max-width: auto;',
-    #                                  }), empty_label='-------------', to_field_name='name')
     
+    observationsSolicitud = forms.CharField(required=False)
+
     widgets = {
             'deliveryDate': forms.widgets.DateInput(attrs={'type': 'date'}),
          #   'cantidad': forms.Input(attrs={'class':"bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"})
@@ -459,7 +459,7 @@ class OutboundDeliveryForm(forms.ModelForm):
         # fields = ['product','department','issuer', 'motivoEgreso', 'cantidad', 'date',
         #           'receptor', 'cantidadEntregada', 'deliveryDate', 'warehouse']
 #        fields = ['department','issuer', 'motivoEgreso', 'date', 'receptor', 'warehouse', 'observations']
-        fields = ['department','issuer', 'motivoEgreso', 'date', 'receptor', 'observations']
+        fields = ['department','issuer', 'motivoEgreso', 'date', 'receptor', 'observationsConfirma']
 
 
 
@@ -492,7 +492,9 @@ class OutboundDeliveryForm(forms.ModelForm):
                  #.widget.value_from_datadict = self.instance.warehouse
             self.fields['issuer'].widget.attrs.update({'class':'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 flex w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500', 'disabled':True }) #    .widget.value_from_datadict = self.instance.issuer
             self.fields['date'].widget.attrs.update({'class':'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 flex w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500', 'disabled':True }) #    .widget.value_from_datadict = self.instance.issuer
-            
+            self.fields['observationsSolicitud'].widget.attrs.update({'class': "block p-2.5 w-full text-sm text-gray-900 bg-gray-100 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" , 'disabled': True })
+
+
             self.fields['department'].widget.value_from_datadict = lambda *args: self.instance.department
             self.fields['motivoEgreso'].widget.value_from_datadict = lambda *args: self.instance.motivoEgreso
             self.fields['date'].widget.value_from_datadict = lambda *args: self.instance.date
@@ -501,6 +503,7 @@ class OutboundDeliveryForm(forms.ModelForm):
             self.fields['warehouse'].widget.attrs.update({'class':'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 flex w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500', 'disabled':True })
             self.fields['receptor'].widget.value_from_datadict = lambda *args: self.instance.receptor
             self.fields['issuer'].widget.value_from_datadict = lambda *args: self.instance.issuer
+            self.fields['observationsSolicitud'].initial = lambda *args: self.instance.observationsSolicitud
 
             for i , product in enumerate(products):
           

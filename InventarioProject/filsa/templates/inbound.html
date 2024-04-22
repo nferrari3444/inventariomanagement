@@ -82,7 +82,7 @@
                 
             <div class="max-w-4xl mt-10">
             <table id="productTable" class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                <thead class="text-xs text-gray-700 uppercase bg-green-100 dark:bg-gray-700 dark:text-gray-400">
+                <thead class="text-xs text-black uppercase bg-green-500 dark:bg-gray-700 dark:text-gray-400">
                     <tr>
                         <th scope="col-span-2" class="px-6 py-3">
                             Producto
@@ -127,11 +127,11 @@
             </table>
             <td class="px-6 py-4">
                 <button  id="add-product" class="inline-flex items-center px-3 py-1.5 mt-2 sm:mt-6 text-sm font-medium text-center text-white bg-primary-700 rounded-lg focus:ring-4 focus:ring-primary-200 dark:focus:ring-primary-900 hover:bg-primary-800">
-                    Add New Product
+                    Nuevo Producto
                  </button>
 
                  <button  id="remove-product" class="inline-flex items-center px-3 py-1.5 mt-2 sm:mt-6 text-sm font-medium text-center text-white bg-primary-700 rounded-lg focus:ring-4 focus:ring-primary-200 dark:focus:ring-primary-900 hover:bg-primary-800">
-                    Remove Product
+                    Eliminar Producto
                  </button>
 
             </td>
@@ -146,9 +146,11 @@
         </div>
 
         <div class="sm:col-span-2">
-            <label for="description" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Observaciones</label>
-            <textarea id="description" rows="4" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Descripcion ..."></textarea>
-        
+            <label for="description" class="block mb-2 mt-4 text-sm font-medium text-gray-900 dark:text-white">Observaciones</label>
+            <!-- <textarea id="description" rows="4" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Descripcion ..."></textarea>
+         -->
+            {{form.observationsSolicitud}}
+
         </div>
             
             
@@ -197,6 +199,9 @@ newCell.innerHTML=`<tr><td><input type="text" class="bg-gray-50 border border-gr
 newCell = newRow.insertCell();
 newCell.innerHTML= `<tr><td><input type = "number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" type='text' id="cantidad_${form_count}" name="cantidad_${form_count}" placeholder="cantidad" required></td></tr>`; 
 
+
+$('#productTable tbody').append(newRow);
+
 $(`#internalcode_${form_count}`).autocomplete({
         source: '{% url "autocomplete-name" %}',
     
@@ -238,7 +243,7 @@ $(`#internalcode_${form_count}`).autocomplete({
     }})
 
 
-    $(`#productname_${form_count}`).autocomplete({
+$(`#productname_${form_count}`).autocomplete({
         source: '{% url "autocomplete-name" %}',
         minLength:1,
         select: function(event, ui) {

@@ -355,6 +355,7 @@ def transferView(request):
             motivoIngreso = 'Transferencia'
             # motivoIngreso = form.cleaned_data['motivoIngreso']
             actionType = 'Transferencia'
+            observaciones = form.cleaned_data['observationsSolicitud']
        
             warehourse_inst = WarehousesProduct.objects.filter(name=warehouse_out).first()
             print('number of Products in form is {}'.format(numberOfProducts))
@@ -367,7 +368,7 @@ def transferView(request):
             print('Product that not exist in database are:')    
             #  warehouse= warehouse_out,
             task = Tasks.objects.create(date= date, receptor= receptor, warehouseProduct= warehourse_inst, issuer=solicitante,
-                                        motivoIngreso=motivoIngreso,  actionType=actionType, department=department)
+                                        motivoIngreso=motivoIngreso,  actionType=actionType, department=department, observationsSolicitud = observaciones)
             
             for i in range(1,int(numberOfProducts) + 1):
 
@@ -496,14 +497,14 @@ def transferReceptionView(request, requested_id):
             warehouse = form.cleaned_data['warehouse']
             print('warehouse in form is', warehouse)
             actionType = 'Confirma Transferencia'
-            observations = form.cleaned_data['observations']
+            observations = form.cleaned_data['observationsConfirma']
             deliveryDate = datetime.now().date()
             datalist = []
             # task = Tasks.objects.create(date= date, receptor= receptor, warehouse= warehouse, issuer= issuer,
             #                             motivoIngreso=motivoIngreso,  actionType=actionType, department=department)
             
             taskToUpdate = Tasks.objects.filter(task_id=requested_id)
-            taskToUpdate.update(status='Confirmed', observations=observations, deliveryDate=deliveryDate)
+            taskToUpdate.update(status='Confirmed', observationsConfirma=observations, deliveryDate=deliveryDate)
             
             taskupdated = Tasks.objects.filter(task_id = requested_id).values_list('receptor', 'issuer','status', 'motivoIngreso','motivoEgreso','warehouseProduct__name','actionType')
             print('taskupdated in view is ', taskupdated)
@@ -550,23 +551,6 @@ def transferReceptionView(request, requested_id):
                     
                     newProductInDeposit= WarehousesProduct.objects.create(product=productdb, name=warehouse, quantity = quantity, deltaQuantity=  diffQuantity)
 
-                    # productdb = Product.objects.filter(name= product.product.name).first()
-                    # barcode = productdb.barcode
-                    # internalCode = productdb.internalCode
-                    # category =  productdb.category
-                    # location = productdb.location
-                    # supplier = productdb.supplier
-                    # warehouse = Warehouses.objects.get(name=warehouse) 
-                    # deltaQuantity = 0
-                    # stockSecurity =  np.ceil(quantity * 0.3) #   productdb.stockSecurity
-                    # inTransit = False
-                    # newProductInDeposit = Product.objects.create(name=product.product.name, warehouse=warehouse,
-                    #             barcode= barcode, quantity = quantity, internalCode= internalCode, category= category,
-                    #             location = location, supplier = supplier , deltaQuantity= deltaQuantity,
-                    #             stockSecurity = stockSecurity, inTransit=inTransit)
-                       
-                    # newProduct.save()
-
                     newProductMovement = StockMovements(warehouseProduct = newProductInDeposit, 
                              actionType = actionType,
                                          cantidad= quantity, cantidadNeta=netQuantity, task = task )
@@ -593,6 +577,17 @@ def transferReceptionView(request, requested_id):
 
             StockMovements.objects.bulk_create(datalist)     
 
+            send_mail(
+                subject='Confirmacion de Transferencia de Productos',
+                message= 'Se confirma la transferencia de {} productos al depósito {}. La tarea fue confirmada por {}'.format(numberOfProducts,warehouse, receptor),
+                from_email = settings.EMAIL_HOST_USER,
+                recipient_list=[issuer],
+                fail_silently=False,
+                auth_user=None,
+                auth_password=None,
+                connection=None,
+                html_message=None
+            )
 
             return redirect('/tasks/')
             
@@ -641,13 +636,14 @@ def inboundView(request):
         #     deltaDiff =  cantidadNeta - cantidad
             motivoIngreso = form.cleaned_data['motivoIngreso']
             actionType = 'Nuevo Ingreso'
+            observaciones = form.cleaned_data['observationsSolicitud']
           #  product = form.cleaned_data['product_23']
          #   print('product_23 is {}'.format(product))
 
             print('number of Products in form is {}'.format(numberOfProducts))
             datalist = []
             task = Tasks.objects.create(date= date, receptor= receptor, warehouseProduct= warehourse_inst, issuer=solicitante,
-                                        motivoIngreso=motivoIngreso,  actionType=actionType, department=department)
+                                        motivoIngreso=motivoIngreso,  actionType=actionType, department=department, observationsSolicitud= observaciones)
             
             
             for i in range(1,int(numberOfProducts) + 1):
@@ -774,7 +770,7 @@ def inboundReceptionView(request, requested_id):
             warehouse = form.cleaned_data['warehouse']
             actionType = 'Confirma Ingreso'
             motivoIngreso = form.cleaned_data['motivoIngreso']
-            observations = form.cleaned_data['observations']
+            observations = form.cleaned_data['observationsConfirma']
             deliveryDate = datetime.now().date()
             
             # StockMovements.objects.create(product = product, date=date, department=department,
@@ -786,7 +782,7 @@ def inboundReceptionView(request, requested_id):
             #                             motivoIngreso=motivoIngreso,  actionType=actionType, department=department)
             
             taskToUpdate = Tasks.objects.filter(task_id=requested_id)
-            taskToUpdate.update(status='Confirmed', observations=observations, deliveryDate=deliveryDate)
+            taskToUpdate.update(status='Confirmed', observationsConfirma=observations, deliveryDate=deliveryDate)
             
             taskupdated = Tasks.objects.filter(task_id = requested_id).values_list('receptor', 'issuer','status', 'motivoIngreso','motivoEgreso','warehouseProduct__name','actionType')
             print('taskupdated in view is ', taskupdated)
@@ -841,7 +837,17 @@ def inboundReceptionView(request, requested_id):
 
             StockMovements.objects.bulk_create(datalist)     
 
-
+            send_mail(
+                subject='Confirmacion de Ingreso de Productos',
+                message= 'Se confirma el Ingreso de {} productos al depósito {} por motivo de {}. La tarea fue confirmada por {}'.format(numberOfProducts,warehouse,motivoIngreso, receptor),
+                from_email = settings.EMAIL_HOST_USER,
+                recipient_list=[issuer],
+                fail_silently=False,
+                auth_user=None,
+                auth_password=None,
+                connection=None,
+                html_message=None
+            )
             return redirect('/tasks/')
             
     else:
@@ -911,6 +917,7 @@ def outboundOrderView(request):
             #     cantidadNeta = form.cleaned_data['cantidadNeta']
             #     deltaDiff =  cantidadNeta - cantidad
             motivoEgreso = form.cleaned_data['motivoEgreso']
+            observaciones = form.cleaned_data['observationsSolicitud']
             actionType = 'Nuevo Egreso'
             #form.fields['issuer'] = request.user
             solicitante = request.user
@@ -920,7 +927,7 @@ def outboundOrderView(request):
             print('number of Products in form is {}'.format(numberOfProducts))
             datalist = []
             task = Tasks.objects.create(date= date, receptor= receptor, warehouseProduct= warehourse_inst, issuer=solicitante,
-                                        motivoEgreso=motivoEgreso,  actionType=actionType, department=department)
+                                        motivoEgreso=motivoEgreso,  actionType=actionType, department=department, observationsSolicitud= observaciones)
             
             print('form cleaned data', form.cleaned_data)
             for i in range(1,int(numberOfProducts) + 1 ):
@@ -937,11 +944,7 @@ def outboundOrderView(request):
                
                 print('product is:', product)
                 print('quantity is:', quantity)
-                # newProduct = StockMovements()
-                # newProduct.product = newproduct
-                # newProduct.actionType = actionType
-                # newProduct.cantidad = quantity
-                # newProduct.task = task
+                
                 newProduct = StockMovements(warehouseProduct = productWarehouse_db, 
                              actionType = actionType,
                                          cantidad= quantity, task = task )
@@ -1121,7 +1124,7 @@ class StockListView(LoginRequiredMixin, FilteredListView, generic.ListView):
 
         print('warehouse , category and supplier are {} {} {}'.format(warehouse,category,supplier))
         if None not in (warehouse,category,supplier, location) :
-            filter = WarehousesProduct.objects.select_related('product').filter(name__in= warehouseList, location__in= locationList, product__category__in= categoryList, product__supplier__in=supplierList ).order_by('product__internalCode')
+            filter = WarehousesProduct.objects.select_related('product').filter(name__in= warehouseList, location__in= locationList, product__category__in= categoryList, product__supplier__in=supplierList).order_by('product__internalCode')
 
             
         else:
@@ -1574,6 +1577,17 @@ def outboundDeliveryView(request, requested_id):
             print('form fields in view', form.fields)
             StockMovements.objects.bulk_create(datalist)     
 
+            send_mail(
+                subject='Confirmacion de Egreso de Materiales',
+                message= 'Se confirma el Egreso de {} productos en el depósito {} por motivo de {}. La tarea fue confirmada por {}'.format(numberOfProducts,warehouse,motivoEgreso, receptor),
+                from_email = settings.EMAIL_HOST_USER,
+                recipient_list=[issuer],
+                fail_silently=False,
+                auth_user=None,
+                auth_password=None,
+                connection=None,
+                html_message=None
+            )
 
             return redirect('/tasks/')
            
