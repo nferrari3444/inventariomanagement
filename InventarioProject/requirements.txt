@@ -6,11 +6,9 @@ Django
 django-annoying
 django-appconf
 django-compressor
-django-crontab
 django-import-export
 django-environ
 django-filter
-django-redis
 django-storages
 et-xmlfile
 gunicorn
@@ -22,7 +20,6 @@ pillow
 psycopg2-binary
 python-dateutil
 rcssmin
-redis
 rjsmin
 s3transfer
 six
