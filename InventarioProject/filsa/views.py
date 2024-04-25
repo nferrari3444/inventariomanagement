@@ -1512,7 +1512,7 @@ def outboundDeliveryView(request, requested_id):
             warehouse = form.cleaned_data['warehouse']
             actionType = 'Confirma Egreso'
             motivoEgreso = form.cleaned_data['motivoEgreso']
-            observations = form.cleaned_data['observations']
+            observations = form.cleaned_data['observationsConfirma']
             deliveryDate = datetime.now().date()
             # StockMovements.objects.create(product = product, date=date, department=department,
             #                             issuer=issuer, actionType = actionType, cantidad=cantidad,
