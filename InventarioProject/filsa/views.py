@@ -1,7 +1,6 @@
 from typing import Any
 from django.db.models.query import QuerySet
 from django.contrib import messages
-import numpy as np
 import pandas as pd
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.models import User

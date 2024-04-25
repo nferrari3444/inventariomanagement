@@ -62,10 +62,9 @@ class Product(models.Model):
     internalCode = models.BigIntegerField(verbose_name=u"Codigo Interno")
     quantity = models.FloatField()
     category = models.CharField(max_length=100, default='Insumos') #  choices=CATEGORIES,
-    #location = models.CharField(max_length=20, default='')
+    
     supplier = models.CharField(max_length=100, default='')
-    #warehouse = models.ForeignKey(Warehouses, on_delete=models.CASCADE, related_name='warehouse_name')
-    # deltaQuantity = models.FloatField()
+
     stockSecurity = models.IntegerField(default=0)
     
     hasOffer = models.ForeignKey(Cotization, on_delete=models.SET_DEFAULT, blank=True, null=True, default=None)
@@ -118,8 +117,7 @@ class Tasks(models.Model):
                        ('Mantenimiento', 'Mantenimiento') ]
     
     task_id = models.AutoField(primary_key=True)
-#    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-  #  department = models.CharField(max_length=30, choices = DEPARTMENT, default='Sales')
+
     receptor = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='receptor',  blank=True, null=True)
     issuer = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='issuer', blank=True, null=True)
     status = models.CharField(max_length=30, choices= STATUS, default='Pending')
@@ -136,11 +134,6 @@ class Tasks(models.Model):
     actionType = models.CharField(max_length=20,  default='Inbound')
     observationsSolicitud = models.CharField(max_length=500, null=True, blank= True)
     observationsConfirma = models.CharField(max_length=500, null=True, blank= True)
-
-   # date = models.DateField(verbose_name=u"Fecha")
-#deliveryDate = models.DateField(verbose_name=u"Fecha", default = '1970-01-01')
-#actionType = models.CharField(max_length=20,  default='Inbound')
-
 
 class StockMovements(models.Model):
     
