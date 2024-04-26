@@ -13,11 +13,7 @@
         "config": { "distDir": "staticfiles" }
     }],
 
-    "functions": {
-      "/static/**/*": {
-        "excludeFiles": "static/admin/img"
-      }
-    },
+    
 
     "routes": [
 
