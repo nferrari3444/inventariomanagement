@@ -13,13 +13,20 @@
         "config": { "distDir": "staticfiles" }
     }],
 
+    "functions": {
+      "pages/**/*": {
+        "excludeFiles": "static/admin/img"
+      }
+    },
+
     "routes": [
 
   
 
       {
         "src": "/(.*)",
-        "dest": "InventarioProject/wsgi.py"
+        "dest": "InventarioProject/wsgi.py",
+        
       }
   
     ],
