@@ -14,7 +14,7 @@
     }],
 
     "functions": {
-      "pages/**/*": {
+      "/static/**/*": {
         "excludeFiles": "static/admin/img"
       }
     },
