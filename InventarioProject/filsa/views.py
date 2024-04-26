@@ -1522,7 +1522,7 @@ def outboundDeliveryView(request, requested_id):
             #                             motivoIngreso=motivoIngreso,  actionType=actionType, department=department)
             
             taskToUpdate = Tasks.objects.filter(task_id=requested_id)
-            taskToUpdate.update(status='Confirmed', observations=observations, deliveryDate= deliveryDate)
+            taskToUpdate.update(status='Confirmed', observationsConfirma=observations, deliveryDate= deliveryDate)
             
             
             task = Tasks.objects.get(task_id=requested_id)
