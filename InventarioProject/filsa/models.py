@@ -150,10 +150,6 @@ class StockMovements(models.Model):
 #date = models.DateField(verbose_name=u"Fecha")
   #  deliveryDate = models.DateField(verbose_name=u"Fecha", default = '1970-01-01')
     actionType = models.CharField(max_length=25,  default='Inbound')
-    
-  #  receptor = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='receptor',  blank=True, null=True)
-    # department = models.CharField(max_length=30, choices = DEPARTMENT, default='Sales')
-  #  issuer = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='issuer', blank=True, null=True)
     cantidad = models.FloatField(default=0)
     cantidadNeta = models.FloatField(default=0)
     cantidadEntregada = models.FloatField(default=0)

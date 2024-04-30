@@ -73,7 +73,7 @@ class FaltanteFilter(SimpleListFilter):
             return queryset.filter(Q(actionType='Confirma Ingreso') | Q(actionType='Confirma Transferencia') | Q(actionType='Confirma Egreso'))
         
 class AdminStockMovements(ExportActionMixin, admin.ModelAdmin):
-    list_display = ["Ingreso", "date", "producto", "internalCode", "faltante",  "warehouse", "cantidad","cantidadNeta", "diferencia", "observations"]
+    list_display = ["Ingreso", "date", "producto", "internalCode", "faltante",  "warehouse", "cantidad","cantidadNeta", "diferencia", "receptor", "issuer", "observations"]
     list_select_related = ["warehouseProduct"]
     list_filter = [FaltanteFilter]
     search_fields = ["warehouseProduct__product__name", "warehouseProduct__product__internalCode"]
@@ -88,6 +88,16 @@ class AdminStockMovements(ExportActionMixin, admin.ModelAdmin):
     def internalCode(self, obj):
         return obj.warehouseProduct.product.internalCode
     
+    @admin.display(description='Receptor')
+    def receptor(self, obj):
+    
+        return obj.task.receptor
+        
+    @admin.display(description='Solicitante')
+    def issuer(self, obj):
+    
+        return obj.task.issuer
+        
     @admin.display(ordering='task__motivoIngreso', description='Movimiento')
     def Ingreso(self, obj):
         print('motivo ingreso', obj.task.motivoIngreso)

@@ -321,11 +321,6 @@ def getProductWarehouse(request): #, productId, warehouse):
     print('product has offer', product[0].hasOffer)
    
    
-    
-   
-    
-    
-
 
 @login_required
 def transferView(request):
@@ -528,7 +523,7 @@ def transferReceptionView(request, requested_id):
                 warehouseProduct = WarehousesProduct.objects.filter(product= productdb, name=warehouse)
                 # productToUpdate = get_object_or_None(Product, name=product.product.name, warehouse=warehouse)
                 print('productToUPdate is', warehouseProduct)
-                
+                warehouseProduct_data = WarehousesProduct.objects.get(product=productdb, name=warehouse)
                 # 20-03-2024 Lo siguiente se borra tb porque está a nivel de producto global
                 #if productToUpdate.exists():    
                 #    product_data = Product.objects.get(name= product.product.name, warehouse=warehouse)
@@ -537,7 +532,7 @@ def transferReceptionView(request, requested_id):
                 #    productToUpdate.update(quantity = F('quantity') + netQuantity, deltaQuantity = F('deltaQuantity') - diffQuantity ,inTransit=False )
                 
                 if warehouseProduct.exists():
-                    warehouseProduct_data = WarehousesProduct.objects.get(product=productdb, name=warehouse)
+                   
                     #warehouseProductToUpdate = WarehousesProduct.objects.filter(product=productdb, name=warehouse)
                     warehouseProduct.update(quantity = F('quantity') + netQuantity, deltaQuantity = F('deltaQuantity') - diffQuantity)
                     
@@ -556,7 +551,15 @@ def transferReceptionView(request, requested_id):
                 
                     datalist.append(newProductMovement)
                     
-                 
+                if diffQuantity > 0 : #and motivoEgreso in ('Ventas','Planta de Armado'):
+                    if DiffProducts.objects.filter(warehouseProduct= warehouseProduct_data).exists(): #, warehouse= warehouse).exists():
+                        
+                        DiffProducts.objects.filter(warehouseProduct= warehouseProduct_data).update(totalPurchase= F('totalPurchase') + quantity, totalQuantity= F('totalQuantity') + netQuantity, productDiff= F('productDiff') + diffQuantity) #), warehouse=warehouse).update(totalPurchase= F('totalPurchase') + quantity, totalQuantity= F('totalQuantity') + netQuantity, productDiff= F('productDiff') + diffQuantity)
+
+                    else:
+                        
+                        DiffProducts.objects.create(warehouseProduct= warehouseProduct_data,  totalPurchase=quantity, totalQuantity= netQuantity, productDiff= diffQuantity)
+                
                 
                 # productToDelete = Product.objects.filter(product_id= newproduct.product_id, warehouse='InTransit')
                 #productToDelete = Product.objects.filter(name= product.product.name, warehouse= warehouseInTransit)
@@ -822,7 +825,7 @@ def inboundReceptionView(request, requested_id):
                                          cantidad= quantity, cantidadNeta=netQuantity, task = task )
                 
 
-                if diffQuantity > 0 and motivoIngreso in('Importación','Compra en Plaza'):
+                if diffQuantity > 0: # and motivoIngreso in('Importación','Compra en Plaza'):
                     if DiffProducts.objects.filter(warehouseProduct=productWarehouse).exists(): #, warehouse= warehouse).exists():
                         
                         DiffProducts.objects.filter(warehouseProduct= productWarehouse).update(totalPurchase= F('totalPurchase') + quantity, totalQuantity= F('totalQuantity') + netQuantity, productDiff= F('productDiff') + diffQuantity) #), warehouse=warehouse).update(totalPurchase= F('totalPurchase') + quantity, totalQuantity= F('totalQuantity') + netQuantity, productDiff= F('productDiff') + diffQuantity)
@@ -1196,129 +1199,7 @@ class StockListView(LoginRequiredMixin, FilteredListView, generic.ListView):
         # return context
     
         
-        #filter = StockFilterSet(self.request.GET, queryset)
-        
-    # f = StockFilterSet(queryset=Product.objects.all())
-
-    # print('llega aca con el checkbox')
     
-    
-
-    # def get_context_data(self, *args, **kwargs):
-    #     # Call the base implementation first to get the context
-    #     #products_obj = Product.objects.all().values()
-       
-    #     context = super(BookListView, self).get_context_data(*args, **kwargs)
-
-    #     warehouse = self.request.GET.get('warehouse',None)
-    #     print('warehouse is', warehouse)
-    #     supplier = self.request.GET.get('supplier',None)
-    #     category = self.request.GET.get('category',None)
-
-    #     if category:
-    #         category_filter = True
-    #         categoryList = [category]
-    #     else:
-    #         categoryList = Product.objects.all().values('category').distinct()
-
-    #     if supplier:
-    #         supplier_filter = True
-    #         supplierList = [supplier]
-        
-    #     else:
-    #         supplierList = Product.objects.all().values('supplier').distinct()
-
-    #     if warehouse:
-    #         warehouse = WarehousesProduct.objects.get(name=warehouse)
-    #         warehouseList = WarehousesProduct.objects.get(name=warehouse)
-    #         # context.update({'products' : Product.objects.select_related('warehouse').filter(warehouse=warehouse, category ='Insumos', inTransit=False)}) #, supplier ='De Salt') 
-    #         context.update({'products': WarehousesProduct.objects.filter(name=warehouse) } )
-    #     else:
-    #         warehouseList = WarehousesProduct.objects.all()
-            
-    #         #context['products'] = Product.objects.select_related('warehouse').filter(category ='Insumos') #, supplier ='De Salt') 
-    #     context['products'] = Product.objects.all() #.filter(inTransit=False) #.filter(category__in=categoryList, supplier__in=supplierList)                   # Product.objects.all().select_related('warehouse').filter(inTransit=False) #.filter(category__in=categoryList, supplier__in=supplierList) 
-    #     f = StockFilterSet(self.request.GET, queryset=Product.objects.all())
-    #     print('categoryList', categoryList)
-    #     print('args', args)
-    #     print('kwargs in get_context_data', kwargs)
-    #     # Create any data and add it to the context
-        
-    #     context['productList'] = Product.objects.all().values('name').distinct()
-    #     context['categoryList'] = Product.objects.all().values('category').distinct()
-    #     context['supplierList'] = Product.objects.all().values('supplier').distinct()
-    #     context['warehouseList'] = WarehousesProduct.objects.all().values('name').distinct()
-        
-    #     print('context in get_context_data', context)
-    #     return context 
-
-    # def get_queryset(self):
-        
-    #     key = self.request.GET.get('name')
-    #     minp = self.request.GET.get('supplier')
-    #     maxp = self.request.GET.get('category')
-
-    #     #if is_valid_queryparam(key):
-    #     obj = WarehousesProduct.objects.filter(Q(name=key) | Q(product__supplier=minp) | Q(product__category=maxp))
-
-    #     return  obj #super().get_queryset()
-
-# class StockListView(LoginRequiredMixin, generic.ListView):
-#     paginate_by = 10
-#     model = Product
-    
-#     template_name = 'stock.html'
-    
-#     print('llega aca con el checkbox')
-    
-
-#     def get_context_data(self, *args, **kwargs):
-#         # Call the base implementation first to get the context
-#         #products_obj = Product.objects.all().values()
-       
-#         context = super(StockListView, self).get_context_data(*args, **kwargs)
-
-#         warehouse = self.request.GET.get('warehouse',None)
-#         print('warehouse is', warehouse)
-#         supplier = self.request.GET.get('supplier',None)
-#         category = self.request.GET.get('category',None)
-
-#         if category:
-#             category_filter = True
-#             categoryList = [category]
-#         else:
-#             categoryList = Product.objects.all().values('category').distinct()
-
-#         if supplier:
-#             supplier_filter = True
-#             supplierList = [supplier]
-        
-#         else:
-#             supplierList = Product.objects.all().values('supplier').distinct()
-
-#         if warehouse:
-#             warehouse = WarehousesProduct.objects.get(name=warehouse)
-#             warehouseList = WarehousesProduct.objects.get(name=warehouse)
-#             # context.update({'products' : Product.objects.select_related('warehouse').filter(warehouse=warehouse, category ='Insumos', inTransit=False)}) #, supplier ='De Salt') 
-#             context.update({'products': WarehousesProduct.objects.filter(name=warehouse) } )
-#         else:
-#             warehouseList = WarehousesProduct.objects.all()
-            
-#             #context['products'] = Product.objects.select_related('warehouse').filter(category ='Insumos') #, supplier ='De Salt') 
-#         context['products'] = Product.objects.all() #.filter(inTransit=False) #.filter(category__in=categoryList, supplier__in=supplierList)                   # Product.objects.all().select_related('warehouse').filter(inTransit=False) #.filter(category__in=categoryList, supplier__in=supplierList) 
-#         print('categoryList', categoryList)
-#         print('args', args)
-#         print('kwargs in get_context_data', kwargs)
-#         # Create any data and add it to the context
-        
-#         context['productList'] = Product.objects.all().values('name').distinct()
-#         context['categoryList'] = Product.objects.all().values('category').distinct()
-#         context['supplierList'] = Product.objects.all().values('supplier').distinct()
-#         context['warehouseList'] = WarehousesProduct.objects.all().values('name').distinct()
-        
-#         print('context in get_context_data', context)
-#         return context 
-
 def filterProducts(request):
     
     
@@ -1562,7 +1443,7 @@ def outboundDeliveryView(request, requested_id):
                               actionType = actionType,
                                           cantidad= quantity, cantidadNeta=netQuantity, task = task )
                 
-                if diffQuantity > 0 and motivoEgreso in('Ventas','Planta de Armado'):
+                if diffQuantity > 0 : #and motivoEgreso in ('Ventas','Planta de Armado'):
                     if DiffProducts.objects.filter(warehouseProduct=productWarehouse_db).exists(): #, warehouse= warehouse).exists():
                         
                         DiffProducts.objects.filter(warehouseProduct= productWarehouse_db).update(totalPurchase= F('totalPurchase') + quantity, totalQuantity= F('totalQuantity') + netQuantity, productDiff= F('productDiff') + diffQuantity) #), warehouse=warehouse).update(totalPurchase= F('totalPurchase') + quantity, totalQuantity= F('totalQuantity') + netQuantity, productDiff= F('productDiff') + diffQuantity)
