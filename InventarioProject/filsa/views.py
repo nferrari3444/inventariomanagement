@@ -402,19 +402,7 @@ def transferView(request):
                                         cantidad= quantity, task = task )
             
 
-                # barcode = productdb.barcode
-                # internalCode = productdb.internalCode
-                # category =  productdb.category
-                # location = 'Transit'
-                # supplier = productdb.supplier
-                # warehouse = WarehousesProduct.objects.get(name='En Transito')  # Warehouses.objects.get(name='En Transito') 
-                # deltaQuantity = 0
-                # stockSecurity = 0
-                # inTransit = False
-                # productInTransit = Product.objects.create(name= product, warehouse= warehouse,
-                #             barcode= barcode, quantity = quantity, internalCode= internalCode, category= category,
-                #             location = location, supplier = supplier , deltaQuantity= deltaQuantity,
-                #             stockSecurity = stockSecurity, inTransit=inTransit)
+               
                 productInTransit = WarehousesProduct.objects.create(product=productdb,
                                     name="En Transito", quantity=quantity, deltaQuantity = 0)
 
@@ -523,7 +511,6 @@ def transferReceptionView(request, requested_id):
                 warehouseProduct = WarehousesProduct.objects.filter(product= productdb, name=warehouse)
                 # productToUpdate = get_object_or_None(Product, name=product.product.name, warehouse=warehouse)
                 print('productToUPdate is', warehouseProduct)
-                warehouseProduct_data = WarehousesProduct.objects.get(product=productdb, name=warehouse)
                 # 20-03-2024 Lo siguiente se borra tb porque está a nivel de producto global
                 #if productToUpdate.exists():    
                 #    product_data = Product.objects.get(name= product.product.name, warehouse=warehouse)
@@ -532,7 +519,8 @@ def transferReceptionView(request, requested_id):
                 #    productToUpdate.update(quantity = F('quantity') + netQuantity, deltaQuantity = F('deltaQuantity') - diffQuantity ,inTransit=False )
                 
                 if warehouseProduct.exists():
-                   
+                    warehouseProduct_data = WarehousesProduct.objects.get(product=productdb, name=warehouse)
+
                     #warehouseProductToUpdate = WarehousesProduct.objects.filter(product=productdb, name=warehouse)
                     warehouseProduct.update(quantity = F('quantity') + netQuantity, deltaQuantity = F('deltaQuantity') - diffQuantity)
                     
@@ -541,6 +529,16 @@ def transferReceptionView(request, requested_id):
                                          cantidad= quantity, cantidadNeta=netQuantity, task = task )
                 
                     datalist.append(newProduct)
+
+                    if diffQuantity > 0 : #and motivoEgreso in ('Ventas','Planta de Armado'):
+                        if DiffProducts.objects.filter(warehouseProduct= warehouseProduct_data).exists(): #, warehouse= warehouse).exists():
+                        
+                            DiffProducts.objects.filter(warehouseProduct= warehouseProduct_data).update(totalPurchase= F('totalPurchase') + quantity, totalQuantity= F('totalQuantity') + netQuantity, productDiff= F('productDiff') + diffQuantity) #), warehouse=warehouse).update(totalPurchase= F('totalPurchase') + quantity, totalQuantity= F('totalQuantity') + netQuantity, productDiff= F('productDiff') + diffQuantity)
+
+                    else:
+                        
+                        DiffProducts.objects.create(warehouseProduct= warehouseProduct_data,  totalPurchase=quantity, totalQuantity= netQuantity, productDiff= diffQuantity)
+                
                 else:
                     
                     newProductInDeposit= WarehousesProduct.objects.create(product=productdb, name=warehouse, quantity = quantity, deltaQuantity=  diffQuantity)
@@ -550,15 +548,18 @@ def transferReceptionView(request, requested_id):
                                          cantidad= quantity, cantidadNeta=netQuantity, task = task )
                 
                     datalist.append(newProductMovement)
-                    
-                if diffQuantity > 0 : #and motivoEgreso in ('Ventas','Planta de Armado'):
-                    if DiffProducts.objects.filter(warehouseProduct= warehouseProduct_data).exists(): #, warehouse= warehouse).exists():
+
+                    if diffQuantity > 0 : #and motivoEgreso in ('Ventas','Planta de Armado'):
                         
-                        DiffProducts.objects.filter(warehouseProduct= warehouseProduct_data).update(totalPurchase= F('totalPurchase') + quantity, totalQuantity= F('totalQuantity') + netQuantity, productDiff= F('productDiff') + diffQuantity) #), warehouse=warehouse).update(totalPurchase= F('totalPurchase') + quantity, totalQuantity= F('totalQuantity') + netQuantity, productDiff= F('productDiff') + diffQuantity)
+                        if DiffProducts.objects.filter(warehouseProduct= newProductInDeposit).exists(): #, warehouse= warehouse).exists():
+                        
+                             DiffProducts.objects.filter(warehouseProduct= newProductInDeposit).update(totalPurchase= F('totalPurchase') + quantity, totalQuantity= F('totalQuantity') + netQuantity, productDiff= F('productDiff') + diffQuantity) #), warehouse=warehouse).update(totalPurchase= F('totalPurchase') + quantity, totalQuantity= F('totalQuantity') + netQuantity, productDiff= F('productDiff') + diffQuantity)
 
                     else:
+                        DiffProducts.objects.create(warehouseProduct= newProductInDeposit,  totalPurchase=quantity, totalQuantity= netQuantity, productDiff= diffQuantity)
+                    
                         
-                        DiffProducts.objects.create(warehouseProduct= warehouseProduct_data,  totalPurchase=quantity, totalQuantity= netQuantity, productDiff= diffQuantity)
+                    
                 
                 
                 # productToDelete = Product.objects.filter(product_id= newproduct.product_id, warehouse='InTransit')
@@ -681,10 +682,7 @@ def inboundView(request):
                     datalist.append(newWarehouseProduct)
                 
                 else:
-                    #stockSecurity = np.ceil(quantity * 0.3)
-                    #warehouse_obj = WarehousesProduct.objects.filter(name=warehouse).first()
-                    #barcode = form.cleaned_data['barcode_{}'.format(i)]
-                    #internalCode = form.cleaned_data['internalCode_{}'.format(i)]
+                  
                     cantidad = form.cleaned_data['cantidad_{}'.format(i)]
                     
                     productWarehouseNoStock = WarehousesProduct.objects.filter(product = productdb, name='No Stock')

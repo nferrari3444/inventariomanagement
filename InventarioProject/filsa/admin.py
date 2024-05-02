@@ -192,7 +192,7 @@ class StockSecurity(ExportActionMixin, admin.ModelAdmin):
 
 class AdminProductDiff(ExportActionMixin, admin.ModelAdmin):
  
-    list_display = ["product", "warehouse", "totalPurchase", "totalQuantity", "productDiff"]
+    list_display = ["product", "internalCode", "warehouse", "totalPurchase", "totalQuantity", "productDiff"]
     list_select_related = ["warehouseProduct"]
 
     #search_fields = ["product", "product__name"]
@@ -200,6 +200,10 @@ class AdminProductDiff(ExportActionMixin, admin.ModelAdmin):
     @admin.display(description='Producto')
     def product(self, obj):
         return obj.warehouseProduct.product.name
+    
+    @admin.display(description='Codigo Interno')
+    def internalCode(self, obj):
+        return obj.warehouseProduct.product.internalCode
     
     @admin.display(description='Cantidad')
     def totalPruchase(self, obj):
