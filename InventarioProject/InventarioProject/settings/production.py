@@ -97,12 +97,12 @@ SITE_ID = 1
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'URL': os.getenv('DATABASE_URL'),
-        'NAME': os.getenv('PGDATABASE'),
-        'USER': 'postgres',
-        'PASSWORD': os.getenv('PGPASSWORD'),
-        'HOST': os.getenv('PGHOST'),
-        'PORT': 19787
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        # 'URL': os.getenv('DATABASE_URL'),
+        'NAME': os.getenv('DATABASE'),
+        'USER': 'filsa',
+        'PASSWORD': os.getenv('PASSWORD'),
+        'HOST': 'localhost',
+        'PORT': ''
     }
 }
