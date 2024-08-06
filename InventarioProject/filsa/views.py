@@ -1592,19 +1592,7 @@ def handle_uploaded_file(file):
     file_data = pd.read_excel(file)
     file_data.columns = map(str.lower, file_data.columns)
     return file_data
-
-#     date = file_data['date'][0
-#  = file_data['date'][0]
-#     date = file_data['date'][0]
-#     date = file_data['date'][0]
-#     Cotization.objects.create(name=)
-#     for i in range(0, len(file_data)):
-#         producto = file_data.iloc[i]['product']
-        
-#         product_to_offer = Product.objects.get(name=producto)
-        
-        
-
+     
 def cotizationDelete(request,cotization_id):
     
     Cotization.objects.filter(cotization_id=cotization_id).delete()

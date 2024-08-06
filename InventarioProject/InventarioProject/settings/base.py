@@ -34,7 +34,7 @@ environ.Env.read_env()
 SECRET_KEY = 'django-insecure-1t6k3r0)5-(nn@i3mp9_o&t+x*v&q+j8v=#ux!y_j17hqm!hw%'
 #SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", get_random_secret_key())
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 #DEBUG = os.getenv("DEBUG", "True") == "True"
 #ALLOWED_HOSTS = ['127.0.0.1','localhost','inventariomanagement.vercel.app', '*.vercel.app', '.now.sh']
 

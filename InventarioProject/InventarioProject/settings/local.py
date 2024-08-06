@@ -44,22 +44,22 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 #STATICFILES_DIRS = os.path.join(BASE_DIR, 'static'),
-# DATABASES = {
-#          "default": {
-#              "ENGINE": "django.db.backends.sqlite3",
-#              "NAME": os.path.join(BASE_DIR, "db.sqlite3"),
-#          }
-# }
-
-
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'URL': os.getenv('DATABASE_URL'),
-        'NAME': os.getenv('PGDATABASE'),
-        'USER': 'postgres',
-        'PASSWORD': os.getenv('PGPASSWORD'),
-        'HOST': os.getenv('PGHOST'),
-        'PORT': 19787
-    }
+         "default": {
+             "ENGINE": "django.db.backends.sqlite3",
+             "NAME": os.path.join(BASE_DIR, "db.sqlite3"),
+         }
 }
+
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'URL': os.getenv('DATABASE_URL'),
+#         'NAME': os.getenv('PGDATABASE'),
+#         'USER': 'postgres',
+#         'PASSWORD': os.getenv('PGPASSWORD'),
+#         'HOST': os.getenv('PGHOST'),
+#         'PORT': 19787
+#     }
+# }

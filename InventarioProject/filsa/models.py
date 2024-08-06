@@ -46,12 +46,8 @@ class Product(models.Model):
       verbose_name = 'Stock Productos vs Seguridad'
       verbose_name_plural = 'Stock Productos vs Seguridad'
     
-    CATEGORIES = [('Tubos', 'Tubos'),
-                  ('Tornillos', 'Tornillos'),
-                  ('Accesorios','Accesorios'),
-                  ('Maquinas','Maquinas'),
-                  ('Insumos','Insumos')
-                  ]
+    CURRENCIES= [('USD', 'Dolar'),
+                  ('$', 'Pesos')]
     
     # class Meta:
     #     unique_together = (('product_id', 'warehouse'),)
@@ -66,7 +62,8 @@ class Product(models.Model):
     supplier = models.CharField(max_length=100, default='')
 
     stockSecurity = models.IntegerField(default=0)
-    
+    price = models.FloatField(default=0)
+    currency = models.CharField(max_length=10, choices=CURRENCIES, default='Dolar')
     hasOffer = models.ForeignKey(Cotization, on_delete=models.SET_DEFAULT, blank=True, null=True, default=None)
     quantityOffer = models.FloatField(null=True, blank= True)
     priceOffer = models.FloatField(null=True, blank= True)
