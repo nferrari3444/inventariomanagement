@@ -22,7 +22,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 
 import environ
+
 env = environ.Env(DEBUG=(bool,False))
+
+env = environ.Env(
+# Set casting default value 
+DEBUG=(bool,False))
+
+
 environ.Env.read_env()
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
@@ -36,7 +43,7 @@ DEBUG = False
 #ALLOWED_HOSTS = ['127.0.0.1','localhost','inventariomanagement.vercel.app', '*.vercel.app', '.now.sh']
 
 
-ALLOWED_HOSTS= ["*"]
+ALLOWED_HOSTS= ["192.168.1.53", "127.0.0.1", "localhost", "*"]
 
 SITE_ID = 1
 #ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
@@ -101,7 +108,6 @@ TEMPLATES = [
     
     ,
 ]
-
 
 WSGI_APPLICATION = 'InventarioProject.wsgi.application'
 
