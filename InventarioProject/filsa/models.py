@@ -92,7 +92,8 @@ class WarehousesProduct(models.Model):
         
 class Tasks(models.Model):
     STATUS = [('Pending','Pending'),
-              ('Confirmed','Confirmed')]
+              ('Confirmed','Confirmed'),
+              ('Cancelled', 'Cancelled')]
 
 
     DEPARTMENT = [('Ventas','Ventas'),

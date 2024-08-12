@@ -56,9 +56,13 @@
   </svg></a> -->
                     </div>
                 </th>
-                <th scope="col" class="px-6 py-3">
-                    <span class="sr-only">Editar</span>
+                <th scope="col-span-2 space-y-2" class="px-6 py-3">
+                    <div class="flex items-center">
+                        Acción
+                       
+                    </div>
                 </th>
+              
             </tr>
         </thead>
         <tbody>
@@ -84,48 +88,56 @@
                 
                 </td>
 
-                
-                  
-
                     {% if task.status == 'Pending' %}
                     <td class="px-6 py-4 text-right">
                         <span class="bg-yellow-100 text-yellow-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded dark:bg-yellow-900 dark:text-yellow-300">{{task.status}}</span>
                     </td>
+                    {% elif task.status == 'Confirmed' %}
                     
-                    {% else %}
                     <td class="px-6 py-4 text-right">
                     <span class="bg-green-100 text-green-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300">{{task.status}}</span>
-                 
+                    
+                     {% elif task.status == 'Cancelled' %}
+                    
+                    <td class="px-6 py-4 text-right">
+                    <span class="bg-red-100 text-red-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-red-300">{{task.status}}</span>
+                        
                 </td>
                 
                 {% endif %}   
 
-                
                 {% if task.actionType == 'Nuevo Egreso' and task.status == 'Pending' %}
-                <td class="px-6 py-4 text-right">
-                    <a href="{% url 'outbounddelivery' requested_id=task.task_id %}"  class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Editar</a>
+                <td class="flex items-center px-6 py-4"> 
+                    <a href="{% url 'outbounddelivery' requested_id=task.task_id %}"  class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Confirmar</a>
+                    <a href="{% url 'canceltask' requested_id=task.task_id %}"  class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Cancelar</a>
                 </td>
-                {% elif task.actionType == 'Nuevo Egreso' and task.status == 'Confirmed' %}
+
+                
+
+                {% elif task.actionType == 'Nuevo Egreso' and task.status == 'Confirmed'  or  task.actionType == 'Nuevo Egreso' and task.status == 'Cancelled' %}
                 <td class="px-6 py-4 text-right">
                     <a href="{% url 'outboundconfirmed' requested_id=task.task_id %}"  class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Ver</a>
                 </td>
 
                 {% elif task.actionType == 'Nuevo Ingreso' and task.status == 'Pending' %}
                 <td class="px-6 py-4 text-right">
-                    <a href="{% url 'inboundreception' requested_id=task.task_id %}"  class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Editar</a>
+                    <a href="{% url 'inboundreception' requested_id=task.task_id %}"  class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Confirmar</a>
                 </td>
 
-                {% elif task.actionType == 'Nuevo Ingreso' and task.status == 'Confirmed' %}
+                {% elif task.actionType == 'Nuevo Ingreso' and task.status == 'Confirmed'  %}
                 <td class="px-6 py-4 text-right">
                     <a href="{% url 'inboundconfirmed' requested_id=task.task_id %}"  class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Ver</a>
                 </td>
 
                 {% elif task.actionType == 'Transferencia' and task.status == 'Pending' %}
-                <td class="px-6 py-4 text-right">
-                    <a href="{% url 'transferreception' requested_id=task.task_id %}"  class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Editar</a>
+
+                <td class="flex items-center px-6 py-4"> 
+                    <a href="{% url 'transferreception' requested_id=task.task_id %}"  class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Confirmar</a>
+                    <a href="{% url 'canceltask' requested_id=task.task_id %}"  class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Cancelar</a>
                 </td>
 
-                {% elif task.actionType == 'Transferencia' and task.status == 'Confirmed' %}
+               
+                {% elif task.actionType == 'Transferencia' and task.status == 'Confirmed' or task.actionType == 'Transferencia' and task.status == 'Cancelled' %}
                 <td class="px-6 py-4 text-right">
                     <a href="{% url 'transferconfirmed' requested_id=task.task_id %}"  class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Ver</a>
                 </td>

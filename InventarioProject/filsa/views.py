@@ -480,13 +480,14 @@ def transferReceptionView(request, requested_id):
             print('warehouse in form is', warehouse)
             actionType = 'Confirma Transferencia'
             observations = form.cleaned_data['observationsConfirma']
+            observationsSolicitud = form.cleaned_data['observationsSolicitud']
             deliveryDate = datetime.now().date()
             datalist = []
             # task = Tasks.objects.create(date= date, receptor= receptor, warehouse= warehouse, issuer= issuer,
             #                             motivoIngreso=motivoIngreso,  actionType=actionType, department=department)
             
             taskToUpdate = Tasks.objects.filter(task_id=requested_id)
-            taskToUpdate.update(status='Confirmed', observationsConfirma=observations, deliveryDate=deliveryDate)
+            taskToUpdate.update(status='Confirmed', observationsConfirma=observations, observationsSolicitud= observationsSolicitud, deliveryDate=deliveryDate)
             
             taskupdated = Tasks.objects.filter(task_id = requested_id).values_list('receptor', 'issuer','status', 'motivoIngreso','motivoEgreso','warehouseProduct__name','actionType')
             print('taskupdated in view is ', taskupdated)
@@ -771,6 +772,7 @@ def inboundReceptionView(request, requested_id):
             actionType = 'Confirma Ingreso'
             motivoIngreso = form.cleaned_data['motivoIngreso']
             observations = form.cleaned_data['observationsConfirma']
+            observationsSolicitud = form.cleaned_data['observationsSolicitud']
             deliveryDate = datetime.now().date()
             
             # StockMovements.objects.create(product = product, date=date, department=department,
@@ -782,7 +784,7 @@ def inboundReceptionView(request, requested_id):
             #                             motivoIngreso=motivoIngreso,  actionType=actionType, department=department)
             
             taskToUpdate = Tasks.objects.filter(task_id=requested_id)
-            taskToUpdate.update(status='Confirmed', observationsConfirma=observations, deliveryDate=deliveryDate)
+            taskToUpdate.update(status='Confirmed', observationsConfirma=observations, observationsSolicitud= observationsSolicitud, deliveryDate=deliveryDate)
             
             taskupdated = Tasks.objects.filter(task_id = requested_id).values_list('receptor', 'issuer','status', 'motivoIngreso','motivoEgreso','warehouseProduct__name','actionType')
             print('taskupdated in view is ', taskupdated)
@@ -873,7 +875,7 @@ def transferConfirmedView(request, requested_id):
    # pendingRequest = get_object_or_None(StockMovements, pk=requested_id)
     #print('pendingRequest product is:', pendingRequest.product)
     # confirmedTask = get_object_or_None(Tasks, pk=requested_id)
-    confirmedTask = Tasks.objects.filter(task_id=requested_id, status='Confirmed')
+    confirmedTask = Tasks.objects.filter(task_id=requested_id, status__in =('Confirmed', 'Cancelled'))
     firstTask = Tasks.objects.filter(task_id= requested_id).first()
     firstMovement = firstTask.stockmovements_set.all().filter(actionType='Transferencia').first()
     depositoSalida = firstMovement.warehouseProduct.name
@@ -1391,6 +1393,7 @@ def outboundDeliveryView(request, requested_id):
             actionType = 'Confirma Egreso'
             motivoEgreso = form.cleaned_data['motivoEgreso']
             observations = form.cleaned_data['observationsConfirma']
+            observationsSolicitud = form.cleaned_data['observationsSolicitud']
             deliveryDate = datetime.now().date()
             # StockMovements.objects.create(product = product, date=date, department=department,
             #                             issuer=issuer, actionType = actionType, cantidad=cantidad,
@@ -1401,7 +1404,7 @@ def outboundDeliveryView(request, requested_id):
             #                             motivoIngreso=motivoIngreso,  actionType=actionType, department=department)
             
             taskToUpdate = Tasks.objects.filter(task_id=requested_id)
-            taskToUpdate.update(status='Confirmed', observationsConfirma=observations, deliveryDate= deliveryDate)
+            taskToUpdate.update(status='Confirmed', observationsConfirma=observations, observationsSolicitud= observationsSolicitud,  deliveryDate= deliveryDate)
             
             
             task = Tasks.objects.get(task_id=requested_id)
@@ -1427,15 +1430,6 @@ def outboundDeliveryView(request, requested_id):
                 productWarehouseToUpdate = WarehousesProduct.objects.filter(product= product_db, name=warehouse)
                 
                 productWarehouseToUpdate.update(quantity = F('quantity') - netQuantity, deltaQuantity= F('deltaQuantity') + diffQuantity)
-
-
-                #newProduct = StockMovements()
-
-                #newProduct.product = newproduct
-                #newProduct.actionType = actionType
-                #newProduct.cantidad = quantity
-                #newProduct.cantidadNeta = netQuantity
-                #newProduct.task = task
 
                 newProduct = StockMovements(warehouseProduct = productWarehouse_db, 
                               actionType = actionType,
@@ -1482,11 +1476,17 @@ def outboundConfirmedView(request, requested_id):
    # pendingRequest = get_object_or_None(StockMovements, pk=requested_id)
     #print('pendingRequest product is:', pendingRequest.product)
     # confirmedTask = get_object_or_None(Tasks, pk=requested_id)
-    confirmedTask = Tasks.objects.filter(task_id=requested_id, status='Confirmed')
+    confirmedTask = Tasks.objects.filter(task_id=requested_id, status__in = ('Confirmed','Cancelled'))
     print('confirmedTask is', confirmedTask)
 
 
     return render(request, 'outboundConfirmed.html', { 'task': confirmedTask[0]})
+
+def cancelTaskView(request, requested_id):
+
+    Tasks.objects.filter(task_id=requested_id).update(status='Cancelled')
+
+    return redirect('/tasks/')
 
 def finishTask(request, requested_id):
 
@@ -1516,15 +1516,6 @@ class StockHistoryView(LoginRequiredMixin, generic.ListView):
         context['movements'] = StockMovements.objects.filter(warehouseProduct__product__name=
         product_name[0].name).select_related('task')
         
-        # .values_list(
-        # 'actionType', 'task__date', 'task__department', 'cantidad', 'cantidadNeta',
-        # 'warehouseProduct__name',  'task__receptor__username', 'task__motivoIngreso',
-        # 'task__motivoEgreso', 'task__status', 'task__deliveryDate')
-        
-    
-
-        #context['movements'] = StockMovements.objects.filter(warehouseProduct__product__name= product_name[0].name).select_related # , name=product_name[0].name)
-
         context['product'] = product_name[0].name
         return context 
 
@@ -1569,14 +1560,8 @@ def export_excel(request, dimension):
             cell = worksheet.cell(row=1, column=col_num)
             cell.value = column_title
 
-        # Write data rows
-        #firstquery = Product.objects.all().select_related('warehouse')
-        #queryset = firstquery.values_list('name', 'internalCode','quantity')
- 
         queryset = Product.objects.values_list('name', 'internalCode', 'quantity', 'category','supplier','stockSecurity').order_by('internalCode') #.annotate(CantidadTotal=Sum('quantity'))
-        #queryset = Product.objects.values('name','internalCode').order_by('name').annotate(=Sum('quantity'))
-        #list(Product.objects.all().values('name', 'internalCode','quantity','warehouse__name','category','supplier','location','stockSecurity'))
-
+    
         for row_num, row in enumerate(queryset, 1):
             for col_num, cell_value in enumerate(row, 1):
                 cell = worksheet.cell(row=row_num+1, column=col_num)
