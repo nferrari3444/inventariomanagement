@@ -1,7 +1,14 @@
 from django.urls import path, include
 from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
-from .views import home,  Login, Logout, Register, filterProducts, getProductWarehouse, StockListView,  newCotization, inboundView, getProducts, getProduct, getProductsNames, transferView,  transferReceptionView, transferConfirmedView, outboundDeliveryView, outboundOrderView, outboundConfirmedView, finishTask, inboundReceptionView, inboundConfirmedView, cotizationView, TaskListView,  StockHistoryView, cotizationDelete, export_excel
+from .views import (home,  Login, Logout, Register, filterProducts, getProductWarehouse,
+                    StockListView,  newCotization, inboundView, getProducts, getProduct,
+                    getProductsNames, transferView,  transferReceptionView,
+                    transferConfirmedView, outboundDeliveryView, outboundOrderView,
+                    outboundConfirmedView, finishTask, inboundReceptionView, inboundConfirmedView,
+                    cotizationView, TaskListView,  StockHistoryView, cotizationDelete,
+                    export_excel, cancelTaskView)
+
 from django.contrib.auth.views import (
     LogoutView, 
     PasswordResetView, 
@@ -21,23 +28,21 @@ urlpatterns = [
     path('outbound-order/', outboundOrderView, name='outboundorder'),
     path('outbound-delivery/<int:requested_id>', outboundDeliveryView, name='outbounddelivery'),
     path('outbound-confirmed/<int:requested_id>', outboundConfirmedView, name='outboundconfirmed'),
-   
     path('transfer/', transferView, name='transfer'),
     path('transfer-reception/<int:requested_id>', transferReceptionView, name='transferreception'),
     path('transfer-confirmed/<int:requested_id>', transferConfirmedView, name='transferconfirmed'),
     path('finishtask/<int:requested_id>', finishTask,  name='finishtask'),
+    path('task-cancelled/<int:requested_id>', cancelTaskView, name='canceltask'),
     path('tasks/', TaskListView.as_view() , name='tasks'),
     path('new-cotization/', newCotization , name='newcotization'),
     path('modal/<int:cotization_id>/', cotizationView , name='cotizationview'),
     path('delete-cotization/<int:cotization_id>/', cotizationDelete , name='deletecotization'),
-    # path('stock/', StockListView.as_view() , name='stock'),
     path('historical-movements/<int:product_id>', StockHistoryView.as_view(), name= "stockhistory" ) ,
     path('autocomplete-name', getProductsNames, name='autocomplete-name'),
     path('products/', getProducts, name='products'),
+
     path('product/<int:productId>/', getProduct, name='product'),
-   # <int:productId>/<str:warehouse>/$
     path('product/$', getProductWarehouse, name='productwarehouse'),
-    #path('stock/', StockListView.as_view(), name='stock'),
     path('stock/', StockListView.as_view(), name='stock'),
     path('products-filter/$', filterProducts, name='filterproducts'),
     path('login/', Login, name='login'),
