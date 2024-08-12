@@ -49,34 +49,34 @@ class Command(BaseCommand):
         #reader = f.read()
         #users_lines = list(reader)
         
-        # with open(users_file) as file:
-        # #     #print(file.readlines())
-        #     users_lines = file.readlines()
-        # # # Archivo: Nombre,Correo,Contraseña, Deparamento,Rol
-        #     users_obj = []
-        #     superuser = CustomUser.objects.create_superuser(username = 'filsacompany' , email='operaciones@filsa.com.uy', password='sitioweb_2024')
-        #     for line in users_lines[1:]:
+        with open(users_file) as file:
+        #     #print(file.readlines())
+            users_lines = file.readlines()
+        # # Archivo: Nombre,Correo,Contraseña, Deparamento,Rol
+            users_obj = []
+            superuser = CustomUser.objects.create_superuser(username = 'filsacompany' , email='operaciones@filsa.com.uy', password='sitioweb_2024')
+            for line in users_lines[1:]:
                 
-        #         user_model = CustomUser()
-        #         # print('user line is ', line)
-        #         line = line.split(',')
-        #         print(line)
-        #         nombre_usuario = line[0]
-        #         correo = line[2]
-        #         password = line[1]
-        #         departamento = line[3]
-        #         rol = line[4]
-        #         # print('username', line[0])
-        #         # user_model.username = line[0]
-        #         # print('email', line[2])
-        #         # user_model.email = line[2]
-        #         # user_model.password = line[1]
-        #         # user_model.departamento = line[3]
-        #         # user_model.role = line[4]
-        #         userobj = CustomUser.objects.create_user(username= nombre_usuario, password=password, email=correo, departamento=departamento,role=rol)
-        #         # userobj.save()
-        #         user_group ,  created = Group.objects.get_or_create(name=rol) 
-        #         user_group.user_set.add(userobj)
+                user_model = CustomUser()
+                # print('user line is ', line)
+                line = line.split(',')
+                print(line)
+                nombre_usuario = line[0]
+                correo = line[2]
+                password = line[1]
+                departamento = line[3]
+                rol = line[4]
+                # print('username', line[0])
+                # user_model.username = line[0]
+                # print('email', line[2])
+                # user_model.email = line[2]
+                # user_model.password = line[1]
+                # user_model.departamento = line[3]
+                # user_model.role = line[4]
+                userobj = CustomUser.objects.create_user(username= nombre_usuario, password=password, email=correo, departamento=departamento,role=rol)
+                # userobj.save()
+                user_group ,  created = Group.objects.get_or_create(name=rol) 
+                user_group.user_set.add(userobj)
                 
                 #users_obj.append(user_model)
 
