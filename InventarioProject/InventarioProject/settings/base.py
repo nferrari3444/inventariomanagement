@@ -46,7 +46,7 @@ SITE_ID = 1
 # Application definition
 
 
-# PYTHONIOENCODING='utf-8'
+#PYTHONIOENCODING='utf-8'
 
 INSTALLED_APPS = [
     'filsa',

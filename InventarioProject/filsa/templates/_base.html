@@ -25,16 +25,14 @@
    <!-- Autocomplete CSS -->
    <!-- <script src="{% static 'js/autocomplete.js' %}"></script>
    <link rel="stylesheet" href="{% static 'css/autocomplete.min.css' %}"> -->
-
     {% compress css %}
-    
  <link rel="stylesheet" href="{% static 'src/output.css' %}">  
     
     {% endcompress %}
 </head>
 
 <nav class="sm:w-full bg-blue-600 border-gray-200 dark:bg-gray-900">
-    <div class="max-w-screen-xl flex flex-wrap items-center justify-between p-4">
+    <div class="max-w-screen-xl flex flex-wrap items-center p-4">
       <a href="https://www.filsa.com.uy/" target="_blank" class="flex items-center space-x-3 rtl:space-x-reverse">
           <img src="https://filsa.s3.amazonaws.com/logo.jpg" class="h-8" alt="Filsa Logo" />
           <!-- <span class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">Filsa</span> -->
@@ -46,23 +44,23 @@
           </svg>
       </button>
 
+      
       {% if user.is_authenticated %}
-
-
-      <div class="flex text-white items-center lg:mr-10 sm:mr-0 lm:mr-0">
+      
+      <div class="flex text-white ml-3 lg:mr-0 sm:mr-0 lm:mr-0">
 
         Usuario: &nbsp <i><strong class="text-black-400">{{user.get_username}}</strong></i>
       
       </div>
-      <a href="{% url 'logout' %}" class="py-4 px-2 text-white hover:text-green-500 transition duration-300">Logout</a>
+      <a href="{% url 'logout' %}" class="ml-3 py-4 px-2 text-white hover:text-green-500 transition duration-300">Logout</a>
 
       {% else %}
 
       <a href="{% url 'login' %}" class="py-4 px-2 text-white hover:text-green-500 transition duration-300">Login</a>
 
       {% endif %}
-      
-      <div class="hidden w-full md:block md:w-auto" id="navbar-default">
+    
+      <div class="mx-auto hidden w-full md:block md:w-auto" id="navbar-default">
         <ul class="font-medium flex flex-col p-4 md:p-0 mt-4 border border-gray-100 rounded-lg md:flex-row md:space-x-8 rtl:space-x-reverse md:mt-0 md:border-0 dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700">
           <li>
             <a href="{% url 'home' %}" class="text-white rounded hover:bg-gray-100 md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Inicio</a>
@@ -73,27 +71,52 @@
           <li>
             <a href="{% url 'tasks' %}" class="block py-2 px-3 text-white rounded hover:bg-gray-100 md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Tareas</a>
           </li>
-          <li>
-           
-            {% if user.groups.all.0.name.strip == "Administrador"  or user.groups.all.0.name.strip == "Supervisor"  or user.groups.all.0.name.strip == "Tecnico"   or user.groups.all.0.name.strip == "Logistica" %}
-            <a href="{% url 'transfer' %}" class="block py-2 px-3 text-white rounded hover:bg-gray-100 md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Transferencia</a>
-            {% endif %}
-          </li>
-          <li>
 
-            
-          {% if user.groups.all.0.name.strip == "Administrador"  or user.groups.all.0.name.strip == "Supervisor" %}
-            
-            <a href="{% url 'inbound' %}" class="block py-2 px-3 text-white rounded hover:bg-gray-100 md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Nuevo Ingreso</a>
-           {% endif %}
-          </li>
-          <li>
-            {% if user.groups.all.0.name.strip == "Administrador"  or user.groups.all.0.name.strip == "Supervisor" or user.groups.all.0.name.strip == "Comercial" %}
-            <a href="{% url 'outboundorder' %}" class="block py-2 px-3 text-white rounded hover:bg-gray-100 md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Nuevo Egreso</a>
-            {% endif %}
+          <button id="dropdownDefaultButton" data-dropdown-toggle="dropdown" class="text-white focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">Movimientos<svg class="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
+            </svg>
+            </button>
+            <!-- Dropdown menu -->
+            <div id="dropdown" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700">
+                <!-- <ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownDefaultButton"> -->
+                  <li>
+                    {% if user.groups.all.0.name.strip == "Administrador"  or user.groups.all.0.name.strip == "Supervisor"  or user.groups.all.0.name.strip == "Tecnico"   or user.groups.all.0.name.strip == "Logistica" %}
+                    <a href="{% url 'transfer' %}" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Transferencia</a>
+                    {% endif %}
+                  </li>
+                  <li>
+                  {% if user.groups.all.0.name.strip == "Administrador"  or user.groups.all.0.name.strip == "Supervisor" %}
+                    <a href="{% url 'inbound' %}" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Nuevo Ingreso</a>
+                   {% endif %}
+                  </li>
+                  <li>
+                    {% if user.groups.all.0.name.strip == "Administrador"  or user.groups.all.0.name.strip == "Supervisor" or user.groups.all.0.name.strip == "Comercial" %}
+                    <a href="{% url 'outboundorder' %}" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Nuevo Egreso</a>
+                    {% endif %}
+                  </li>
+            </div>
+         
+             <!-- Dropdown menu -->
+             {% if user.groups.all.0.name.strip == "Administrador"  %}
+            <button id="dropdownDefaultButton" data-dropdown-toggle="dropdown-productos" class="text-white focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">Productos<svg class="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
+              </svg>
+              </button>
 
-          </li>
+                 <div id="dropdown-productos" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700">
+                  <!-- <ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownDefaultButton"> -->
+                    <li>
+                      <a href="{% url 'productscrud' action='create' %}" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Alta Nuevos Productos</a>
+                    </li>
+                    <li>
+                      <a href="{% url 'productscrud' action='update' %}" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Actualización Productos</a>
+                    </li>
+                    <li>
+                      <a href="{% url 'productscrud' action='delete' %}" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Eliminación Productos</a>
+                    </li>
 
+                    {% endif %}
+              </div>
           <li>
             {% if user.groups.all.0.name.strip == "Administrador" %}
             <a href="{% url 'newcotization' %}" data-popover-target="popover-default" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">

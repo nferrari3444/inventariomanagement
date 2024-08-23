@@ -26,8 +26,8 @@ from annoying.functions import get_object_or_None
 from django.http import HttpRequest, HttpResponseRedirect, JsonResponse, HttpResponse
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError, PermissionDenied
-from .forms import SignUpForm , InboundForm, OutboundOrderForm, CotizationForm, OutboundDeliveryForm, InboundReceptionForm, TransferForm, TransferReceptionForm, CustomSetPasswordForm
-from .models import CustomUser, StockMovements, DiffProducts, Product, WarehousesProduct, Tasks, Cotization
+from .forms import SignUpForm , InboundForm, OutboundOrderForm, CotizationForm, OutboundDeliveryForm, InboundReceptionForm, TransferForm, TransferReceptionForm, CustomSetPasswordForm, CrudProductsForm
+from .models import CustomUser,  StockMovements, DiffProducts, Product, WarehousesProduct, Tasks, Cotization
 from .filters import StockFilterSet
 from django.core.cache import cache
 from django.utils.http import urlsafe_base64_encode
@@ -868,19 +868,33 @@ def inboundConfirmedView(request, requested_id):
     # confirmedTask = get_object_or_None(Tasks, pk=requested_id)
     confirmedTask = Tasks.objects.filter(task_id=requested_id, status='Confirmed')
 
-    return render(request, 'inboundConfirmed.html', { 'task': confirmedTask[0] })
+    firstTask = Tasks.objects.filter(task_id= requested_id).first()
+    
+    taskStatus = firstTask.status
+    if taskStatus == 'Confirmed':
+        title = 'Informacion Ingreso de Productos Confirmada'
+    elif taskStatus == 'Cancelled':
+        title = 'Informacion Ingreso de Productos Cancelada'
+
+    return render(request, 'inboundConfirmed.html', { 'task': confirmedTask[0] , 'title':title})
 
 @login_required
 def transferConfirmedView(request, requested_id):
    # pendingRequest = get_object_or_None(StockMovements, pk=requested_id)
     #print('pendingRequest product is:', pendingRequest.product)
     # confirmedTask = get_object_or_None(Tasks, pk=requested_id)
+    
     confirmedTask = Tasks.objects.filter(task_id=requested_id, status__in =('Confirmed', 'Cancelled'))
     firstTask = Tasks.objects.filter(task_id= requested_id).first()
     firstMovement = firstTask.stockmovements_set.all().filter(actionType='Transferencia').first()
     depositoSalida = firstMovement.warehouseProduct.name
     depositoEntrada = StockMovements.objects.filter(task__task_id=requested_id).last().warehouseProduct.name
-    return render(request, 'transferConfirmed.html', { 'task': confirmedTask[0] ,'warehouseIn': depositoEntrada})
+    taskStatus = firstTask.status
+    if taskStatus == 'Cancelled':
+        title = "Información de Transferencia de Productos Cancelada"
+    elif taskStatus == 'Confirmed':
+        title = "Información de Transferencia de Productos Confirmada"
+    return render(request, 'transferConfirmed.html', { 'task': confirmedTask[0] ,'warehouseIn': depositoEntrada, 'title':title})
 
 
 @login_required
@@ -1478,9 +1492,15 @@ def outboundConfirmedView(request, requested_id):
     # confirmedTask = get_object_or_None(Tasks, pk=requested_id)
     confirmedTask = Tasks.objects.filter(task_id=requested_id, status__in = ('Confirmed','Cancelled'))
     print('confirmedTask is', confirmedTask)
+    firstTask = Tasks.objects.filter(task_id= requested_id).first()
+    
+    taskStatus = firstTask.status
+    if taskStatus == 'Confirmed':
+        title = 'Informacion Entrega de Productos Confirmada'
+    elif taskStatus == 'Cancelled':
+        title = 'Informacion Cancelación de Entrega de Productos'
 
-
-    return render(request, 'outboundConfirmed.html', { 'task': confirmedTask[0]})
+    return render(request, 'outboundConfirmed.html', { 'task': confirmedTask[0], 'title': title})
 
 def cancelTaskView(request, requested_id):
 
@@ -1607,11 +1627,153 @@ def cotizationView(request,cotization_id):
     return render(request, 'modal.html', context)
     #return JsonResponse({'products': list(products)})
 
+def crudProducts(request,action):
+    
+    print('request.Files are')
+    print(request.FILES)
+    cotizations = Cotization.objects.all()
+   
+    if action == 'update':
+        operation = 'Actualizar Productos'
+        title = 'Actualizar Stock/Precios Productos'
+
+    elif action == 'create':
+        operation = 'Crear Productos'
+        title = 'Creacion Nuevos Productos'
+    
+    elif action == 'delete':
+        operation = 'Eliminar Productos'
+        title = 'Eliminar Productos'
+    
+    if request.method == 'POST':
+        form = CrudProductsForm(request.POST, request.FILES)
+        if form.is_valid():
+            print('el form es valido')
+
+            data = handle_uploaded_file(request.FILES['archivo'])
+            
+            register_date = datetime.now().date()
+        
+            numberOfProducts = len(data)
+            products = []
+            products_warehouse = []
+
+            if action == 'update':
+                
+                for i in range(0,len(data)):
+                    try:
+                        print(data.iloc[i])
+                        product_code = data.iloc[i]['codigo interno']
+                        product_quantity = data.iloc[i]['cantidad']
+                        product_price = data.iloc[i]['precio']
+                        deposit = data.iloc[i]['deposito']
+                        productdb = Product.objects.get(internalCode = product_code)
+                        
+                        if len(WarehousesProduct.objects.filter(product = productdb.product_id)) > 1:
+                        
+                            productdb_update = Product.objects.filter(internalCode = product_code)
+                            for product in productdb_update:
+                                product.quantity = product.quantity + product_quantity
+                                product.price = product_price 
+                                #productdb_update[0].quantity = productdb_update[0].quantity + product_quantity
+                                #productdb_update[0].price = product_price
+
+                                products.append(product)
+                                #.update(quantity= F('quantity') + product_quantity , price = product_price)
+
+                        else:
+                            productdb_update = Product.objects.filter(internalCode = product_code)
+                            #.update(quantity= product_quantity, price = product_price)
+                            for product in productdb_update:
+                                product.quantity = product_quantity
+                                product.price = product_price
+                           
+
+                                products.append(product)
+
+
+                        productWarehousedb = WarehousesProduct.objects.filter(name=deposit, product= productdb.product_id)
+                        print('productWarehousedb', productWarehousedb)
+                        for productWarehouse in productWarehousedb:
+                            productWarehouse.quantity = product_quantity
+                       # productWarehousedb.quantity = product_quantity
+                    
+                            products_warehouse.append(productWarehouse)
+                        #.update(quantity= product_quantity, price = product_price)
+                    except ValidationError as e:                       
+                        messages.error(request, "Corregir nombre de los campos del archivo", extra_tags='product format')
+
+                    Product.objects.bulk_update(products, ['quantity','price'])
+                    WarehousesProduct.objects.bulk_update(products_warehouse, ['quantity'])
+
+                messages.info(request, "Se actualizan {} productos ".format(numberOfProducts), extra_tags="CotizacionOferta")
+            
+            elif action == 'create':
+                
+                for i in range(0,len(data)):
+                    try:
+                        product_code = data.iloc[i]['codigo interno']
+
+                        productExist = Product.objects.filter(internalCode= product_code).exists()
+                        print('productExist is', productExist)
+                        if productExist:
+                            messages.error(request, 'El Producto con codigo {} ya existe en la base de datos'.format(product_code), extra_tags='product_exists')
+                        
+                            return HttpResponseRedirect('/products-crud/create')
+                        else:
+
+                            product_barcode = data.iloc[i]['codigo de barras']
+                            name = data.iloc[i]['nombre']
+                            category = data.iloc[i]['categoria']
+                            supplier = data.iloc[i]['proveedor']
+                            stockSecurity = data.iloc[i]['stock seguridad']
+                            product_quantity = data.iloc[i]['cantidad']
+                            product_price = data.iloc[i]['precio']
+                            warehouse = data.iloc[i]['deposito']
+                            currency = data.iloc[i]['moneda']
+                            newProduct = Product(name=name, internalCode= product_code, barcode= product_barcode, quantity= product_quantity, category= category, supplier=supplier, stockSecurity=stockSecurity, currency=currency)
+                            newProductInDeposit= WarehousesProduct(product= newProduct, name=warehouse, quantity = product_quantity, deltaQuantity = 0)
+
+                            products.append(newProduct)
+                            products_warehouse.append(newProductInDeposit)
+                        
+                    except ValidationError as e:
+                        
+                        messages.error(request, "Corregir nombre de los campos del archivo", extra_tags='product format')
+
+                Product.objects.bulk_create(products)
+                WarehousesProduct.objects.bulk_create(products_warehouse)
+
+                messages.info(request, "Se crean {} productos ".format(numberOfProducts), extra_tags="CotizacionOferta")
+            
+            elif action == 'delete':
+                for i in range(0,len(data)):
+                    try:
+                        
+                        product_code = data.iloc[i]['codigo interno']
+                        productdb = Product.objects.get(internalCode = product_code).delete()
+                        products.append(productdb)
+                        
+                    except ValidationError as e:
+                        
+                        messages.error(request, "Corregir nombre de los campos del archivo", extra_tags='product format')
+                
+                messages.info(request, "Se eliminan {} productos ".format(numberOfProducts), extra_tags="CotizacionOferta")
+
+            
+            #return HttpResponseRedirect('new-cotization/')
+    else:
+        form = CrudProductsForm()
+    
+    return render(request, 'crudProducts.html', {'form': form, 'action': action, 'operation': operation, 'title': title})
+
 
 def newCotization(request):
 
     print('request.Files are')
     print(request.FILES)
+    print('request object is', request)
+
     cotizations = Cotization.objects.all()
     if request.method == 'POST':
         form = CotizationForm(request.POST, request.FILES)

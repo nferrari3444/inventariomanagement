@@ -1,4 +1,4 @@
-Nombre,Contraseña,Correo,Deparamento,Rol
+Nombre,Contrasenia,Correo,Deparamento,Rol
 Javier Bonetti,alfabeta1984,javier.bonetti@filsa.com.uy,Direccion,Administrador
 Fernando Crego,alfabeta1984,Fernando.crego@filsa.com.uy,Direccion,Administrador
 Natalie Pailos,alfabeta1984,natalie.pailos@filsa.com.uy,Administracion,Administrador
@@ -10,7 +10,7 @@ Rodrigo Fregueiro,alfabeta1984,rodrigofregueiro@filsa.com.uy,Encargado Servicio 
 Gonzalo Fregueiro,alfabeta1984,gonzalo.fregueiro@filsa.com.uy,Encargado Servicio Tecnico,Supervisor
 Raul Ricci,alfabeta1984,raul.ricci@filsa.com.uy,Servicio tecnico,Tecnico
 Carlos Echeverria,alfabeta1984,carlos.echeverria@filsa.com.uy,Servicio tecnico,Tecnico
-Fernando Elías,alfabeta1984,fernando.elias@filsa.com.uy,Servicio tecnico,Tecnico
+Fernando Elias,alfabeta1984,fernando.elias@filsa.com.uy,Servicio tecnico,Tecnico
 Cristian Lopez,alfabeta1984,cristian.lopez@filsa.com.uy,Servicio tecnico,Tecnico
 Joel Villar,alfabeta1984,logistica@filsa.com.uy,Logistica,Logistica
 Gerardo Braga,alfabeta1984,gerardo.braga@ciame.com.uy,Logistica,Logistica
