@@ -7,7 +7,7 @@ from .views import (home,  Login, Logout, Register, filterProducts, getProductWa
                     transferConfirmedView, outboundDeliveryView, outboundOrderView,
                     outboundConfirmedView, finishTask, inboundReceptionView, inboundConfirmedView,
                     cotizationView, TaskListView,  StockHistoryView, cotizationDelete,
-                    export_excel, cancelTaskView)
+                    export_excel, cancelTaskView, crudProducts)
 
 from django.contrib.auth.views import (
     LogoutView, 
@@ -35,6 +35,7 @@ urlpatterns = [
     path('task-cancelled/<int:requested_id>', cancelTaskView, name='canceltask'),
     path('tasks/', TaskListView.as_view() , name='tasks'),
     path('new-cotization/', newCotization , name='newcotization'),
+    path('products-crud/<str:action>', crudProducts, name='productscrud'),
     path('modal/<int:cotization_id>/', cotizationView , name='cotizationview'),
     path('delete-cotization/<int:cotization_id>/', cotizationDelete , name='deletecotization'),
     path('historical-movements/<int:product_id>', StockHistoryView.as_view(), name= "stockhistory" ) ,

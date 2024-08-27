@@ -49,18 +49,18 @@ class Command(BaseCommand):
         #reader = f.read()
         #users_lines = list(reader)
         
-        with open(users_file) as file:
+        with open(users_file, 'r') as file:
         #     #print(file.readlines())
             users_lines = file.readlines()
         # # Archivo: Nombre,Correo,Contraseña, Deparamento,Rol
-            users_obj = []
+            #users_obj = []
             superuser = CustomUser.objects.create_superuser(username = 'filsacompany' , email='operaciones@filsa.com.uy', password='sitioweb_2024')
             for line in users_lines[1:]:
                 
                 user_model = CustomUser()
                 # print('user line is ', line)
                 line = line.split(',')
-                print(line)
+                print('lines is:',line)
                 nombre_usuario = line[0]
                 correo = line[2]
                 password = line[1]
@@ -74,11 +74,11 @@ class Command(BaseCommand):
                 # user_model.departamento = line[3]
                 # user_model.role = line[4]
                 userobj = CustomUser.objects.create_user(username= nombre_usuario, password=password, email=correo, departamento=departamento,role=rol)
-                # userobj.save()
+               # userobj.save()
                 user_group ,  created = Group.objects.get_or_create(name=rol) 
                 user_group.user_set.add(userobj)
                 
-                #users_obj.append(user_model)
+               # users_obj.append(user_model)
 
 
             #CustomUser.objects.bulk_create(users_obj)
