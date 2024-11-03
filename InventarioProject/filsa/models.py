@@ -128,7 +128,7 @@ class Tasks(models.Model):
     motivoEgreso = models.CharField(max_length=30, choices = MOTIVOSEGRESO) #default='Transferencia Depósitos')
 
     #warehouse = models.ForeignKey(Warehouses, on_delete= models.CASCADE, blank=True, null=True)
-    warehouseProduct = models.ForeignKey(WarehousesProduct, on_delete= models.CASCADE, blank=True, null=True)
+    warehouseProduct = models.ForeignKey(WarehousesProduct, on_delete= models.SET_DEFAULT, blank=True, null=True)
     actionType = models.CharField(max_length=20,  default='Inbound')
     observationsSolicitud = models.CharField(max_length=500, null=True, blank= True)
     observationsConfirma = models.CharField(max_length=500, null=True, blank= True)
@@ -143,7 +143,7 @@ class StockMovements(models.Model):
                 ('Outbound', 'Outbound')]
     
     # Se cambia Product como primary key por WarehousesProduct
-    warehouseProduct = models.ForeignKey(WarehousesProduct, on_delete=models.CASCADE,  verbose_name=u"Nombre de Producto")
+    warehouseProduct = models.ForeignKey(WarehousesProduct, on_delete=models.SET_DEFAULT, null=True, verbose_name=u"Nombre de Producto")
     task = models.ForeignKey(Tasks, on_delete=models.CASCADE,  blank=True, null=True )
 #date = models.DateField(verbose_name=u"Fecha")
   #  deliveryDate = models.DateField(verbose_name=u"Fecha", default = '1970-01-01')

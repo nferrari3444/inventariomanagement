@@ -333,7 +333,7 @@ def transferView(request):
     # if this is a POST request we need to process the form data
     if request.method == "POST":
         # # create a form instance and populate it with data from the request:
-        form = TransferForm(request.POST, user = request.user, extra = request.POST.get('extra_field_count'), invalidForm=False)
+        form = TransferForm(request.POST, user = request.user, extra = request.POST.get('extra_field_count'))
         # # check whether it's valid:
       #  print('form is valid', form.is_valid())
         print('request POST', request.POST)
@@ -393,9 +393,9 @@ def transferView(request):
 
                 #productToUpdate.update(quantity = F('quantity') - quantity  )
 
-                depositProductUpdate = WarehousesProduct.objects.filter(product=productdb, name=warehouse_out)
+               # depositProductUpdate = WarehousesProduct.objects.filter(product=productdb, name=warehouse_out)
 
-                depositProductUpdate.update(quantity = F('quantity') - quantity)
+               # depositProductUpdate.update(quantity = F('quantity') - quantity)
 
                 newProduct = StockMovements(warehouseProduct =  warehouseProductdb, 
                             actionType = actionType,
@@ -403,7 +403,7 @@ def transferView(request):
             
 
                
-                productInTransit = WarehousesProduct.objects.create(product=productdb,
+                WarehousesProduct.objects.create(product=productdb,
                                     name="En Transito", quantity=quantity, deltaQuantity = 0)
 
                 datalist.append(newProduct)
@@ -435,9 +435,83 @@ def transferView(request):
     # if a GET (or any other method) we'll create a blank form
     else:
         
-        form = TransferForm(user=request.user, invalidForm=False)
+        form = TransferForm(user=request.user)
 
     return render(request, "transfer.html", {"form": form, "formInvalid": False}) #, "products" :productNames})
+
+@login_required
+def transferEditTask(request,requested_id):
+    pendingTask = get_object_or_None(Tasks, pk=requested_id)
+    if pendingTask:
+        products = pendingTask.stockmovements_set.all()
+
+    tasks = Tasks.objects.filter(task_id=requested_id, status='Pending').prefetch_related('stockmovements_set')
+
+    numberOfProducts = request.POST.get('extra_field_count')
+    print('number Of Products in OutboundDeliver view is', numberOfProducts)
+     # if this is a POST request we need to process the form data
+    if request.method == "POST":
+        # create a form instance and populate it with data from the request:
+        form = TransferForm(request.POST,   user = request.user, instance= pendingTask, extra= request.POST.get('extra_field_count'))
+
+        print('form is valid', form.is_valid())
+      #  print('form is', form)
+        print('form fields are', form.cleaned_data)
+
+        # check whether it's valid:
+        if form.is_valid():
+            print('el form es valido')
+            
+            department = form.cleaned_data['department']
+            issuer = form.cleaned_data['issuer']
+            receptor = form.cleaned_data['receptor']
+            warehouse = form.cleaned_data['warehouse']
+            
+            # motivoEgreso = form.cleaned_data['motivoEgreso']
+        
+            observationsSolicitud = form.cleaned_data['observationsSolicitud']
+            deliveryDate = datetime.now().date()
+            
+           
+            taskToUpdate = Tasks.objects.filter(task_id=requested_id)
+            taskToUpdate.update(receptor=receptor, department=department, observationsSolicitud= observationsSolicitud,deliveryDate= deliveryDate)
+            
+            
+            # task = Tasks.objects.get(task_id=requested_id)
+            
+            # print('products are:',products)
+            # for i , product in enumerate(products):
+            #     print('product in enumerate is:', product)
+            #     form.fields['producto_{}'.format(i)] = product.warehouseProduct.product.name
+            #     form.fields['cantidad_{}'.format(i)] = product.cantidad
+            #     form.fields['internalCode_{}'.format(i)] = product.warehouseProduct.product.internalCode
+            #     form.fields['barcode_{}'.format(i)] = product.warehouseProduct.product.barcode
+                
+                # internalCode = product.warehouseProduct.product.internalCode
+                # quantity = form.fields['cantidad_{}'.format(i)]
+
+                # #product_db = Product.objects.get(name= product.warehouseProduct.product.name)
+                # product_db = Product.objects.get(internalCode= internalCode)
+                # productWarehouse_db = WarehousesProduct.objects.get(product= product_db, name=warehouse)
+
+                # productToUpdate= Product.objects.filter(product_id= product_db.product_id)
+            
+                # print('productToUpdate is:', productToUpdate)
+
+                # productToUpdate.update(quantity = quantity) #, deltaQuantity = F('deltaQuantity') + diffQuantity  )
+            
+                # productWarehouseToUpdate = WarehousesProduct.objects.filter(product= product_db, name=warehouse)
+                
+                # productWarehouseToUpdate.update(quantity = quantity)
+
+            print('form fields in view', form.fields)
+            return redirect('/tasks/')
+    else:
+        print('pending task is:', pendingTask)
+        form = TransferForm(instance= pendingTask , user = request.user, 
+                                    initial={"task_id": requested_id })
+    
+    return render(request, "transferEdit.html", {"form": form, 'task_id': requested_id , "tasks": tasks})#, "numberOfProducts": len(productsToReceive)})
 
 @login_required
 def transferReceptionView(request, requested_id):
@@ -477,17 +551,23 @@ def transferReceptionView(request, requested_id):
             issuer = form.cleaned_data['issuer']
             receptor = form.cleaned_data['receptor']
             warehouse = form.cleaned_data['warehouse']
+            warehouseSalida = form.cleaned_data['warehouseSalida']
             print('warehouse in form is', warehouse)
             actionType = 'Confirma Transferencia'
             observations = form.cleaned_data['observationsConfirma']
             observationsSolicitud = form.cleaned_data['observationsSolicitud']
             deliveryDate = datetime.now().date()
+
+
+
+
+
             datalist = []
             # task = Tasks.objects.create(date= date, receptor= receptor, warehouse= warehouse, issuer= issuer,
             #                             motivoIngreso=motivoIngreso,  actionType=actionType, department=department)
             
             taskToUpdate = Tasks.objects.filter(task_id=requested_id)
-            taskToUpdate.update(status='Confirmed', observationsConfirma=observations, observationsSolicitud= observationsSolicitud, deliveryDate=deliveryDate)
+            taskToUpdate.update(status='Confirmed', actionType= actionType, observationsConfirma=observations, observationsSolicitud= observationsSolicitud, deliveryDate=deliveryDate)
             
             taskupdated = Tasks.objects.filter(task_id = requested_id).values_list('receptor', 'issuer','status', 'motivoIngreso','motivoEgreso','warehouseProduct__name','actionType')
             print('taskupdated in view is ', taskupdated)
@@ -507,18 +587,23 @@ def transferReceptionView(request, requested_id):
                 print('productdb is', productdb)
                 # productToUpdate= Product.objects.filter(product_id= newproduct.product_id, warehouse=warehouse)
                 
+                # Se debe actualizar el stock de producto en el depósito de salida, el stock en depósito En Transito, 
+                # y el stock en el depósito de entrada.
+                warehouseProductSalida = WarehousesProduct.objects.filter(product=productdb, name = warehouseSalida)
+                warehouseProductSalida.update(quantity = F('quantity') - quantity) #, deltaQuantity = F('deltaQuantity') - diffQuantity)
+
+                warehouseProductEnTransito = WarehousesProduct.objects.filter(product=productdb , name = 'En Transito')
+                warehouseProductEnTransito.update(quantity = F('quantity') - quantity) #, deltaQuantity = F('deltaQuantity') - diffQuantity)
+
+
                 # Se comenta productToUpdate porque ahora se va a actualizar el producto en el deposito
                 #productToUpdate= Product.objects.filter(name= product.product.name, warehouse=warehouse)
                 warehouseProduct = WarehousesProduct.objects.filter(product= productdb, name=warehouse)
                 # productToUpdate = get_object_or_None(Product, name=product.product.name, warehouse=warehouse)
                 print('productToUPdate is', warehouseProduct)
-                # 20-03-2024 Lo siguiente se borra tb porque está a nivel de producto global
-                #if productToUpdate.exists():    
-                #    product_data = Product.objects.get(name= product.product.name, warehouse=warehouse)
-                    # print('product line 273 is:', product)
-                #    productToUpdate= Product.objects.filter(name= product.product.name, warehouse=warehouse)
-                #    productToUpdate.update(quantity = F('quantity') + netQuantity, deltaQuantity = F('deltaQuantity') - diffQuantity ,inTransit=False )
-                
+               
+
+                # Se suman las cantidades que se recepcionan de los productos
                 if warehouseProduct.exists():
                     warehouseProduct_data = WarehousesProduct.objects.get(product=productdb, name=warehouse)
 
@@ -536,13 +621,13 @@ def transferReceptionView(request, requested_id):
                         
                             DiffProducts.objects.filter(warehouseProduct= warehouseProduct_data).update(totalPurchase= F('totalPurchase') + quantity, totalQuantity= F('totalQuantity') + netQuantity, productDiff= F('productDiff') + diffQuantity) #), warehouse=warehouse).update(totalPurchase= F('totalPurchase') + quantity, totalQuantity= F('totalQuantity') + netQuantity, productDiff= F('productDiff') + diffQuantity)
 
-                    else:
-                        
-                        DiffProducts.objects.create(warehouseProduct= warehouseProduct_data,  totalPurchase=quantity, totalQuantity= netQuantity, productDiff= diffQuantity)
+                        else:
+                            
+                            DiffProducts.objects.create(warehouseProduct= warehouseProduct_data,  totalPurchase=quantity, totalQuantity= netQuantity, productDiff= diffQuantity)
                 
                 else:
                     
-                    newProductInDeposit= WarehousesProduct.objects.create(product=productdb, name=warehouse, quantity = quantity, deltaQuantity=  diffQuantity)
+                    newProductInDeposit= WarehousesProduct.objects.create(product=productdb, name=warehouse, quantity = netQuantity, deltaQuantity=  diffQuantity)
 
                     newProductMovement = StockMovements(warehouseProduct = newProductInDeposit, 
                              actionType = actionType,
@@ -556,8 +641,8 @@ def transferReceptionView(request, requested_id):
                         
                              DiffProducts.objects.filter(warehouseProduct= newProductInDeposit).update(totalPurchase= F('totalPurchase') + quantity, totalQuantity= F('totalQuantity') + netQuantity, productDiff= F('productDiff') + diffQuantity) #), warehouse=warehouse).update(totalPurchase= F('totalPurchase') + quantity, totalQuantity= F('totalQuantity') + netQuantity, productDiff= F('productDiff') + diffQuantity)
 
-                    else:
-                        DiffProducts.objects.create(warehouseProduct= newProductInDeposit,  totalPurchase=quantity, totalQuantity= netQuantity, productDiff= diffQuantity)
+                        else:
+                            DiffProducts.objects.create(warehouseProduct= newProductInDeposit,  totalPurchase=quantity, totalQuantity= netQuantity, productDiff= diffQuantity)
                     
                         
                     
@@ -652,7 +737,7 @@ def inboundView(request):
             
             for i in range(1,int(numberOfProducts) + 1):
 
-                product = form.cleaned_data['product_{}'.format(i)]
+                product = form.cleaned_data['producto_{}'.format(i)]
                 internalCode = form.cleaned_data['internalCode_{}'.format(i)]
 
                 print('product in inbound view is {}'.format(product))
@@ -686,18 +771,22 @@ def inboundView(request):
                   
                     cantidad = form.cleaned_data['cantidad_{}'.format(i)]
                     
-                    productWarehouseNoStock = WarehousesProduct.objects.filter(product = productdb, name='No Stock')
-                    if productWarehouseNoStock.exists():                    
-                        print('Se elimina el producto {} en el deposito No Stock'.format(productWarehouseNoStock))
-                        productWarehouseNoStock.delete()
-                    
-                    print('el producto {} no existe en el deposito {}'.format(product, warehouse))
-                    #newproduct_db = Product.objects.create(name=product, barcode=barcode,internalCode=internalCode,quantity=0, 
-                    
-                    #                       warehouse= warehouse_obj, deltaQuantity=0, stockSecurity= stockSecurity, inTransit=True)
+                    # Se comenta esto 31-10-2024 porque los productos no se mueven aun. Se pasa este codigo
+                    # al momento que se confirma el producto. Finalmente se crea el producto con cantidad 0.
 
-                    #newproduct_db.save()
-                    newWarehouseProduct_db = WarehousesProduct.objects.create(product=productdb, name=warehouse, quantity=quantity, deltaQuantity=0, inTransit=True)
+                    # productWarehouseNoStock = WarehousesProduct.objects.filter(product = productdb, name='No Stock')
+                    # if productWarehouseNoStock.exists():                    
+                    #     print('Se elimina el producto {} en el deposito No Stock'.format(productWarehouseNoStock))
+                    #     productWarehouseNoStock.delete()
+                    
+                    # print('el producto {} no existe en el deposito {}'.format(product, warehouse))
+                    # #newproduct_db = Product.objects.create(name=product, barcode=barcode,internalCode=internalCode,quantity=0, 
+                    
+                    # #                       warehouse= warehouse_obj, deltaQuantity=0, stockSecurity= stockSecurity, inTransit=True)
+
+                    # #newproduct_db.save()
+                    # 3-11-2024 Borramos el deposito del producto y le ingreso name=En Transito como
+                    newWarehouseProduct_db = WarehousesProduct.objects.create(product=productdb, name=warehouse, quantity=0, deltaQuantity=0, inTransit=True)
                     newWarehouseProduct_db.save()
 
                     newWarehouseProduct = StockMovements(warehouseProduct = newWarehouseProduct_db, actionType = actionType, cantidad= cantidad, task = task )
@@ -731,6 +820,79 @@ def inboundView(request):
 
     return render(request, "inbound.html", {"form": form}) #, "products" :productNames})
 
+@login_required
+def inboundEditTask(request,requested_id):
+    pendingTask = get_object_or_None(Tasks, pk=requested_id)
+    if pendingTask:
+        products = pendingTask.stockmovements_set.all()
+
+    tasks = Tasks.objects.filter(task_id=requested_id, status='Pending').prefetch_related('stockmovements_set')
+
+    numberOfProducts = request.POST.get('extra_field_count')
+    print('number Of Products in OutboundDeliver view is', numberOfProducts)
+     # if this is a POST request we need to process the form data
+    if request.method == "POST":
+        # create a form instance and populate it with data from the request:
+        form = InboundForm(request.POST,   user = request.user, instance= pendingTask, extra= request.POST.get('extra_field_count'))
+
+        print('form is valid', form.is_valid())
+      #  print('form is', form)
+        print('form fields are', form.cleaned_data)
+
+        # check whether it's valid:
+        if form.is_valid():
+            print('el form es valido')
+            
+            department = form.cleaned_data['department']
+            issuer = form.cleaned_data['issuer']
+            receptor = form.cleaned_data['receptor']
+            warehouse = form.cleaned_data['warehouse']
+            
+            motivoIngreso = form.cleaned_data['motivoIngreso']
+        
+            observationsSolicitud = form.cleaned_data['observationsSolicitud']
+            deliveryDate = datetime.now().date()
+            
+            taskToUpdate = Tasks.objects.filter(task_id=requested_id)
+            taskToUpdate.update(receptor=receptor, department=department, observationsSolicitud= observationsSolicitud, motivoIngreso=motivoIngreso, deliveryDate= deliveryDate)
+            
+            
+            task = Tasks.objects.get(task_id=requested_id)
+            
+            # print('products are:',products)
+            # for i , product in enumerate(products):
+            #     print('product in enumerate is:', product)
+            #     form.fields['producto_{}'.format(i)] = product.warehouseProduct.product.name
+            #     form.fields['cantidad_{}'.format(i)] = product.cantidad
+            #     form.fields['internalCode_{}'.format(i)] = product.warehouseProduct.product.internalCode
+            #     form.fields['barcode_{}'.format(i)] = product.warehouseProduct.product.barcode
+                
+            #     internalCode = product.warehouseProduct.product.internalCode
+            #     quantity = form.fields['cantidad_{}'.format(i)]
+
+            #     product_db = Product.objects.get(internalCode= internalCode )
+
+            #     productWarehouse_db = WarehousesProduct.objects.get(product= product_db, name=warehouse)
+
+            #     productToUpdate= Product.objects.filter(product_id= product_db.product_id)
+            
+            #     print('productToUpdate is:', productToUpdate)
+
+            #     productToUpdate.update(quantity = quantity) #, deltaQuantity = F('deltaQuantity') + diffQuantity  )
+            
+            #     productWarehouseToUpdate = WarehousesProduct.objects.filter(product= product_db, name=warehouse)
+                
+            #     productWarehouseToUpdate.update(quantity = quantity)
+
+            # print('form fields in view', form.fields)
+            return redirect('/tasks/')
+    else:
+        print('pending task is:', pendingTask)
+        form = InboundForm(instance= pendingTask , user = request.user, 
+                                    initial={"task_id": requested_id })
+    
+    return render(request, "inboundEdit.html", {"form": form, 'task_id': requested_id , "tasks": tasks})#, "numberOfProducts": len(productsToReceive)})
+
     
 @login_required
 def inboundReceptionView(request, requested_id):
@@ -760,11 +922,7 @@ def inboundReceptionView(request, requested_id):
         # check whether it's valid:
         if form.is_valid():
             print('el form es valido')
-           #product = form.cleaned_data['product']
-           # date  =   form.cleaned_data['date']
-            
-           # print(product)
-           # print(date)
+      
             department = form.cleaned_data['department']
             issuer = form.cleaned_data['issuer']
             receptor = form.cleaned_data['receptor']
@@ -797,27 +955,51 @@ def inboundReceptionView(request, requested_id):
                 
                 quantity = form.fields['cantidad_{}'.format(i)]
                 diffQuantity = int(quantity) - int(netQuantity)
+
                 newproduct = Product.objects.get(internalCode= product.warehouseProduct.product.internalCode) #, warehouse=warehouse)
                 productWarehouse = WarehousesProduct.objects.get(product=newproduct, name=warehouse)
                 
-                
+                # Este codigo anteriormente estaba en Inbound View. Si el producto se encuentra en deposito 
+                # denominado No Stock => se elimina de ese depósito, y se da de alta como producto nuevo(create) 
+                # en el deposito correspondiente.
+
+                productWarehouseNoStock = WarehousesProduct.objects.filter(product = newproduct, name='No Stock')
+                if productWarehouseNoStock.exists():                    
+                    print('Se elimina el producto {} en el deposito No Stock'.format(productWarehouseNoStock))
+                    productWarehouseNoStock.delete()
+                    
+                    print('el producto {} no existe en el deposito {}'.format(product, warehouse))
+                    #newproduct_db = Product.objects.create(name=product, barcode=barcode,internalCode=internalCode,quantity=0, 
+                    
+                    #                       warehouse= warehouse_obj, deltaQuantity=0, stockSecurity= stockSecurity, inTransit=True)
+
+                    #newproduct_db.save()
+                    # newWarehouseProduct_db = WarehousesProduct.objects.create(product=newproduct, name=warehouse, quantity=quantity, deltaQuantity=0, inTransit=True)
+                    # newWarehouseProduct_db.save()
+               
+               
+                # Se actualizan las cantidades del proyecto
+               
+
                 print('El nuevo producto a recibir es {} en el deposito {}'.format(product.warehouseProduct.product.name, warehouse))
                 productToUpdate= Product.objects.filter(product_id= newproduct.product_id) #, warehouse=warehouse)
-            
+        
                 print('productToUpdate is:', productToUpdate)
 
                 productToUpdate.update(quantity = F('quantity') + netQuantity) #, deltaQuantity = F('deltaQuantity') - diffQuantity , inTransit=False )
-            
+        
 
                 productWarehouseToUpdate = WarehousesProduct.objects.filter(product= newproduct, name=warehouse)
-                
-                # Si el producto tiene inTransit=True, entonces el producto no estaba anteriormente en ningun deposito y se creo en InboundView en el 
-                # deposito correspondiente con la cantidad ingresada. 
-                if productWarehouseToUpdate[0].inTransit == True:
-                    productWarehouseToUpdate.update(quantity = netQuantity, deltaQuantity= F('deltaQuantity') - diffQuantity, inTransit=False)
 
-                else:
-                    productWarehouseToUpdate.update(quantity = F('quantity') + netQuantity, deltaQuantity= F('deltaQuantity') - diffQuantity)
+                productWarehouseToUpdate.update(quantity = F('quantity') + netQuantity, deltaQuantity= F('deltaQuantity') - diffQuantity)
+
+                # # Si el producto tiene inTransit=True, entonces el producto no estaba anteriormente en ningun deposito y se creo en InboundView en el 
+                # # deposito correspondiente con la cantidad ingresada. 
+                # if productWarehouseToUpdate[0].inTransit == True:
+                #     productWarehouseToUpdate.update(quantity = netQuantity, deltaQuantity= F('deltaQuantity') - diffQuantity, inTransit=False)
+
+                # else:
+                #     productWarehouseToUpdate.update(quantity = F('quantity') + netQuantity, deltaQuantity= F('deltaQuantity') - diffQuantity)
 
                 print('Se actualizó el producto {} en la tabla de productos así como en la tabal de warehouseProduct {} en el deposito {}'.format(productToUpdate, productWarehouseToUpdate,warehouse))
                 newProduct = StockMovements(warehouseProduct = productWarehouse,         #newproduct, 
@@ -866,17 +1048,39 @@ def inboundConfirmedView(request, requested_id):
    # pendingRequest = get_object_or_None(StockMovements, pk=requested_id)
     #print('pendingRequest product is:', pendingRequest.product)
     # confirmedTask = get_object_or_None(Tasks, pk=requested_id)
-    confirmedTask = Tasks.objects.filter(task_id=requested_id, status='Confirmed')
+    confirmedTask = Tasks.objects.filter(task_id=requested_id, status__in = ('Confirmed','Cancelled'))
+    print('confirmedTask is', confirmedTask)
+    lastTask = Tasks.objects.filter(task_id= requested_id).first()
+    actionType = lastTask.actionType
+    taskStatus = lastTask.status
+    print('lastTask is', lastTask)
+    print('task actionType is', actionType)
+    print('task status is', taskStatus)
+    if taskStatus == 'Confirmed':
+        title = 'Informacion Entrega de Productos Confirmada'
+    elif taskStatus == 'Cancelled':
+        title = 'Informacion Cancelación de Entrega de Productos'
+
+
+
+
+
+    confirmedTask = Tasks.objects.filter(task_id=requested_id, status__in =('Confirmed', 'Cancelled'))
 
     firstTask = Tasks.objects.filter(task_id= requested_id).first()
     
-    taskStatus = firstTask.status
+    taskStatus = confirmedTask[0].status
+    actionType = firstTask.actionType
     if taskStatus == 'Confirmed':
+        firstMovement = firstTask.stockmovements_set.all().filter(actionType='Confirma Ingreso').first()
+        actionType = firstMovement.actionType
         title = 'Informacion Ingreso de Productos Confirmada'
     elif taskStatus == 'Cancelled':
+        firstMovement = firstTask.stockmovements_set.all().filter(actionType='Nuevo Ingreso').first()
+        actionType = firstMovement.actionType
         title = 'Informacion Ingreso de Productos Cancelada'
 
-    return render(request, 'inboundConfirmed.html', { 'task': confirmedTask[0] , 'title':title})
+    return render(request, 'inboundConfirmed.html', { 'task': confirmedTask[0] , 'actionType': actionType, 'title':title})
 
 @login_required
 def transferConfirmedView(request, requested_id):
@@ -886,15 +1090,20 @@ def transferConfirmedView(request, requested_id):
     
     confirmedTask = Tasks.objects.filter(task_id=requested_id, status__in =('Confirmed', 'Cancelled'))
     firstTask = Tasks.objects.filter(task_id= requested_id).first()
-    firstMovement = firstTask.stockmovements_set.all().filter(actionType='Transferencia').first()
-    depositoSalida = firstMovement.warehouseProduct.name
+    
+    # depositoSalida = firstMovement.warehouseProduct.name
     depositoEntrada = StockMovements.objects.filter(task__task_id=requested_id).last().warehouseProduct.name
-    taskStatus = firstTask.status
+   
+    taskStatus = confirmedTask[0].status
     if taskStatus == 'Cancelled':
+        firstMovement = firstTask.stockmovements_set.all().filter(actionType='Transferencia').first()
+        actionType = firstMovement.actionType
         title = "Información de Transferencia de Productos Cancelada"
     elif taskStatus == 'Confirmed':
+        firstMovement = firstTask.stockmovements_set.all().filter(actionType='Confirma Transferencia').first()
+        actionType = firstMovement.actionType
         title = "Información de Transferencia de Productos Confirmada"
-    return render(request, 'transferConfirmed.html', { 'task': confirmedTask[0] ,'warehouseIn': depositoEntrada, 'title':title})
+    return render(request, 'transferConfirmed.html', { 'task': confirmedTask[0] , 'actionType': actionType, 'warehouseIn': depositoEntrada, 'title':title})
 
 
 @login_required
@@ -1365,6 +1574,79 @@ def filterProducts(request):
         #return render(request, 'stock.html', {'productList' : productList, 'supplierList':supplierList, 'warehouseList':warehouseList,   'categoryList':categoryList,   'page_obj': page_obj})
         
     
+@login_required
+def editDeliveryTask(request,requested_id):
+    pendingTask = get_object_or_None(Tasks, pk=requested_id)
+    if pendingTask:
+        products = pendingTask.stockmovements_set.all()
+
+    tasks = Tasks.objects.filter(task_id=requested_id, status='Pending').prefetch_related('stockmovements_set')
+
+    numberOfProducts = request.POST.get('extra_field_count')
+    print('number Of Products in OutboundDeliver view is', numberOfProducts)
+     # if this is a POST request we need to process the form data
+    if request.method == "POST":
+        # create a form instance and populate it with data from the request:
+        form = OutboundOrderForm(request.POST,   user = request.user, instance= pendingTask, extra= request.POST.get('extra_field_count'))
+
+        print('form is valid', form.is_valid())
+      #  print('form is', form)
+        print('form fields are', form.cleaned_data)
+
+        # check whether it's valid:
+        if form.is_valid():
+            print('el form es valido')
+            
+            department = form.cleaned_data['department']
+            issuer = form.cleaned_data['issuer']
+            receptor = form.cleaned_data['receptor']
+            warehouse = form.cleaned_data['warehouse']
+            
+            motivoEgreso = form.cleaned_data['motivoEgreso']
+        
+            observationsSolicitud = form.cleaned_data['observationsSolicitud']
+            deliveryDate = datetime.now().date()
+            
+            taskToUpdate = Tasks.objects.filter(task_id=requested_id)
+            taskToUpdate.update(receptor=receptor, department=department, observationsSolicitud= observationsSolicitud, motivoEgreso=motivoEgreso, deliveryDate= deliveryDate)
+            
+            
+            task = Tasks.objects.get(task_id=requested_id)
+            
+            # print('products are:',products)
+            # for i , product in enumerate(products):
+            #     print('product in enumerate is:', product)
+            #     form.fields['producto_{}'.format(i)] = product.warehouseProduct.product.name
+            #     form.fields['cantidad_{}'.format(i)] = product.cantidad
+            #     form.fields['internalCode_{}'.format(i)] = product.warehouseProduct.product.internalCode
+            #     form.fields['barcode_{}'.format(i)] = product.warehouseProduct.product.barcode
+                
+            #     internalCode = product.warehouseProduct.product.internalCode
+            #     quantity = form.fields['cantidad_{}'.format(i)]
+
+            #     product_db = Product.objects.get(internalCode= internalCode )
+
+            #     productWarehouse_db = WarehousesProduct.objects.get(product= product_db, name=warehouse)
+
+            #     productToUpdate= Product.objects.filter(product_id= product_db.product_id)
+            
+            #     print('productToUpdate is:', productToUpdate)
+
+            #     productToUpdate.update(quantity = quantity) #, deltaQuantity = F('deltaQuantity') + diffQuantity  )
+            
+            #     productWarehouseToUpdate = WarehousesProduct.objects.filter(product= product_db, name=warehouse)
+                
+            #     productWarehouseToUpdate.update(quantity = quantity)
+
+            # print('form fields in view', form.fields)
+            return redirect('/tasks/')
+    else:
+        print('pending task is:', pendingTask)
+        form = OutboundOrderForm(instance= pendingTask , user = request.user, 
+                                    initial={"task_id": requested_id })
+    
+    return render(request, "outboundEdit.html", {"form": form, 'task_id': requested_id , "tasks": tasks})#, "numberOfProducts": len(productsToReceive)})
+
 
 @login_required
 def outboundDeliveryView(request, requested_id):
@@ -1372,7 +1654,7 @@ def outboundDeliveryView(request, requested_id):
     #print('pendingRequest product is:', pendingRequest.product)
     pendingTask = get_object_or_None(Tasks, pk=requested_id)
     if pendingTask:
-        products = pendingTask.stockmovements_set.all()
+        products = pendingTask.stockmovements_set.all().filter(actionType='Nuevo Egreso')
     print('pendingTask is ', pendingTask)
     print('request is:', request.method)
     print('request product data', request.POST.get('producto_0'))
@@ -1418,7 +1700,8 @@ def outboundDeliveryView(request, requested_id):
             #                             motivoIngreso=motivoIngreso,  actionType=actionType, department=department)
             
             taskToUpdate = Tasks.objects.filter(task_id=requested_id)
-            taskToUpdate.update(status='Confirmed', observationsConfirma=observations, observationsSolicitud= observationsSolicitud,  deliveryDate= deliveryDate)
+        
+            taskToUpdate.update(status='Confirmed', actionType=actionType, observationsConfirma=observations, observationsSolicitud= observationsSolicitud,  deliveryDate= deliveryDate)
             
             
             task = Tasks.objects.get(task_id=requested_id)
@@ -1492,21 +1775,74 @@ def outboundConfirmedView(request, requested_id):
     # confirmedTask = get_object_or_None(Tasks, pk=requested_id)
     confirmedTask = Tasks.objects.filter(task_id=requested_id, status__in = ('Confirmed','Cancelled'))
     print('confirmedTask is', confirmedTask)
-    firstTask = Tasks.objects.filter(task_id= requested_id).first()
-    
-    taskStatus = firstTask.status
+    lastTask = Tasks.objects.filter(task_id= requested_id).first()
+    actionType = lastTask.actionType
+    taskStatus = lastTask.status
+    print('lastTask is', lastTask)
+    print('task actionType is', actionType)
+    print('task status is', taskStatus)
     if taskStatus == 'Confirmed':
         title = 'Informacion Entrega de Productos Confirmada'
     elif taskStatus == 'Cancelled':
         title = 'Informacion Cancelación de Entrega de Productos'
 
-    return render(request, 'outboundConfirmed.html', { 'task': confirmedTask[0], 'title': title})
+    return render(request, 'outboundConfirmed.html', { 'task': confirmedTask[0], 'actionType':actionType, 'title': title})
 
 def cancelTaskView(request, requested_id):
 
-    Tasks.objects.filter(task_id=requested_id).update(status='Cancelled')
+    # return render(request, 'cancelTaskModal.html')
+
+    print('llega a cancelTaskView')
+    print('requested_id is', requested_id)
+    context = {'task': requested_id}
+    print('request method is:', request.method)
+    #if request.method == 'POST':
+    taskToCancel = Tasks.objects.filter(task_id=requested_id) 
+    taskToCancel.update(status='Cancelled')
+
+    cancelledTask = get_object_or_None(Tasks, pk=requested_id)
+    actionType = cancelledTask.actionType
+    print('action Type for task id {} is {}'.format(requested_id, actionType))
+
+    products = cancelledTask.stockmovements_set.all()
+
+    for product in products:
+
+        internalCode = product.warehouseProduct.product.internalCode
+        productdb = Product.objects.get(internalCode = internalCode)
+        if actionType == 'Transferencia':
+           
+            warehouse = 'En Transito'
+            print('warehouse for producto to delete is', warehouse)
+            print('producto con internal code a borrar', internalCode)
+            
+
+            newWarehouseProduct_db = WarehousesProduct.objects.get(product=productdb, name=warehouse)
+
+        
+            newWarehouseProduct_db.delete()
+        elif actionType == 'Nuevo Ingreso':
+            
+            warehouse = product.warehouseProduct.name
+            print('warehouse for producto to delete is', warehouse)
+            print('producto con internal code a borrar', internalCode)
+            
+            newWarehouseProduct_db = WarehousesProduct.objects.get(product=productdb, name=warehouse)
+            newWarehouseProduct_db.delete()
+        
+        else:
+            pass
+   
+
+       
+
+    
 
     return redirect('/tasks/')
+    # else:
+    #     return render(request, 'cancelTaskModal.html', context)
+
+    
 
 def finishTask(request, requested_id):
 

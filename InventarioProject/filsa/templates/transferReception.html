@@ -78,7 +78,7 @@
                         {% for task in tasks %}
 
                         {% for product in task.stockmovements_set.all %}
-                        
+                        {% if  product.actionType == "Transferencia" %}
                              <tr class="bg-gray-100 border-b dark:bg-gray-800 dark:border-gray-700">
                                 <td class="w-1/2"><input type="text" name="producto_{{ forloop.counter0 }}" value="{{product.warehouseProduct.product.name}}"  class="bg-gray-200 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"  id="" name="" placeholder="" disabled></td>
                                 <td class="px-6 py-4"><input type="number" name="cantidad_{{ forloop.counter0 }}" value="{{product.cantidad}}"  class="bg-gray-200 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" id="" name="" placeholder="" disabled></td>             
@@ -86,7 +86,7 @@
                                 <td class="px-6 py-4" name="cantidad_{{ forloop.counter0 }}" value="{{product.cantidad}}">{{product.cantidad}}</td> -->
                                 <td class="px-6 py-4"><input type="number" name="cantidadNeta_{{forloop.counter0}}" class="border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" id="" name="" placeholder="" required></td>
                             </tr>
-                        
+                            {% endif %}
                         {% endfor %}
                         {% endfor %}  
                          <!-- {% for product in form.get_products_fields %}
@@ -124,6 +124,10 @@
             <button type="submit" class="inline-flex items-center px-5 py-2.5 mt-4 sm:mt-6 text-sm font-medium text-center text-white bg-primary-700 rounded-lg focus:ring-4 focus:ring-primary-200 dark:focus:ring-primary-900 hover:bg-primary-800">
                 Confirma Ingreso
             </button>
+
+            <a href="{% url 'tasks' %}" ><button type="button" class="inline-flex items-center px-5 py-2.5 mt-4 sm:mt-6 text-sm font-medium text-center text-white bg-primary-700 rounded-lg focus:ring-4 focus:ring-primary-200 dark:focus:ring-primary-900 hover:bg-primary-800">
+                Volver a Tareas
+                </button></a>
         </form>
     </div>
 
