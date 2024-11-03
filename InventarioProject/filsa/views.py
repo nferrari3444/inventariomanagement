@@ -786,7 +786,7 @@ def inboundView(request):
 
                     # #newproduct_db.save()
                     # 3-11-2024 Borramos el deposito del producto y le ingreso name=En Transito como
-                    newWarehouseProduct_db = WarehousesProduct.objects.create(product=productdb, name=warehouse, quantity=0, deltaQuantity=0, inTransit=True)
+                    newWarehouseProduct_db = WarehousesProduct.objects.create(product=productdb, name=warehouse, quantity=0, deltaQuantity=0 , inTransit=True)
                     newWarehouseProduct_db.save()
 
                     newWarehouseProduct = StockMovements(warehouseProduct = newWarehouseProduct_db, actionType = actionType, cantidad= cantidad, task = task )
@@ -1060,10 +1060,6 @@ def inboundConfirmedView(request, requested_id):
         title = 'Informacion Entrega de Productos Confirmada'
     elif taskStatus == 'Cancelled':
         title = 'Informacion Cancelación de Entrega de Productos'
-
-
-
-
 
     confirmedTask = Tasks.objects.filter(task_id=requested_id, status__in =('Confirmed', 'Cancelled'))
 
@@ -1821,17 +1817,17 @@ def cancelTaskView(request, requested_id):
 
         
             newWarehouseProduct_db.delete()
-        elif actionType == 'Nuevo Ingreso':
+        # elif actionType == 'Nuevo Ingreso':
             
-            warehouse = product.warehouseProduct.name
-            print('warehouse for producto to delete is', warehouse)
-            print('producto con internal code a borrar', internalCode)
+        #     warehouse = product.warehouseProduct.name
+        #     print('warehouse for producto to delete is', warehouse)
+        #     print('producto con internal code a borrar', internalCode)
             
-            newWarehouseProduct_db = WarehousesProduct.objects.get(product=productdb, name=warehouse)
-            newWarehouseProduct_db.delete()
+        #     newWarehouseProduct_db = WarehousesProduct.objects.get(product=productdb, name=warehouse)
+        #     newWarehouseProduct_db.delete()
         
-        else:
-            pass
+        # else:
+        #     pass
    
 
        
