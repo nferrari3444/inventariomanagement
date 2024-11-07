@@ -93,7 +93,7 @@
                         <!-- {{ forloop.counter0 }} -->
                           
                            {% for product in task.stockmovements_set.all %}
-                           {% if  product.actionType == 'Confirma Transferencia' %}
+                           {% if  product.actionType == actionType %}
                          
                                 <tr class="bg-gray-200 border-b dark:bg-gray-800 dark:border-gray-700">
                                    <td class="w-1/2"><input type="text" name="producto_{{ forloop.counter0 }}" value="{{product.warehouseProduct.product.name}}"  class="bg-gray-100 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"  id="" name="" placeholder="" disabled></td>

@@ -6,8 +6,8 @@ from .views import (home,  Login, Logout, Register, filterProducts, getProductWa
                     getProductsNames, transferView,  transferReceptionView,
                     transferConfirmedView, outboundDeliveryView, outboundOrderView,
                     outboundConfirmedView, finishTask, inboundReceptionView, inboundConfirmedView,
-                    cotizationView, TaskListView,  StockHistoryView, cotizationDelete,
-                    export_excel, cancelTaskView, crudProducts)
+                    cotizationView, TaskListView,  StockHistoryView, cotizationDelete, editDeliveryTask,
+                    export_excel, cancelTaskView, crudProducts, transferEditTask, inboundEditTask)
 
 from django.contrib.auth.views import (
     LogoutView, 
@@ -25,14 +25,21 @@ urlpatterns = [
     path('inbound/', inboundView, name='inbound'),
     path('inbound-reception/<int:requested_id>', inboundReceptionView, name='inboundreception'),
     path('inbound-confirmed/<int:requested_id>', inboundConfirmedView, name='inboundconfirmed'),
+    path('inbound-edit/<int:requested_id>', inboundEditTask, name='inboundedit'),
     path('outbound-order/', outboundOrderView, name='outboundorder'),
     path('outbound-delivery/<int:requested_id>', outboundDeliveryView, name='outbounddelivery'),
+
     path('outbound-confirmed/<int:requested_id>', outboundConfirmedView, name='outboundconfirmed'),
     path('transfer/', transferView, name='transfer'),
     path('transfer-reception/<int:requested_id>', transferReceptionView, name='transferreception'),
+    path('transfer-edit/<int:requested_id>', transferEditTask, name='transferedit'),
+
+
     path('transfer-confirmed/<int:requested_id>', transferConfirmedView, name='transferconfirmed'),
+  
     path('finishtask/<int:requested_id>', finishTask,  name='finishtask'),
     path('task-cancelled/<int:requested_id>', cancelTaskView, name='canceltask'),
+    path('task-edited/<int:requested_id>', editDeliveryTask, name='editdeliverytask'),
     path('tasks/', TaskListView.as_view() , name='tasks'),
     path('new-cotization/', newCotization , name='newcotization'),
     path('products-crud/<str:action>', crudProducts, name='productscrud'),

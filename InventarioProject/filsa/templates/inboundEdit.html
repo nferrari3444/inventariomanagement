@@ -10,7 +10,7 @@
 <section class="bg-white dark:bg-gray-900">
     <div class="py-8 px-4 mx-auto max-w-2xl lg:py-16">
         <h1 class="flex mb-4 text-2xl sm:px-16 font-extrabold leading-none tracking-tight text-gray-900 md:text-3xl lg:text-4xl dark:text-white">Entrega de Productos</h1>
-        <form id ='productsreception' action="{% url 'outbounddelivery' task_id  %}" method="POST" onsubmit="openLoader()">
+        <form id ='taskedit' action="{% url 'inboundedit' task_id  %}" method="POST" onsubmit="openLoader()">
             {% csrf_token %}
             {{form.extra_field_count}}
            
@@ -46,7 +46,7 @@
 
                 <div>
                     <label for="receptor" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Motivo de Solicitud</label>
-                    {{form.motivoEgreso}}
+                    {{form.motivoIngreso}}
                 </div>
 
                 <div>
@@ -62,9 +62,6 @@
                     {{form.warehouse}}
                     
                     </div>
-
-                
-                
                 </div>
 
                 <div class="py-8">          
@@ -73,10 +70,10 @@
                            <tr>
                                
                                <th scope="col" class="px-6 py-3">Producto</th>
-                               <!-- <th scope="col" class="px-6 py-3">Codigo de Barras</th> -->
+                               <th scope="col" class="px-6 py-3">Codigo de Barras</th>
                                <th scope="col" class="px-6 py-3">Codigo Interno</th>
                                <th scope="col" class="px-6 py-3">Cantidad</th>
-                               <th scope="col" class="px-6 py-3">Cantidad Neta</th>
+                              
                            </tr>
                        </thead>
                        <tbody>
@@ -84,20 +81,19 @@
                            {% for task in tasks %}
                             {% if  task.status == 'Pending' %}
                            {% for product in task.stockmovements_set.all %}
-                           {% if  product.actionType == 'Nuevo Egreso' %}
+                           {% if  product.actionType == 'Nuevo Ingreso' %}
                          
                                 <tr class="w-full bg-gray-100 border-b dark:bg-gray-800 dark:border-gray-700">
-                                   <td class="w-1/3"><input type="text" name="producto_{{ forloop.counter0 }}" value="{{product.warehouseProduct.product.name}}"  class="bg-gray-200 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"  id="" name="" placeholder="" disabled></td>
-                                  
-                                   <!-- <td class="px-6 py-4"><input type="" name="barcode_{{forloop.counter0}}" value="{{product.warehouseProduct.product.barcode}}"class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" id="" name="" placeholder=""></td> -->
+                                   <td class="w-1/3"><input type="text" name="producto_{{ forloop.counter }}" value="{{product.warehouseProduct.product.name}}"  class="bg-white-200 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"  id="" name="" placeholder=""></td>
+                                    
+                                   <td class="px-6 py-4"><input type="" name="barcode_{{forloop.counter}}" value="{{product.warehouseProduct.product.barcode}}"class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" id="" name="" placeholder=""></td>
 
-                                   <td class="px-6 py-4"><input type="number" name="internalCode_{{forloop.counter0}}" value="{{product.warehouseProduct.product.internalCode}}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" id="" name="" placeholder=""></td>
+                                   <td class="px-6 py-4"><input type="number" name="internalCode_{{forloop.counter}}" value="{{product.warehouseProduct.product.internalCode}}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" id="" name="" placeholder=""></td>
 
-                                   <td class="px-6 py-4"><input type="number" name="cantidad_{{ forloop.counter0 }}" value="{{product.cantidad}}"  class="bg-gray-200 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" id="" name="" placeholder="" disabled></td>             
-                                  
-                                   <!-- <td class="px-6 py-4" name="producto_{{ forloop.counter0 }}" value="{{product.product.name}}">{{product.product.name}}</td>
+                                   <td class="px-6 py-4"><input type="number" name="cantidad_{{ forloop.counter}}" value="{{product.cantidad}}"  class="bg-white-200 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" id="" name="" placeholder=""></td>             
+                                       <!-- <td class="px-6 py-4" name="producto_{{ forloop.counter0 }}" value="{{product.product.name}}">{{product.product.name}}</td>
                                    <td class="px-6 py-4" name="cantidad_{{ forloop.counter0 }}" value="{{product.cantidad}}">{{product.cantidad}}</td> -->
-                                   <td class="px-6 py-4"><input type="number" name="cantidadNeta_{{forloop.counter0}}" class="border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" id="" name="" placeholder="" required></td>
+                                   <!-- <td class="px-6 py-4"><input type="number" name="cantidadNeta_{{forloop.counter0}}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" id="" name="" placeholder="" disabled></td> -->
                                </tr>
                                {% endif %}
                            {% endfor %}
@@ -137,14 +133,13 @@
             
 
             <button type="submit" class="inline-flex items-center px-5 py-2.5 mt-4 sm:mt-6 text-sm font-medium text-center text-white bg-primary-700 rounded-lg focus:ring-4 focus:ring-primary-200 dark:focus:ring-primary-900 hover:bg-primary-800">
-                Confirma Entrega
+                Editar Ingreso
             </button>
 
             <a href="{% url 'tasks' %}" ><button type="button" class="inline-flex items-center px-5 py-2.5 mt-4 sm:mt-6 text-sm font-medium text-center text-white bg-primary-700 rounded-lg focus:ring-4 focus:ring-primary-200 dark:focus:ring-primary-900 hover:bg-primary-800">
                 Volver a Tareas
                 </button></a>
         </form>
-        
     </div>
 
     {% if form.errors %}
@@ -159,14 +154,14 @@
   <script>
 
     let form_count = Number($("[name=extra_field_count]").val());
-    
-    $('#productsreception').submit(function(e) {
+ 
+    $('#taskedit').submit(function(e) {
     
        // e.preventDefault()
     
         var table = document.getElementById('productTable')
         
-        form_count = table.rows.length -1;
+        form_count = table.rows.length -1 ;
     
         console.log('form_count', form_count)
         $("[name=extra_field_count]").val(form_count);
