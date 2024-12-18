@@ -401,7 +401,7 @@ $('#productTable tbody').append(newRow);
                     // console.log('productSelected', dataLS[String(product)])
     
                     var productId = dataLS[product]
-    
+                    var warehouse = $("#warehouse option:selected" ).val()
                     console.log('productId',productId)
                     console.log('warehouse in request_url', warehouse)
                     request_url = "{% url 'productwarehouse' %}" 

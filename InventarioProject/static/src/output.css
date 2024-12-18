@@ -1369,6 +1369,12 @@ input[type="range"]::-ms-fill-lower {
   gap: 1rem;
 }
 
+.-space-x-px > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 0;
+  margin-right: calc(-1px * var(--tw-space-x-reverse));
+  margin-left: calc(-1px * calc(1 - var(--tw-space-x-reverse)));
+}
+
 .space-x-3 > :not([hidden]) ~ :not([hidden]) {
   --tw-space-x-reverse: 0;
   margin-right: calc(0.75rem * var(--tw-space-x-reverse));
@@ -1483,6 +1489,11 @@ input[type="range"]::-ms-fill-lower {
 
 .border-t-0 {
   border-top-width: 0px;
+}
+
+.border-blue-300 {
+  --tw-border-opacity: 1;
+  border-color: rgb(164 202 254 / var(--tw-border-opacity));
 }
 
 .border-gray-100 {
@@ -1978,6 +1989,19 @@ input[type="range"]::-ms-fill-lower {
   width: 10rem;
 }
 
+.ui-autocomplete {
+  max-width: 236px;
+  max-height: 200px;
+  overflow-x: scroll;
+  overflow-y: scroll;
+  font-size: medium;
+}
+
+.hover\:bg-blue-100:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(225 239 254 / var(--tw-bg-opacity));
+}
+
 .hover\:bg-blue-800:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(30 66 159 / var(--tw-bg-opacity));
@@ -2016,6 +2040,11 @@ input[type="range"]::-ms-fill-lower {
 .hover\:text-blue-700:hover {
   --tw-text-opacity: 1;
   color: rgb(26 86 219 / var(--tw-text-opacity));
+}
+
+.hover\:text-gray-700:hover {
+  --tw-text-opacity: 1;
+  color: rgb(55 65 81 / var(--tw-text-opacity));
 }
 
 .hover\:text-gray-900:hover {

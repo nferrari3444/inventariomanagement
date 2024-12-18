@@ -39,7 +39,7 @@ class Command(BaseCommand):
 
         # Warehouses.objects.bulk_create(warehouse_object)
 
-
+    
         #users_file = './usuariosFilsa.txt' 
         #products_file = './productosFilsa.txt' 
         users_file = "C:/Users/nicol/Inventario/InventarioProject/filsa/management/commands/usuariosFilsa.txt"

@@ -182,6 +182,7 @@ def getProductsNames(request):
          
             print(titles)       
             titles = list(set(titles)) 
+            titles = sorted(titles)
             return JsonResponse(titles, safe=False)
         
         else:
@@ -195,6 +196,7 @@ def getProductsNames(request):
          
             print(codes)      
             codes = list(set(codes))  
+            codes = sorted(codes)
             return JsonResponse(codes,safe=False)
             
 
@@ -1294,6 +1296,7 @@ class StockListView(LoginRequiredMixin, FilteredListView, generic.ListView):
     filterset_class = StockFilterSet
     filter_backends = (filters.DjangoFilterBackend,)
     paginate_by = 20
+    
     # paginate_by = 10
    # model = Product
 
