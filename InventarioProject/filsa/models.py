@@ -56,7 +56,7 @@ class Product(models.Model):
     name = models.CharField(max_length=100)
     barcode = models.CharField(max_length= 100, verbose_name=u"Codigo de Barras")
     internalCode = models.BigIntegerField(verbose_name=u"Codigo Interno")
-    quantity = models.FloatField()
+    quantity = models.FloatField(default=0)
     category = models.CharField(max_length=100, default='Insumos') #  choices=CATEGORIES,
     
     supplier = models.CharField(max_length=100, default='')
