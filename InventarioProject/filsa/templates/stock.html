@@ -339,35 +339,64 @@
             <a href="?page={{ page_obj.next_page_number }}" class="text-white bg-green-400 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-1.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">next</a>
             <a href="?page={{ page_obj.paginator.num_pages }}" class=" text-white bg-green-400 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-1.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">last &raquo;</a>
         {% endif %} -->
-         
-        
-
         </div>
     </table>
 
-    <div id="pagination">
+    <div id="pagination px-4 relative">
+    <ul class="inline-flex -space-x-px text-sm">
     {% if is_paginated %}
     {% if page_obj.has_previous %}
-      <a href="?{% param_replace page=1 %}" class="text-white bg-green-400 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-1.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" >Primera</a>
+      <a href="?{% param_replace page=1 %}" class="text-white bg-green-400 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-2 h-8 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" >Primera</a>
       {% if page_obj.previous_page_number != 1 %}
-        <a href="?{% param_replace page=page_obj.previous_page_number %}" class="text-white bg-green-400 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-1.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" >Anterior</a>
+        <a href="?{% param_replace page=page_obj.previous_page_number %}" class="text-white bg-green-400 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-2 h-8 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" >Anterior</a>
       {% endif %}
     {% endif %}
+        
   
+
+
+        {% if page_obj.number|add:'-10' > 1 %}
+        <li><a href="?{% param_replace page=page_obj.number|add:'-11' %}" class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">&hellip;</a></li>
+        {% endif %}
+
+    {% for i in paginator.page_range %}
+
+        {% if  page_obj.number == i %}
+
+        <li>
+            <a href="#" aria-current="page" class="z-10 flex items-center justify-center px-3 h-8 leading-tight text-blue-600 border border-blue-300 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 dark:border-gray-700 dark:bg-gray-700 dark:text-white">{{i}}</a>
+          </li>
+        
+        {% elif i > page_obj.number|add:'-12' and i < page_obj.number|add:'12' %}
+         
+        <li>
+            <a href="?{% param_replace page=i %}" class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">{{i}}</a>
+          </li>
+        {% endif %}
+
+       
+          {% endfor %}
+        
+    {% if page_obj.paginator.num_pages > page_obj.number|add:'10' %}
+          
+    <li><a href="?{% param_replace page=page_obj.number|add:'11' %}" class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">&hellip;</a></li>
+
+    {% endif %}
+    
     Pagina {{ page_obj.number }} de {{ paginator.num_pages }}
   
     {% if page_obj.has_next %}
       {% if page_obj.next_page_number != paginator.num_pages %}
-        <a href="?{% param_replace page=page_obj.next_page_number %}" class="text-white bg-green-400 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-1.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" >Siguiente</a>
+        <a href="?{% param_replace page=page_obj.next_page_number %}" class="text-white bg-green-400 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-2 h-8 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" >Siguiente</a>
       {% endif %}
-      <a href="?{% param_replace page=paginator.num_pages %}" class="text-white bg-green-400 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-1.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" >Ultima</a>
+      <a href="?{% param_replace page=paginator.num_pages %}" class="text-white bg-green-400 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-2 h-8 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" >Ultima</a>
     {% endif %}
-  
+</ul>
     <p>Productos {{ page_obj.start_index }}—{{ page_obj.end_index }}</p>
   {% endif %}
 </div>
   <hr>
-  </section>
+
 
 
   <script>

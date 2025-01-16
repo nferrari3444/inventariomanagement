@@ -19,3 +19,13 @@
 
     width: 10rem;
  }
+
+ .ui-autocomplete {
+   max-width: 236px;
+   max-height: 200px;
+
+   overflow-x: scroll;
+   overflow-y: scroll;
+
+   font-size: medium;
+ }

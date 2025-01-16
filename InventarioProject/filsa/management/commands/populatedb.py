@@ -43,7 +43,7 @@ class Command(BaseCommand):
 
         # Warehouses.objects.bulk_create(warehouse_object)
 
-
+    
         #users_file = './usuariosFilsa.txt' 
         #products_file = './productosFilsa.txt' 
         users_file = os.path.join(dirname, './usuariosFilsa.txt')

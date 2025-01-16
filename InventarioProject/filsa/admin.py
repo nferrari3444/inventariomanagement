@@ -71,11 +71,30 @@ class FaltanteFilter(SimpleListFilter):
             return queryset.exclude(cantidad__gt = F('cantidadNeta')).filter(Q(actionType='Confirma Ingreso') | Q(actionType= 'Confirma Transferencia') | Q(actionType='Confirma Egreso'))
         else:
             return queryset.filter(Q(actionType='Confirma Ingreso') | Q(actionType='Confirma Transferencia') | Q(actionType='Confirma Egreso'))
-        
+
+class TipoMovimientoFilter(SimpleListFilter):
+    title = "Movimiento"
+    parameter_name = "Movimiento"
+
+    def lookups(self, request, model_admin):
+        return [
+            ("Transferencia", "Transferencia"),
+            ("Ingreso", "Ingreso"),
+            ("Egreso", "Egreso"),
+        ]
+
+    def queryset(self, request, queryset):
+        if self.value() == "Transferencia":
+            return queryset.filter(actionType= 'Confirma Transferencia') 
+        elif self.value() == "Ingreso":
+            return queryset.filter(actionType='Confirma Ingreso')
+        elif self.value() == "Egreso":    
+            return queryset.filter(actionType='Confirma Egreso')
+     
 class AdminStockMovements(ExportActionMixin, admin.ModelAdmin):
     list_display = ["Ingreso", "date", "producto", "internalCode", "faltante",  "warehouse", "cantidad","cantidadNeta", "diferencia", "receptor", "issuer", "observations"]
     list_select_related = ["warehouseProduct"]
-    list_filter = [FaltanteFilter]
+    list_filter = [FaltanteFilter, TipoMovimientoFilter]
     search_fields = ["warehouseProduct__product__name", "warehouseProduct__product__internalCode"]
 
     #"actionType",
