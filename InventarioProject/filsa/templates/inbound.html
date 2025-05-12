@@ -13,8 +13,12 @@
 </div>
 {% endif %}
 <!-- sm:col-span-2 -->
-<section class="bg-white dark:bg-gray-900">
-    <div class="py-8 px-4 mx-auto max-w-2xl lg:py-8">
+<section class="bg-gray-100 dark:bg-gray-900 min-h-screen">
+    <div class="py-8 px-4 mx-auto max-w-4xl lg:py-12">
+        <!-- Card wrapper -->
+        <div class="bg-white rounded-lg shadow-md dark:bg-gray-800 w-full p-10 lg:p-12">
+        
+       
         <h1 class="flex mb-8 text-2xl sm:px-16 xl:px-15 font-extrabold leading-none tracking-tight text-gray-900 md:text-3xl lg:text-4xl dark:text-white">Solicitud Ingreso de Nuevos Productos</h1>
         <form id="forms" action="{% url 'inbound' %}" method="POST" onsubmit="openLoader()">
             {% csrf_token %}
@@ -162,7 +166,7 @@
            
         </form>
     </div>
-
+</div>
 
   </section>
 
