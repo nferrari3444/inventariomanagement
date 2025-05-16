@@ -1982,36 +1982,43 @@ def crudProducts(request,action):
             products = []
             products_warehouse = []
 
-            if action == 'create':
+            if action == 'crear':
                 for i in range(0,len(data)):
                     try:
                         product_code = data.iloc[i][1] #['codigo interno']
-                        product_quantity = data.iloc[i][5] # ['cantidad']
-                        product_price = data.iloc[i][8] # ['precio']
-                        deposit = data.iloc[i][6] # ['deposito']
+                        product_quantity = data.iloc[i][3] # ['cantidad']
+                        product_price = data.iloc[i][7] # ['precio']
+                        deposit = data.iloc[i][9] # ['deposito']
                         product_barcode = data.iloc[i][2] #['codigo de barras']
                         name = data.iloc[i][0]# ['nombre']
                         category = data.iloc[i][4] #['categoria']
-                        supplier = data.iloc[i][3] # ['proveedor']
-                        stockSecurity = data.iloc[i][7] # ['stock seguridad']
-                        currency = data.iloc[i][9] # ['moneda']
+                        supplier = data.iloc[i][5] # ['proveedor']
+                        stockSecurity = data.iloc[i][6] # ['stock seguridad']
+                        currency = data.iloc[i][8] # ['moneda']
+                        location = data.iloc[i][10] # ['ubicacion']
 
                         # El producto maestro se crea o actualiza
-                        obj, created = Product.objects.update_or_create(
-                        internalCode= product_code,
-                        defaults={"quantity": F('quantity') + product_quantity,
-                                "barcode": product_barcode, 
-                                "name": name, "category": category, 
-                                "supplier": supplier, 
-                                "stockSecurity": stockSecurity, "currency": currency})
+                        # obj, created = Product.objects.update_or_create(
+                        # internalCode= product_code,
+                        # defaults={"quantity": F('quantity') + product_quantity,
+                        #         "barcode": product_barcode, 
+                        #         "name": name, "category": category, 
+                        #         "supplier": supplier, 
+                        #         "stockSecurity": stockSecurity, "currency": currency})
                         
-                        #newProduct = Product.objects.filter(internalCode = product_code)
+                        newProduct = Product.objects.filter(internalCode = product_code)
 
-                        #if newProduct.exists():
-                        #    newProduct.update(quantity = F("quantity") + product_quantity) #, deltaQuantity = F('deltaQuantity') + diffQuantity  )
-                        #newProduct = Product(name=name, internalCode= product_code, barcode= product_barcode, quantity= product_quantity, category= category, supplier=supplier, stockSecurity=stockSecurity, currency=currency)
-                        newProductInDeposit= WarehousesProduct(product= newProduct, name=deposit, quantity = product_quantity)
+                        if newProduct.exists():
+                            newProduct.update(quantity = F("quantity") + product_quantity) #, deltaQuantity = F('deltaQuantity') + diffQuantity  )
+                            product_obj = newProduct.first()
+                            newProductInDeposit= WarehousesProduct(product= product_obj, name=deposit, quantity = product_quantity, location=location, deltaQuantity=0)
 
+                        else:
+                            newProduct = Product.objects.create(name=name, internalCode= product_code, barcode= product_barcode, quantity= product_quantity,  price= product_price, category= category, supplier=supplier, stockSecurity=stockSecurity, currency=currency)
+                            newProduct.save()
+                            product_obj = newProduct[0]
+                            newProductInDeposit= WarehousesProduct(product= product_obj, name=deposit, quantity = product_quantity, location=location, deltaQuantity=0)
+                        
                         #products.append(newProduct)
                         products_warehouse.append(newProductInDeposit)
                     
@@ -2020,8 +2027,9 @@ def crudProducts(request,action):
                         messages.error(request, "Creacion de Producto con codigo {} es incorrecta. Chequear campos".format(product_code), extra_tags='product format')
 
                 WarehousesProduct.objects.bulk_create(products_warehouse)
+                messages.info(request, "Se crean {} productos".format(len(products_warehouse)))
 
-            elif action == 'update':
+            elif action == 'actualizar':
                 for i in range(0,len(data)):
                     try:
                         product_code = data.iloc[i][0] #['codigo interno']
@@ -2031,151 +2039,155 @@ def crudProducts(request,action):
 
 
                         productToUpdate = Product.objects.filter(internalCode = product_code)
-                        if newProduct.exists():
-                            productToUpdate.update(quantity = F("quantity") + product_quantity) #, deltaQuantity = F('deltaQuantity') + diffQuantity  )
+                        product_first = productToUpdate.first()
+                        print('product first is', product_first)
+                        #if newProduct.exists():
+                        productToUpdate.update(quantity = F("quantity") + product_quantity,price =product_price) #, deltaQuantity = F('deltaQuantity') + diffQuantity  )
 
-                            newProductInDeposit = WarehousesProduct.objects.filter(name=deposit, product__internalCode= product_code)
-                            try:
-                                if newProductInDeposit.exists():
-                                    newProductInDeposit.update(quantity= product_quantity, price= product_price)
+                        productInDepositToUpdate = WarehousesProduct.objects.filter(name=deposit, product__internalCode= product_code)
+                        #try:
+                        #if newProductInDeposit.exists():
+                        productInDepositToUpdate.update(quantity= product_quantity)
                             
-                            except ValidationError as e:
-                                messages.error(request, "El Producto con codigo {} no existe en el deposito {}. Chequear campos".format(product_code, deposit), extra_tags='product format')
+                    # except ValidationError as e:
+                    #     messages.error(request, "El Producto con codigo {} no existe en el deposito {}. Chequear campos".format(product_code, deposit), extra_tags='product format')
             
-
-                        
-                        newProduct = Product(name=name, internalCode= product_code, barcode= product_barcode, quantity= product_quantity, category= category, supplier=supplier, stockSecurity=stockSecurity, currency=currency)
-                        newProductInDeposit= WarehousesProduct(product= newProduct, name=deposit, quantity = product_quantity)
+                        #newProduct = Product(name=name, internalCode= product_code, barcode= product_barcode, quantity= product_quantity, category= category, supplier=supplier, stockSecurity=stockSecurity, currency=currency)
+                        #newProductInDeposit= WarehousesProduct(product= newProduct, name=deposit, quantity = product_quantity)
 
                     
                     except ValidationError as e:
-                        messages.error(request, "Actualiazión de Producto con codigo {} es incorrecta. Chequear campos".format(product_code), extra_tags='product format')
+                        messages.error(request, "Actualiazión de Producto con codigo {} es incorrecta. Chequear si el producto existe".format(product_code), extra_tags='product format')
             
-            elif action == 'delete':
+            elif action == 'eliminar':
                 for i in range(0,len(data)):
                     try:
                         product_code = data.iloc[i][0] #['codigo interno']
+                        print('product_code is', product_code)
                         productdb = Product.objects.get(internalCode = product_code).delete()
                         #productdb.delete() 
                     
                     except ValidationError as e:
-                        messages.error(request, "Eliminación de Producto con codigo {} es incorrecta. Chequear campos".format(product_code), extra_tags='product format')
-            
-            
-            for i in range(0,len(data)):
-                
-                create_products = 0
-                update_products = 0
-                delete_products = 0
-                
-                if data.iloc[i][9].lower() == 'actualizar':
-                    try:
-                        print(data.iloc[i])
-                        product_code = data.iloc[1] #['codigo interno']
-                        product_quantity = data.iloc[5] # ['cantidad']
-                        product_price = data.iloc[8] # ['precio']
-                        deposit = data.iloc[6] # ['deposito']
-                        productdb = Product.objects.get(internalCode = product_code)
-                        
-                        if len(WarehousesProduct.objects.filter(product = productdb.product_id)) > 1:
-                        
-                            productdb_update = Product.objects.filter(internalCode = product_code)
-                            for product in productdb_update:
-                                product.quantity = product.quantity + product_quantity
-                                product.price = product_price 
-                                #productdb_update[0].quantity = productdb_update[0].quantity + product_quantity
-                                #productdb_update[0].price = product_price
+                        messages.error(request, "Eliminación de Producto con codigo {} es incorrecta. Chequear si el producto existe".format(product_code), extra_tags='product format')
 
-                                products.append(product)
-                                update_products += 1
-                                #.update(quantity= F('quantity') + product_quantity , price = product_price)
+                messages.info(request, "Se eliminan {} productos".format(len(data)))
 
-                        else:
-                            productdb_update = Product.objects.filter(internalCode = product_code)
-                            #.update(quantity= product_quantity, price = product_price)
-                            for product in productdb_update:
-                                product.quantity = product_quantity
-                                product.price = product_price
+            
+            # for i in range(0,len(data)):
+                
+            #     create_products = 0
+            #     update_products = 0
+            #     delete_products = 0
+                
+            #     if data.iloc[i][9].lower() == 'actualizar':
+            #         try:
+            #             print(data.iloc[i])
+            #             product_code = data.iloc[1] #['codigo interno']
+            #             product_quantity = data.iloc[5] # ['cantidad']
+            #             product_price = data.iloc[8] # ['precio']
+            #             deposit = data.iloc[6] # ['deposito']
+            #             productdb = Product.objects.get(internalCode = product_code)
+                        
+            #             if len(WarehousesProduct.objects.filter(product = productdb.product_id)) > 1:
+                        
+            #                 productdb_update = Product.objects.filter(internalCode = product_code)
+            #                 for product in productdb_update:
+            #                     product.quantity = product.quantity + product_quantity
+            #                     product.price = product_price 
+            #                     #productdb_update[0].quantity = productdb_update[0].quantity + product_quantity
+            #                     #productdb_update[0].price = product_price
+
+            #                     products.append(product)
+            #                     update_products += 1
+            #                     #.update(quantity= F('quantity') + product_quantity , price = product_price)
+
+            #             else:
+            #                 productdb_update = Product.objects.filter(internalCode = product_code)
+            #                 #.update(quantity= product_quantity, price = product_price)
+            #                 for product in productdb_update:
+            #                     product.quantity = product_quantity
+            #                     product.price = product_price
                             
 
-                                products.append(product)
-                                update_products += 1
+            #                     products.append(product)
+            #                     update_products += 1
 
-                        productWarehousedb = WarehousesProduct.objects.filter(name=deposit, product= productdb.product_id)
-                        print('productWarehousedb', productWarehousedb)
-                        for productWarehouse in productWarehousedb:
-                            productWarehouse.quantity = product_quantity
-                        # productWarehousedb.quantity = product_quantity
+            #             productWarehousedb = WarehousesProduct.objects.filter(name=deposit, product= productdb.product_id)
+            #             print('productWarehousedb', productWarehousedb)
+            #             for productWarehouse in productWarehousedb:
+            #                 productWarehouse.quantity = product_quantity
+            #             # productWarehousedb.quantity = product_quantity
                     
-                            products_warehouse.append(productWarehouse)
-                        #.update(quantity= product_quantity, price = product_price)
-                    except ValidationError as e:                       
-                        product_code = data.iloc[1] #['codigo interno']
-                        messages.error(request, "Producto con codigo {} no tiene información completa".format(product_code), extra_tags='product format')
+            #                 products_warehouse.append(productWarehouse)
+            #             #.update(quantity= product_quantity, price = product_price)
+            #         except ValidationError as e:                       
+            #             product_code = data.iloc[1] #['codigo interno']
+            #             messages.error(request, "Producto con codigo {} no tiene información completa".format(product_code), extra_tags='product format')
 
-                    Product.objects.bulk_update(products, ['quantity','price'])
-                    WarehousesProduct.objects.bulk_update(products_warehouse, ['quantity'])
+            #         Product.objects.bulk_update(products, ['quantity','price'])
+            #         WarehousesProduct.objects.bulk_update(products_warehouse, ['quantity'])
 
-                    #messages.info(request, "Se actualizan {} productos ".format(numberOfProducts), extra_tags="CotizacionOferta")
+            #         #messages.info(request, "Se actualizan {} productos ".format(numberOfProducts), extra_tags="CotizacionOferta")
             
   
-                elif data.iloc[i][9].lower() == 'crear':
-                    try:
-                        product_code = data.iloc[1]#['codigo interno']
+            #     elif data.iloc[i][9].lower() == 'crear':
+            #         try:
+            #             product_code = data.iloc[1]#['codigo interno']
 
-                        productExist = Product.objects.filter(internalCode= product_code).exists()
-                        print('productExist is', productExist)
-                        if productExist:
-                            messages.error(request, 'El Producto con codigo {} ya existe en la base de datos'.format(product_code), extra_tags='product_exists')
+            #             productExist = Product.objects.filter(internalCode= product_code).exists()
+            #             print('productExist is', productExist)
+            #             if productExist:
+            #                 messages.error(request, 'El Producto con codigo {} ya existe en la base de datos'.format(product_code), extra_tags='product_exists')
                         
-                            return HttpResponseRedirect('/products-crud/')
-                        else:
+            #                 return HttpResponseRedirect('/products-crud/')
+            #             else:
 
-                            product_barcode = data.iloc[2] #['codigo de barras']
-                            name = data.iloc[0]# ['nombre']
-                            category = data.iloc[4] #['categoria']
-                            supplier = data.iloc[3] # ['proveedor']
-                            stockSecurity = data.iloc[7] # ['stock seguridad']
-                            product_quantity = data.iloc[i]['cantidad']
-                            product_price = data.iloc[8] #['precio']
-                            warehouse = data.iloc[i]['deposito']
-                            currency = data.iloc[i]['moneda']
-                            newProduct = Product(name=name, internalCode= product_code, barcode= product_barcode, quantity= product_quantity, category= category, supplier=supplier, stockSecurity=stockSecurity, currency=currency)
-                            newProductInDeposit= WarehousesProduct(product= newProduct, name=warehouse, quantity = product_quantity, deltaQuantity = 0)
+            #                 product_barcode = data.iloc[2] #['codigo de barras']
+            #                 name = data.iloc[0]# ['nombre']
+            #                 category = data.iloc[4] #['categoria']
+            #                 supplier = data.iloc[3] # ['proveedor']
+            #                 stockSecurity = data.iloc[7] # ['stock seguridad']
+            #                 product_quantity = data.iloc[i]['cantidad']
+            #                 product_price = data.iloc[8] #['precio']
+            #                 warehouse = data.iloc[i]['deposito']
+            #                 currency = data.iloc[i]['moneda']
+            #                 newProduct = Product(name=name, internalCode= product_code, barcode= product_barcode, quantity= product_quantity, category= category, supplier=supplier, stockSecurity=stockSecurity, currency=currency)
+            #                 newProductInDeposit= WarehousesProduct(product= newProduct, name=warehouse, quantity = product_quantity, deltaQuantity = 0)
 
-                            products.append(newProduct)
-                            create_products += 1
-                            #products_warehouse.append(newProductInDeposit)
+            #                 products.append(newProduct)
+            #                 create_products += 1
+            #                 #products_warehouse.append(newProductInDeposit)
                         
-                    except ValidationError as e:
+            #         except ValidationError as e:
                     
-                        messages.error(request, "Creacion de Producto con codigo {} es incorrecta. Chequear campos".format(product_code), extra_tags='product format')
+            #             messages.error(request, "Creacion de Producto con codigo {} es incorrecta. Chequear campos".format(product_code), extra_tags='product format')
 
-                    Product.objects.bulk_create(products)
-                    #WarehousesProduct.objects.bulk_create(products_warehouse)
+            #         Product.objects.bulk_create(products)
+            #         #WarehousesProduct.objects.bulk_create(products_warehouse)
 
-                    #messages.info(request, "Se crean {} productos ".format(numberOfProducts), extra_tags="CotizacionOferta")
+            #         #messages.info(request, "Se crean {} productos ".format(numberOfProducts), extra_tags="CotizacionOferta")
         
         
-                elif data.iloc[i][9].lower() == 'eliminar':
-                    try:
+            #     elif data.iloc[i][9].lower() == 'eliminar':
+            #         try:
                     
-                        product_code = data.iloc[1] #['codigo interno']
-                        productdb = Product.objects.get(internalCode = product_code).delete()
+            #             product_code = data.iloc[1] #['codigo interno']
+            #             productdb = Product.objects.get(internalCode = product_code).delete()
                         
-                        delete_products += 1
-                        #.append(productdb)
+            #             delete_products += 1
+            #             #.append(productdb)
                         
-                    except ValidationError as e:
+            #         except ValidationError as e:
                         
-                        messages.error(request, "Se debe agregar codigo de producto a elminar", extra_tags='product format')
+            #             messages.error(request, "Se debe agregar codigo de producto a elminar", extra_tags='product format')
                 
-                #messages.info(request, "Se eliminan {} productos ".format(numberOfProducts), extra_tags="CotizacionOferta")
+            #     #messages.info(request, "Se eliminan {} productos ".format(numberOfProducts), extra_tags="CotizacionOferta")
 
-            messages.info(request, "Se crean {} productos, se actualizan {} productos y se eliminan {} productos".format(create_products, update_products, delete_products) )
-            #return HttpResponseRedirect('new-cotization/')
+            # messages.info(request, "Se crean {} productos, se actualizan {} productos y se eliminan {} productos".format(create_products, update_products, delete_products) )
+            # #return HttpResponseRedirect('new-cotization/')
     else:
         form = CrudProductsForm()
+        action = action.capitalize()
     
     return render(request, 'crudProducts.html', {'form': form, 'action': action,  'title': title})
 

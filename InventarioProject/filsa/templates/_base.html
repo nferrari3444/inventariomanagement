@@ -63,16 +63,16 @@
       <div class="mx-auto hidden w-full md:block md:w-auto" id="navbar-default">
         <ul class="font-medium flex flex-col p-4 md:p-0 mt-4 border border-gray-100 rounded-lg md:flex-row md:space-x-8 rtl:space-x-reverse md:mt-0 md:border-0 dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700">
           <li>
-            <a href="{% url 'home' %}" class="text-white rounded hover:bg-gray-100 md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Inicio</a>
+            <a href="{% url 'home' %}" class="font-serif text-white rounded hover:bg-gray-100 md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Inicio</a>
           </li>
           <li>
-            <a href="{% url 'stock' %}" class="block py-2 px-3 text-white rounded hover:bg-gray-100 md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Inventario</a>
+            <a href="{% url 'stock' %}" class="font-serif block text-white rounded hover:bg-gray-100 md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Inventario</a>
           </li>
           <li>
-            <a href="{% url 'tasks' %}" class="block py-2 px-3 text-white rounded hover:bg-gray-100 md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Tareas</a>
+            <a href="{% url 'tasks' %}" class="font-serif block text-white rounded hover:bg-gray-100 md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Tareas</a>
           </li>
 
-          <button id="dropdownDefaultButton" data-dropdown-toggle="dropdown" class="text-white focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">Movimientos<svg class="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+          <button id="dropdownDefaultButton" data-dropdown-toggle="dropdown" class="font-serif text-white focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">Movimientos<svg class="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
             </svg>
             </button>
@@ -98,7 +98,7 @@
          
              <!-- Dropdown menu -->
              {% if user.groups.all.0.name.strip == "Administrador"  %}
-            <button id="dropdownDefaultButton" data-dropdown-toggle="dropdown-productos" class="text-white focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">Productos<svg class="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+            <button id="dropdownDefaultButton" data-dropdown-toggle="dropdown-productos" class="font-serif text-white focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">Productos<svg class="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
               <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
               </svg>
               </button>
@@ -106,13 +106,13 @@
                  <div id="dropdown-productos" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700">
                   <!-- <ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownDefaultButton"> -->
                     <li>
-                      <a href="{% url 'productscrud' action='create' %}" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Alta Nuevos Productos</a>
+                      <a href="{% url 'productscrud' action='crear' %}" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Alta Nuevos Productos</a>
                     </li>
                     <li>
-                      <a href="{% url 'productscrud' action='update' %}" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Actualización Productos</a>
+                      <a href="{% url 'productscrud' action='actualizar' %}" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Actualización Productos</a>
                     </li>
                     <li>
-                      <a href="{% url 'productscrud' action='delete' %}" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Eliminación Productos</a>
+                      <a href="{% url 'productscrud' action='eliminar' %}" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Eliminación Productos</a>
                     </li>
 
                     {% endif %}
