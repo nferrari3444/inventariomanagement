@@ -9,7 +9,7 @@
 
 {% if messages %}
 {% for message in messages %}
-{% if "product_exists" in message.tags %}
+
 <div class="p-4 mb-4 mx-auto text-red-800 rounded-lg bg-red-300 dark:bg-gray-800 dark:text-red-400" role="alert">
     <span class="font-medium">{{message}}</span>
 
@@ -17,7 +17,7 @@
         <button type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 ml-2 mb-2 mt-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
             Nueva Carga
         </button>
-        {% endif %}
+       
        
 
     </a>
@@ -48,19 +48,19 @@
             
            El archivo excel debe contener las siguientes columnas:
            <br/> <br/>
-           {% if action == 'Crear'%}
+           {% if action == 'crear'%}
            Nombre &nbsp; Codigo Interno &nbsp; Codigo de Barras &nbsp; Cantidad &nbsp;
            <br/> 
            Categoria &nbsp; Proveedor &nbsp; Stock Seguridad &nbsp; Precio &nbsp; Moneda
            &nbsp; Deposito
            <br/> <br/>
            <br/> <br/>
-           {% elif action == 'Actualizar'%}
+           {% elif action == 'actualizar'%}
            Codigo Interno &nbsp; Cantidad &nbsp; Precio &nbsp; Deposito &nbsp;
            <br/> <br/>
 
            <br/> <br/>
-           {% elif action == 'Eliminar'%}
+           {% elif action == 'eliminar'%}
            Codigo Interno &nbsp; 
            <br/> <br/> 
            {% endif %}  
