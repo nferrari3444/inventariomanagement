@@ -2054,18 +2054,13 @@ def crudProducts(request,action):
                         productToUpdate = Product.objects.filter(internalCode = product_code)
                         product_first = productToUpdate.first()
                         print('product first is', product_first)
-                        #if newProduct.exists():
-                        productToUpdate.update(quantity = F("quantity") + product_quantity,price =product_price) #, deltaQuantity = F('deltaQuantity') + diffQuantity  )
+                    
+                        productToUpdate.update(quantity = F("quantity") + product_quantity,price =product_price)
 
-                        #productInDepositToUpdate = WarehousesProduct.objects.filter(name=deposit, product__internalCode= product_code)
                         productInDepositToUpdate = WarehousesProduct.objects.get(name=deposit, product__internalCode= product_code)
                         productInDepositToUpdate.quantity = product_quantity
 
                         productInDepositToUpdate.save()
-                        #.update(quantity= product_quantity)
-
-                        #try:
-                        #if newProductInDeposit.exists():
                    
                     except WarehousesProduct.DoesNotExist:
                         productdb = None
@@ -2077,11 +2072,10 @@ def crudProducts(request,action):
             elif action == 'eliminar':
                 for i in range(0,len(data)):
                     try:
-                        product_code = data.iloc[i][0] #['codigo interno']
+                        product_code = data.iloc[i][0]
                         print('product_code is', product_code)
                         Product.objects.get(internalCode = product_code).delete()
-                        
-                    
+
                     except Product.DoesNotExist:
                         productdb = None
                         messages.error(request, "Eliminación de Producto con codigo {} es incorrecta. Chequear si el producto existe".format(product_code), extra_tags='product format')

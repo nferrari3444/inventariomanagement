@@ -8,6 +8,10 @@
 
 {% block content %}
 
+<div class="flex flex-col min-h-screen">
+    <div class="flex-grow">
+        
+
 <div class="inline-flex items-center grid grid-cols-4 gap-2 sm:ml-20 lg:ml-5 py-2 px-8 max-w-2xl lg:py-8">
     <!-- <button id="dropdownCheckboxProductButton" data-dropdown-toggle="dropdownProductCheckbox" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">Productos<svg class="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
@@ -342,7 +346,9 @@
        
     </table>
 </div>
-    <div id="pagination px-4 relative mt-6">
+    </div>
+
+    <div id="pagination" class = "px-4 relative mt-6">
     <ul class="inline-flex -space-x-px text-sm">
     {% if is_paginated %}
     {% if page_obj.has_previous %}
@@ -394,6 +400,7 @@
 </ul>
     <p>Productos {{ page_obj.start_index }}—{{ page_obj.end_index }}</p>
   {% endif %}
+</div>
 </div>
   <hr>
 
