@@ -9,7 +9,7 @@
 
 {% if messages %}
 {% for message in messages %}
-{% if "product_exists" in message.tags %}
+
 <div class="p-4 mb-4 mx-auto text-red-800 rounded-lg bg-red-300 dark:bg-gray-800 dark:text-red-400" role="alert">
     <span class="font-medium">{{message}}</span>
 
@@ -17,7 +17,7 @@
         <button type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 ml-2 mb-2 mt-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
             Nueva Carga
         </button>
-        {% endif %}
+       
        
 
     </a>
@@ -38,7 +38,9 @@
 </div>
 {% endfor %}
 {% endif %}
-<div class="grid sm:grid-cols-1 sm:gap-6 md:grid-cols-1 gap-4 block px-5 py-4">
+
+<div class="bg-gray-50 dark:bg-gray-900 min-h-screen grid sm:grid-cols-1 sm:gap-6 md:grid-cols-1 gap-4 block px-5 py-4">
+<div class="bg-white rounded-lg shadow-md dark:bg-gray-800 p-8 mt-8 max-w-xl mx-auto">
     
     <div class="mx-auto relative top-8 block">
         <h3 class="text-3xl font-bold dark:text-white mb-6">{{title}}</h3>
@@ -46,25 +48,26 @@
             
            El archivo excel debe contener las siguientes columnas:
            <br/> <br/>
-           {% if action == 'create'%}
+           {% if action == 'crear'%}
            Nombre &nbsp; Codigo Interno &nbsp; Codigo de Barras &nbsp; Cantidad &nbsp;
            <br/> 
            Categoria &nbsp; Proveedor &nbsp; Stock Seguridad &nbsp; Precio &nbsp; Moneda
            &nbsp; Deposito
            <br/> <br/>
            <br/> <br/>
-           {% elif action == 'update'%}
+           {% elif action == 'actualizar'%}
            Codigo Interno &nbsp; Cantidad &nbsp; Precio &nbsp; Deposito &nbsp;
            <br/> <br/>
 
            <br/> <br/>
-           {% elif action == 'delete'%}
+           {% elif action == 'eliminar'%}
            Codigo Interno &nbsp; 
            <br/> <br/> 
            {% endif %}  
 
           </div>
 
+           <div class="bg-white rounded-lg shadow-md dark:bg-gray-800 p-8 mt-8 max-w-xl mx-auto">
           <div id="loader" role="status" style="display: none;">
             <svg aria-hidden="true" class="w-8 h-8 mx-auto text-gray-200 animate-spin dark:text-gray-600 fill-green-500" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/>
@@ -79,7 +82,7 @@
         {{ form.as_p }}
 
         <button type="submit" id='nuevoIngreso' class="inline-flex items-center px-5 py-2.5 mt-4 sm:mt-6 text-sm font-medium text-center text-white bg-primary-700 rounded-lg focus:ring-4 focus:ring-primary-200 dark:focus:ring-primary-900 hover:bg-primary-800">
-            {{operation}}
+            {{action}}
         </button>
 
     </form>
@@ -88,10 +91,10 @@
     
     </div>
 
-     
+     </div>
 
 </div>
-
+</div>
 <!-- Modal toggle -->
 <script >
 
