@@ -212,9 +212,7 @@ def getProduct(request,productId):
 
 def getProductWarehouse(request): #, productId, warehouse):
 
-   # print('warehouse from template is', warehouse)
-   # print('productId is', productId)
-    #Warehouse = Warehouses.objects.filter(name=warehouse)
+  
     productId = request.GET.get('productId',None)
     warehouse = request.GET.get('warehouse',None)
     quantity_input = request.GET.get('cantidad',None)
@@ -1415,11 +1413,7 @@ class StockListView(LoginRequiredMixin, FilteredListView, generic.ListView):
         #filter = StockFilterSet(self.request.GET, queryset)
         context["filter"] = filter
         return context #filter #.qs
-            
-        # filter = StockFilterSet(self.request.GET, queryset)
-        # context["filter"] = filter
-        # return context
-    
+        
         
     
 def filterProducts(request):
@@ -1819,18 +1813,7 @@ def cancelTaskView(request, requested_id):
 
         
             newWarehouseProduct_db.delete()
-        # elif actionType == 'Nuevo Ingreso':
-            
-        #     warehouse = product.warehouseProduct.name
-        #     print('warehouse for producto to delete is', warehouse)
-        #     print('producto con internal code a borrar', internalCode)
-            
-        #     newWarehouseProduct_db = WarehousesProduct.objects.get(product=productdb, name=warehouse)
-        #     newWarehouseProduct_db.delete()
-        
-        # else:
-        #     pass
-   
+      
 
        
 
