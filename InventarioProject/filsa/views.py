@@ -1878,7 +1878,6 @@ def export_excel(request, dimension):
             cell.value = column_title
 
         # Write data rows
-        #firstquery = Product.objects.all().select_related('warehouse')
         firstquery = WarehousesProduct.objects.all()
         queryset = firstquery.values_list('product__name', 'product__internalCode','quantity','name','product__category','product__supplier','location','product__stockSecurity').order_by('product__internalCode')
  
@@ -2021,7 +2020,6 @@ def crudProducts(request,action):
                 WarehousesProduct.objects.bulk_create(products_warehouse)
                # Product.objects.bulk_create(products)
             
-                #messages.info(request, "Se crean {} productos en el deposito {}".format(len(products_warehouse), deposit)) 
                 messages.info(request, "Se crean {} productos".format(len(products_warehouse)))
 
             elif action == 'actualizar':
