@@ -5,7 +5,11 @@ import csv
 from datetime import datetime
 import re
 import math
+import os
 
+dirname = os.path.dirname(__file__)
+
+ 
 class Command(BaseCommand):
     help = 'import data'
 
@@ -42,9 +46,9 @@ class Command(BaseCommand):
     
         #users_file = './usuariosFilsa.txt' 
         #products_file = './productosFilsa.txt' 
-        users_file = "C:/Users/nicol/Inventario/InventarioProject/filsa/management/commands/usuariosFilsa.txt"
-        products_file = "C:/Users/nicol/Inventario/InventarioProject/filsa/management/commands/productosFilsa.txt"
-        new_products_file = "C:/Users/nicol/Inventario/InventarioProject/filsa/management/filsa_out6.csv"
+        users_file = os.path.join(dirname, './usuariosFilsa.txt')
+        products_file = os.path.join(dirname, './productosFilsa.txt')
+        new_products_file = os.path.join(dirname, '../filsa_out6.csv')
         #f = open(users_file, "r")
         #reader = f.read()
         #users_lines = list(reader)

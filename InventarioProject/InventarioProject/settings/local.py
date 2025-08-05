@@ -52,7 +52,7 @@ DATABASES = {
 }
 
 
-# DATABASES = {
+#DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.postgresql',
 #         'URL': os.getenv('DATABASE_URL'),

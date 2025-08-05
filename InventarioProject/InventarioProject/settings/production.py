@@ -102,7 +102,7 @@ DATABASES = {
         'NAME': os.getenv('DATABASE'),
         'USER': 'filsa',
         'PASSWORD': os.getenv('PASSWORD'),
-        'HOST': 'localhost',
-        'PORT': ''
+       
+
     }
 }
