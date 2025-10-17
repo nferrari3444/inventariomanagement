@@ -38,9 +38,6 @@ SECRET_KEY = 'django-insecure-1t6k3r0)5-(nn@i3mp9_o&t+x*v&q+j8v=#ux!y_j17hqm!hw%
 #SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", get_random_secret_key())
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-#DEBUG = os.getenv("DEBUG", "True") == "True"
-#ALLOWED_HOSTS = ['127.0.0.1','localhost','inventariomanagement.vercel.app', '*.vercel.app', '.now.sh']
-
 
 ALLOWED_HOSTS= ["192.168.1.53", "127.0.0.1", "localhost", "*"]
 
@@ -48,8 +45,6 @@ SITE_ID = 1
 #ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
 # Application definition
 
-
-#PYTHONIOENCODING='utf-8'
 
 INSTALLED_APPS = [
     'filsa',
@@ -167,19 +162,7 @@ USE_I18N = True
 
 USE_TZ = True
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.0/howto/static-files/
-
-
-#STATIC_ROOT =  os.path.join(BASE_DIR, 'static/')    
-#print('STATIC_ROOT is {}'.format(STATIC_ROOT))
-
 STATIC_URL = 'static/'
-                                 # BASE_DIR / 'static'
-
-#STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
-#STATICFILES_LOCATION = '/static/'
 
 #print('STATICFILES_DIRS IS {}'.format(STATICFILES_DIRS))
 
@@ -188,9 +171,6 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-#if os.environ.get('VERCEL'):
-    #STATIC_ROOT= os.path.join(BASE_DIR, "staticfiles")
 
 
 
