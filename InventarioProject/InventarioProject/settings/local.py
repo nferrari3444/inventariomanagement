@@ -28,10 +28,6 @@ STATICFILES_FINDERS = ('compressor.finders.CompressorFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder')
 
 STATIC_URL = 'static/'
-                                 # BASE_DIR / 'static'
-
-#STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
-#STATICFILES_LOCATION = '/static/'
 
 STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 # Default primary key field type
@@ -39,27 +35,9 @@ STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-#if os.environ.get('VERCEL'):
-    #STATIC_ROOT= os.path.join(BASE_DIR, "staticfiles")
-
-
-#STATICFILES_DIRS = os.path.join(BASE_DIR, 'static'),
 DATABASES = {
          "default": {
              "ENGINE": "django.db.backends.sqlite3",
              "NAME": os.path.join(BASE_DIR, "db.sqlite3"),
          }
 }
-
-
-#DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'URL': os.getenv('DATABASE_URL'),
-#         'NAME': os.getenv('PGDATABASE'),
-#         'USER': 'postgres',
-#         'PASSWORD': os.getenv('PGPASSWORD'),
-#         'HOST': os.getenv('PGHOST'),
-#         'PORT': 19787
-#     }
-# }

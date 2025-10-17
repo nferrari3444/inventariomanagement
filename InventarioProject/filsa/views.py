@@ -212,9 +212,7 @@ def getProduct(request,productId):
 
 def getProductWarehouse(request): #, productId, warehouse):
 
-   # print('warehouse from template is', warehouse)
-   # print('productId is', productId)
-    #Warehouse = Warehouses.objects.filter(name=warehouse)
+  
     productId = request.GET.get('productId',None)
     warehouse = request.GET.get('warehouse',None)
     quantity_input = request.GET.get('cantidad',None)
@@ -1415,11 +1413,7 @@ class StockListView(LoginRequiredMixin, FilteredListView, generic.ListView):
         #filter = StockFilterSet(self.request.GET, queryset)
         context["filter"] = filter
         return context #filter #.qs
-            
-        # filter = StockFilterSet(self.request.GET, queryset)
-        # context["filter"] = filter
-        # return context
-    
+        
         
     
 def filterProducts(request):
@@ -1819,18 +1813,7 @@ def cancelTaskView(request, requested_id):
 
         
             newWarehouseProduct_db.delete()
-        # elif actionType == 'Nuevo Ingreso':
-            
-        #     warehouse = product.warehouseProduct.name
-        #     print('warehouse for producto to delete is', warehouse)
-        #     print('producto con internal code a borrar', internalCode)
-            
-        #     newWarehouseProduct_db = WarehousesProduct.objects.get(product=productdb, name=warehouse)
-        #     newWarehouseProduct_db.delete()
-        
-        # else:
-        #     pass
-   
+      
 
        
 
@@ -1895,7 +1878,6 @@ def export_excel(request, dimension):
             cell.value = column_title
 
         # Write data rows
-        #firstquery = Product.objects.all().select_related('warehouse')
         firstquery = WarehousesProduct.objects.all()
         queryset = firstquery.values_list('product__name', 'product__internalCode','quantity','name','product__category','product__supplier','location','product__stockSecurity').order_by('product__internalCode')
  
@@ -2038,7 +2020,6 @@ def crudProducts(request,action):
                 WarehousesProduct.objects.bulk_create(products_warehouse)
                # Product.objects.bulk_create(products)
             
-                #messages.info(request, "Se crean {} productos en el deposito {}".format(len(products_warehouse), deposit)) 
                 messages.info(request, "Se crean {} productos".format(len(products_warehouse)))
 
             elif action == 'actualizar':

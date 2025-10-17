@@ -8,3 +8,19 @@ services:
         # env_file: .env
         ports:
             - 8000:8000
+
+    postgres:
+        image: postgres:latest
+        container_name: filsa_postgres
+        environment:
+            POSTGRES_USER: filsa
+            POSTGRES_PASSWORD: Filsa.2024
+            POSTGRES_DB: filsadb
+        ports:
+            - 5432:5432
+        volumes:
+            - postgres_data:/var/lib/postgresql/data
+        restart: always
+volumes:
+    postgres_data:
+        driver: local
