@@ -26,7 +26,7 @@ env = environ.Env(DEBUG=(bool,False))
 
 env = environ.Env(
 # Set casting default value 
-DEBUG=(bool,False))
+DEBUG=(bool, False))
 
 
 environ.Env.read_env()
