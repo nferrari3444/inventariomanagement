@@ -28,16 +28,14 @@ class CustomUser( AbstractBaseUser , PermissionsMixin ):
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
     objects = CustomUserManager()
-    
-    # isAdmin = models.BooleanField()
 
 class Cotization(models.Model):
     
     cotization_id = models.AutoField(primary_key=True)
     date = models.DateField(verbose_name=u"Fecha", null=True, blank=True)
-    customer = models.CharField(max_length=60, null=True, blank=True)
+    customer = models.CharField(max_length=60, blank=True)
     numberOfProducts = models.IntegerField(null=True, blank=True)
-    observations = models.CharField(max_length=500, null=True, blank= True)
+    observations = models.CharField(max_length=500, blank= True)
 
 # Tabla de Productos
 class Product(models.Model):
@@ -49,15 +47,12 @@ class Product(models.Model):
     CURRENCIES= [('USD', 'Dolar'),
                   ('$', 'Pesos')]
     
-    # class Meta:
-    #     unique_together = (('product_id', 'warehouse'),)
-
     product_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100)
     barcode = models.CharField(max_length= 100, verbose_name=u"Codigo de Barras")
     internalCode = models.BigIntegerField(verbose_name=u"Codigo Interno")
     quantity = models.FloatField(default=0)
-    category = models.CharField(max_length=100, default='Insumos') #  choices=CATEGORIES,
+    category = models.CharField(max_length=100, default='Insumos') 
     
     supplier = models.CharField(max_length=100, default='')
 
@@ -71,8 +66,6 @@ class Product(models.Model):
     def __str__(self):
         return self.name
     
-   
-
 # Create your models here.
 class WarehousesProduct(models.Model):
     
@@ -145,11 +138,10 @@ class Tasks(models.Model):
     motivoIngreso = models.CharField(max_length=30, choices = MOTIVOSINGRESO) # default='Transferencia Depósitos')
     motivoEgreso = models.CharField(max_length=30, choices = MOTIVOSEGRESO) #default='Transferencia Depósitos')
 
-    #warehouse = models.ForeignKey(Warehouses, on_delete= models.CASCADE, blank=True, null=True)
     warehouseProduct = models.ForeignKey(WarehousesProduct, on_delete= models.CASCADE, blank=True, null=True)
     actionType = models.CharField(max_length=20,  default='Inbound')
-    observationsSolicitud = models.CharField(max_length=500, null=True, blank= True)
-    observationsConfirma = models.CharField(max_length=500, null=True, blank= True)
+    observationsSolicitud = models.CharField(max_length=500,  blank= True)
+    observationsConfirma = models.CharField(max_length=500,  blank= True)
 
 class StockMovements(models.Model):
     
@@ -169,8 +161,6 @@ class StockMovements(models.Model):
     cantidad = models.FloatField(default=0)
     cantidadNeta = models.FloatField(default=0)
     cantidadEntregada = models.FloatField(default=0)
-    # motivoIngreso = models.CharField(max_length=30, choices = MOTIVOSINGRESO, default='Transferencia Depósitos')
-    # motivoEgreso = models.CharField(max_length=30, choices = MOTIVOSEGRESO, default='Transferencia Depósitos')
     image = models.ImageField(upload_to='images/', null=True, blank=True)
 #    status = models.CharField(max_length=30, choices= STATUS, default='Pending')
     # warehouse = models.ForeignKey(Warehouses, on_delete= models.CASCADE, blank=True, null=True)
@@ -183,8 +173,7 @@ class DiffProducts(models.Model):
     class Meta:
       verbose_name = 'Faltante Producto Total'
       verbose_name_plural = 'Faltante Productos Total'
-     
-   # product = models.ForeignKey(Product, on_delete=models.CASCADE)
+
     warehouseProduct = models.ForeignKey(WarehousesProduct, on_delete= models.CASCADE, blank=True, null=True)
     totalPurchase = models.FloatField(verbose_name="Cantidad")
     totalQuantity = models.FloatField(verbose_name="Cantidad Neta")
