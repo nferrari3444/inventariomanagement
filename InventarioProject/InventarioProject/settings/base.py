@@ -22,11 +22,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 import environ
 
-env = environ.Env(DEBUG=(bool,False))
+env = environ.Env(DEBUG=(bool,True))
 
 env = environ.Env(
 # Set casting default value 
-DEBUG=(bool, False))
+DEBUG=(bool, True))
 
 
 environ.Env.read_env()
@@ -37,7 +37,7 @@ environ.Env.read_env()
 SECRET_KEY = 'django-insecure-1t6k3r0)5-(nn@i3mp9_o&t+x*v&q+j8v=#ux!y_j17hqm!hw%'
 #SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", get_random_secret_key())
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS= ["192.168.1.53", "127.0.0.1", "localhost", "*"]
 
