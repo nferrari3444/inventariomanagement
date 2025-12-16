@@ -76,7 +76,7 @@ class WarehousesProduct(models.Model):
     name = models.CharField(max_length=100, verbose_name="Deposito")
     product = models.ForeignKey(Product, on_delete = models.CASCADE,  blank=True, null=True, verbose_name="Producto" )
     quantity = models.FloatField(default=0, verbose_name="Cantidad en Deposito")
-    location = models.CharField(max_length=100, default='', blank=True, null=True, verbose_name="Ubicacion")
+    location = models.CharField(max_length=100, default='', blank=True,  verbose_name="Ubicacion")
     deltaQuantity = models.FloatField()
     inTransit = models.BooleanField(default=False)
 

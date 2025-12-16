@@ -1784,45 +1784,41 @@ def crudProducts(request,action):
                         warehouse_3 = 'Joanico' # ['Juanico deposito']
                         ubication_warehouse_3 = data.iloc[i][12] # ['Juanico ubicacion']
                         quantity_warehouse_3 = data.iloc[i][11] # ['cantidad deposito 3
-                        warehouse_4 = data.iloc[i][3] # ['In Transit deposito']
+                        warehouse_4 = "In Transit" # ['In Transit deposito']
                         ubication_warehouse_4 = data.iloc[i][7] # ['ubicacion']
                         quantity_warehouse_4 = data.iloc[i][8] # ['cantidad deposito 4
                         price = data.iloc[i][28] # ['precio de lista']
-                        productdb = Product.objects.get(internalCode = codigo)
+                        productdb = Product.objects.get(internalCode = product_code)
 
                         deposits = [warehouse_1, warehouse_2, warehouse_3, warehouse_4] 
+                        locations = [ubication_warehouse_1, ubication_warehouse_2, ubication_warehouse_3, ubication_warehouse_4]
                         newProduct = Product.objects.filter(internalCode = product_code).exists()
-                        newProductWarehouse = WarehousesProduct.objects.filter(product= productdb, name__in= deposits).exists()
+                        new_product_warehouse = WarehousesProduct.objects.filter(product= productdb, name__in= deposits).exists()
                         print('newProduct is:', newProduct)
-                        print('newProductWarehouse is:', newProductWarehouse)
+                        print('newProductWarehouse is:', new_product_warehouse)
                         
-
-                        if newProduct or newProductWarehouse:
-                            newProduct.update(category= category, supplier=supplier, stock=stock, stockSecurity=stockSecurity, price=price, name= product_name)
+                        if newProduct or new_product_warehouse:
+                            newProduct.update(category= category, quantity = stock,  supplier=supplier, stock=stock, stockSecurity=stockSecurity, price=price, name= product_name)
                             
-                        
                             quantities = [quantity_warehouse_1, quantity_warehouse_2, quantity_warehouse_3, quantity_warehouse_4]   
-                            product_warehouse_quantities_list = list(zip(deposits, quantities)) 
+                            product_warehouse_quantities_list = list(zip(deposits, quantities,locations)) 
                             update_product_warehouse(newProduct.internalCode, deposits, product_warehouse_quantities_list)
                            
-                            newProductWarehouse.objects.filter(product= productdb, name= warehouse_1).update(quantity=  quantity_warehouse_1)
-                            newProductWarehouse.update(quantity= F('quantity') + quantity_warehouse_1 + quantity_warehouse_2 + quantity_warehouse_3 + quantity_warehouse_4)
-                            messages.error(request, 'El Producto con codigo {} ya existe en la base de datos'.format(product_code), extra_tags='product_exists')
+    
             #                 messages.error(request, 'El Producto con codigo {} ya existe en la base de datos'.format(product_code), extra_tags='product_exists')
                             return HttpResponseRedirect(reverse('productscrud', args=[action,]))    
 
                         else:
-                            newProduct = Product.objects.create(name=name, internalCode= product_code, barcode= product_barcode, quantity= product_quantity,  price= product_price, category= category, supplier=supplier, stockSecurity=stockSecurity, currency=currency)
+                            newProduct = Product.objects.create(name=product_name, internalCode= product_code, barcode= product_code_origin, quantity= stock, price= product_price, category= category, supplier=supplier, stockSecurity=stockSecurity)
                             newProduct.save()
-                            newProductInDeposit= WarehousesProduct(product= newProduct, name=deposit, quantity = product_quantity, location=location, deltaQuantity=0)
+
+                            create_products_warehouse(deposits, newProduct.internalCode, product_warehouse_quantities_list)
+                            newProductInDeposit= WarehousesProduct(product= newProduct.internalCode, name=deposit, quantity = product_quantity, location=location, deltaQuantity=0)
                             
                             # products.append(newProduct)
                             products_warehouse.append(newProductInDeposit)
 
                             return HttpResponseRedirect(reverse('productscrud', args=[action,]))    
-
-                        
-                    
                     except ValidationError as e:
                         
                         messages.error(request, "Creacion de Producto con codigo {} es incorrecta. Chequear campos".format(product_code), extra_tags='product format')
@@ -1841,9 +1837,16 @@ def update_product_warehouse(deposits, product_code, product_warehouse_quantitie
     for i, product_warehouse in enumerate(results):
         if product_warehouse.name in product_warehouse_quantities[i][0]:
             product_warehouse.quantity = product_warehouse_quantities[i][1]
+            product_warehouse.location = product_warehouse_quantities[i][2]
         product_warehouse.save()
     return results
 
+
+def create_products_warehouse(deposits, product_code, product_warehouse_quantities):
+    for i, deposit in enumerate(deposits):
+        product_obj = Product.objects.get(internalCode= product_code)
+        new_product_warehouse= WarehousesProduct(product= product_obj, name=product_warehouse_quantities[i][0], quantity = product_warehouse_quantities[i][1], location=product_warehouse_quantities[i][2], deltaQuantity=0)
+        new_product_warehouse.save()
     
 
 def newCotization(request):
