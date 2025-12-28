@@ -12,4 +12,3 @@ env
 venv/
 .venv/
 .venv
-datadump.json
