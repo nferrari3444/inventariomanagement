@@ -2081,11 +2081,11 @@ def crudProducts(request,action):
                         supplier = data.iloc[i][4] # ['proveedor']
                         stock_raw = data.iloc[i][6]
                         stock = float(str(stock_raw).replace(',', '.')) if stock_raw not in [None, ''] else 0
-                        print('product stock is: ', stock)
                         
-                        stockSecurity = data.iloc[i][15] # ['stock seguridad']
+
+                        stockSecurity =  float(str(data.iloc[i][15]).replace(',', '.')) if data.iloc[i][15] not in [None, ''] else 0 # ['stock seguridad']
                         product_name = data.iloc[i][5] # ['nombre']
-                        if pd.isna(product_name) or product_name == '' or product_name is None:
+                        if (pd.isna(product_name) or product_name == '' or product_name is None) or pd.isna(category) or category == '' or category is None:
                             continue
 
                         warehouse_1 = 'Anaya 2710' # ['Anaya deposito']
@@ -2104,15 +2104,16 @@ def crudProducts(request,action):
                         ubication_warehouse_4 = 'Transito' # ['ubicacion']
                         quantity_warehouse_4_raw = data.iloc[i][14]
                         quantity_warehouse_4 = float(str(quantity_warehouse_4_raw).replace(',', '.')) if quantity_warehouse_4_raw not in [None, ''] else 0 # ['cantidad deposito 4
-                        #price =  'USD 2.102,00'
+                        
                         price_raw = data.iloc[i][28]
                         if price_raw is not None and price_raw != '':
+                           
                             price_str = str(price_raw).strip('USD').strip().replace('-', '').replace('#¡REF! ', '').replace('#¡REF!', '')
                             # Handle European number format: remove dots (thousands separator) and replace comma with dot
-                            price = float(price_str.replace('.', '').replace(',', '.'))
+                        
+                            price = float(price_str.replace('.', '').replace(',', '.')) if price_str not in [None, ''] else None
                         else:
-                            price = None
-                         # ['precio de lista']
+                            price = None  # ['precio de lista']
 
                         deposits = [warehouse_1, warehouse_2, warehouse_3, warehouse_4] 
                         locations = [ubication_warehouse_1, ubication_warehouse_2, ubication_warehouse_3, ubication_warehouse_4]
