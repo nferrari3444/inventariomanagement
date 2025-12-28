@@ -51,13 +51,13 @@ class Product(models.Model):
     name = models.CharField(max_length=100)
     barcode = models.CharField(max_length= 100, verbose_name=u"Codigo de Barras")
     internalCode = models.BigIntegerField(verbose_name=u"Codigo Interno")
-    quantity = models.FloatField(default=0)
+    quantity = models.FloatField(default=0, null=True, blank=True)
     category = models.CharField(max_length=100, default='Insumos') 
     
     supplier = models.CharField(max_length=100, default='')
 
-    stockSecurity = models.IntegerField(default=0)
-    price = models.FloatField(default=0)
+    stockSecurity = models.IntegerField(default=0, null=True, blank=True)
+    price = models.FloatField(default=0, null=True, blank=True, verbose_name="Precio de Lista")
     currency = models.CharField(max_length=10, choices=CURRENCIES, default='Dolar')
     hasOffer = models.ForeignKey(Cotization, on_delete=models.SET_DEFAULT, blank=True, null=True, default=None)
     quantityOffer = models.FloatField(null=True, blank= True)
@@ -75,8 +75,8 @@ class WarehousesProduct(models.Model):
 
     name = models.CharField(max_length=100, verbose_name="Deposito")
     product = models.ForeignKey(Product, on_delete = models.CASCADE,  blank=True, null=True, verbose_name="Producto" )
-    quantity = models.FloatField(default=0, verbose_name="Cantidad en Deposito")
-    location = models.CharField(max_length=100, default='', blank=True,  verbose_name="Ubicacion")
+    quantity = models.FloatField(default=0, null=True, blank=True, verbose_name="Cantidad en Deposito")
+    location = models.CharField(max_length=100, null=True, blank=True, verbose_name="Ubicacion")
     deltaQuantity = models.FloatField()
     inTransit = models.BooleanField(default=False)
 

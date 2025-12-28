@@ -12,6 +12,8 @@ django-environ
 django-filter
 django-redis
 django-storages
+dotenv
+djangorestframework
 et-xmlfile
 gunicorn
 jmespath
