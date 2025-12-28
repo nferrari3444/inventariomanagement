@@ -49,12 +49,12 @@ class Product(models.Model):
     
     product_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100)
-    barcode = models.CharField(max_length= 100, verbose_name=u"Codigo de Barras")
+    barcode = models.CharField(max_length= 100, null=True, blank=True, verbose_name=u"Codigo de Barras")
     internalCode = models.BigIntegerField(verbose_name=u"Codigo Interno")
     quantity = models.FloatField(default=0, null=True, blank=True)
     category = models.CharField(max_length=100, default='Insumos') 
     
-    supplier = models.CharField(max_length=100, default='')
+    supplier = models.CharField(max_length=100, default='', null=True, blank=True )
 
     stockSecurity = models.IntegerField(default=0, null=True, blank=True)
     price = models.FloatField(default=0, null=True, blank=True, verbose_name="Precio de Lista")

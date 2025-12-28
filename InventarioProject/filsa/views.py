@@ -2074,25 +2074,45 @@ def crudProducts(request,action):
                     print('data product is:', data.iloc[i])
                     try:
                         product_code = data.iloc[i][0] #['codigo interno']
+                        print('product code is: ', product_code)
                         product_code_origin = data.iloc[i][1] # ['cantidad']
+                        print('product code origin is: ', product_code_origin   )
                         category = data.iloc[i][3] # ['category']
                         supplier = data.iloc[i][4] # ['proveedor']
-                        stock = data.iloc[i][6]
+                        stock_raw = data.iloc[i][6]
+                        stock = float(str(stock_raw).replace(',', '.')) if stock_raw not in [None, ''] else 0
+                        print('product stock is: ', stock)
+                        
                         stockSecurity = data.iloc[i][15] # ['stock seguridad']
                         product_name = data.iloc[i][5] # ['nombre']
+                        if pd.isna(product_name) or product_name == '' or product_name is None:
+                            continue
+
                         warehouse_1 = 'Anaya 2710' # ['Anaya deposito']
                         ubication_warehouse_1 = data.iloc[i][8] # ['Anaya ubicacion']
-                        quantity_warehouse_1 = data.iloc[i][7] # ['cantidad deposito 1
+                        quantity_warehouse_1_raw = data.iloc[i][7]
+                        quantity_warehouse_1 = float(str(quantity_warehouse_1_raw).replace(',', '.')) if quantity_warehouse_1_raw not in [None, ''] else 0 # ['cantidad deposito 1
                         warehouse_2 = 'Crocker' # ['Crocker deposito']
                         ubication_warehouse_2 = data.iloc[i][10] # ['Crocker ubicacion']
-                        quantity_warehouse_2 = data.iloc[i][9] # ['cantidad deposito 2
+                        quantity_warehouse_2_raw = data.iloc[i][9]
+                        quantity_warehouse_2 = float(str(quantity_warehouse_2_raw).replace(',', '.')) if quantity_warehouse_2_raw not in [None, ''] else 0 # ['cantidad deposito 2
                         warehouse_3 = 'Joanico' # ['Juanico deposito']
                         ubication_warehouse_3 = data.iloc[i][12] # ['Juanico ubicacion']
-                        quantity_warehouse_3 = data.iloc[i][11] # ['cantidad deposito 3
+                        quantity_warehouse_3_raw = data.iloc[i][11]
+                        quantity_warehouse_3 = float(str(quantity_warehouse_3_raw).replace(',', '.')) if quantity_warehouse_3_raw not in [None, ''] else 0 # ['cantidad deposito 3
                         warehouse_4 = "In Transit" # ['In Transit deposito']
-                        ubication_warehouse_4 = data.iloc[i][7] # ['ubicacion']
-                        quantity_warehouse_4 = data.iloc[i][8] # ['cantidad deposito 4
-                        price = data.iloc[i][28] # ['precio de lista']
+                        ubication_warehouse_4 = 'Transito' # ['ubicacion']
+                        quantity_warehouse_4_raw = data.iloc[i][14]
+                        quantity_warehouse_4 = float(str(quantity_warehouse_4_raw).replace(',', '.')) if quantity_warehouse_4_raw not in [None, ''] else 0 # ['cantidad deposito 4
+                        #price =  'USD 2.102,00'
+                        price_raw = data.iloc[i][28]
+                        if price_raw is not None and price_raw != '':
+                            price_str = str(price_raw).strip('USD').strip().replace('-', '').replace('#¡REF! ', '').replace('#¡REF!', '')
+                            # Handle European number format: remove dots (thousands separator) and replace comma with dot
+                            price = float(price_str.replace('.', '').replace(',', '.'))
+                        else:
+                            price = None
+                         # ['precio de lista']
 
                         deposits = [warehouse_1, warehouse_2, warehouse_3, warehouse_4] 
                         locations = [ubication_warehouse_1, ubication_warehouse_2, ubication_warehouse_3, ubication_warehouse_4]
@@ -2160,6 +2180,7 @@ def update_product_warehouse(deposits, product_code, product_warehouse_quantitie
 def create_products_warehouse(deposits, product_code, product_warehouse_quantities):
     for i, deposit in enumerate(deposits):
         product_obj = Product.objects.get(internalCode= product_code)
+        print('product warehouse quantities is:', product_warehouse_quantities[i]  )
         new_product_warehouse= WarehousesProduct(product= product_obj, name=product_warehouse_quantities[i][0], quantity = product_warehouse_quantities[i][1], location=product_warehouse_quantities[i][2], deltaQuantity=0)
         new_product_warehouse.save()
     
