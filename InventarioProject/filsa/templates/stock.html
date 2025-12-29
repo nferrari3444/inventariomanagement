@@ -141,7 +141,8 @@
   </svg></a> -->
                     </div>
                 </th>
-    {% if user.groups.all.0.name.strip == "Administrador"  or user.groups.all.0.name.strip == "Comercial" %}
+                
+    {% if request.user.groups.all.0.name.strip == "Administrador"  or request.user.groups.all.0.name.strip == "Comercial" %}
            
                 <th scope="col" class="px-3 py-2">
                     <div class="flex items-center">
@@ -246,7 +247,7 @@
                 
 
                 </td>
-            {% if user.groups.all.0.name.strip == "Administrador"  or user.groups.all.0.name.strip == "Comercial" %}
+            {% if request.user.groups.all.0.name.strip == "Administrador"  or request.user.groups.all.0.name.strip == "Comercial" %}
 
                 <td class="px-3 py-2">
                     {% if 'name' in request.GET or 'supplier' in request.GET or 'category' in request.GET %}                 
