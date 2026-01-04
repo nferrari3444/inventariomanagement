@@ -142,7 +142,7 @@
                     </div>
                 </th>
                 
-    {% if request.user.groups.all.0.name.strip == "Administrador"  or request.user.groups.all.0.name.strip == "Comercial" %}
+    {% if request.user|has_group:"Administrador"  or request.user|has_group:"Comercial" %}
            
                 <th scope="col" class="px-3 py-2">
                     <div class="flex items-center">
@@ -247,7 +247,7 @@
                 
 
                 </td>
-            {% if request.user.groups.all.0.name.strip == "Administrador"  or request.user.groups.all.0.name.strip == "Comercial" %}
+            {% if request.user|has_group:"Administrador"  or request.user|has_group:"Comercial" %}
 
                 <td class="px-3 py-2">
                     {% if 'name' in request.GET or 'supplier' in request.GET or 'category' in request.GET %}                 
