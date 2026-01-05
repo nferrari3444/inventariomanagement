@@ -14,9 +14,9 @@ from django.core.wsgi import get_wsgi_application
 
 
 #os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'InventarioProject.settings.local')
-settings_module = 'InventarioProject.settings.local' if 'runserver' in sys.argv else 'InventarioProject.settings.production'
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', settings_module)
-#os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'InventarioProject.settings.production')
+# settings_module = 'InventarioProject.settings.local' if 'runserver' in sys.argv else 'InventarioProject.settings.production'
+# os.environ.setdefault('DJANGO_SETTINGS_MODULE', settings_module)
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'InventarioProject.settings.production')
 
 
 application = get_wsgi_application()
