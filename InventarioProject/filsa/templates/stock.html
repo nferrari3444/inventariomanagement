@@ -141,7 +141,8 @@
   </svg></a> -->
                     </div>
                 </th>
-                
+     {{request.user.groups.all.0.name.strip}} 
+     {{request.user|has_group:"Administrador"}}          
     {% if request.user|has_group:"Administrador"  or request.user|has_group:"Comercial" %}
            
                 <th scope="col" class="px-3 py-2">
