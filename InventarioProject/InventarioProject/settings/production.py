@@ -55,23 +55,23 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 SITE_ID = 1
 
 # Database
-DATABASES = {
-    'default': os.getenv("DATABASE_URL"),  # Reads DATABASE_URL
-}
-
-
 # DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-#         # 'URL': os.getenv('DATABASE_URL'),
-#         'NAME': 'filsadb',
-#         'USER': 'filsa',
-#         'HOST': 'localhost',
-#         'PASSWORD': 'Filsa.2024',
-# 	'PORT': 5432
-
-#     }
+#     'default': os.getenv("DATABASE_URL"),  # Reads DATABASE_URL
 # }
+
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        # 'URL': os.getenv('DATABASE_URL'),
+        'NAME': 'filsadb',
+        'USER': 'filsa',
+        'HOST': 'localhost',
+        'PASSWORD': 'Filsa.2024',
+        'PORT': 5432
+
+    }
+}
 
 # # Logging
 # LOGGING = {
