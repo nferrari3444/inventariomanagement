@@ -1,5 +1,11 @@
 from .base import *
 
+import environ
+
+load_dotenv()
+
+env = environ.Env()
+environ.Env.read_env()
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
@@ -48,17 +54,24 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 SITE_ID = 1
 
+# Database
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        # 'URL': os.getenv('DATABASE_URL'),
-        'NAME': 'filsadb',
-        'USER': 'filsa',
-        'PASSWORD': 'Filsa.2024',
-	'PORT': 5432
-
-    }
+    'default': os.getenv("DATABASE_URL"),  # Reads DATABASE_URL
 }
+
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
+#         # 'URL': os.getenv('DATABASE_URL'),
+#         'NAME': 'filsadb',
+#         'USER': 'filsa',
+#         'HOST': 'localhost',
+#         'PASSWORD': 'Filsa.2024',
+# 	'PORT': 5432
+
+#     }
+# }
 
 # # Logging
 # LOGGING = {
