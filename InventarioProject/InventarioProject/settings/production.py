@@ -66,7 +66,7 @@ DATABASES = {
         # 'URL': os.getenv('DATABASE_URL'),
         'NAME': 'filsadb',
         'USER': 'filsa',
-        'HOST': 'localhost',
+        'HOST': '192.168.1.35',
         'PASSWORD': 'Filsa.2024',
         'PORT': 5432
 
