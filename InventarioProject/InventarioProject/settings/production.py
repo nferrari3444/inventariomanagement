@@ -13,13 +13,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 # LOG_DIR = os.path.join(os.path.dirname(__file__), '..', 'logs')
 # os.makedirs(LOG_DIR, exist_ok=True) # Ensure the log directory exists
 
-
+DEBUG = False
 print('BASE_DIR is', BASE_DIR)
 #print('BASE_DIR_ is', BASE_DIR_)
 USE_X_FORWARDED_HOST=True
 
 # Security Settings
-SECURE_SSL_REDIRECT = True
+SECURE_SSL_REDIRECT = False
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 SECURE_BROWSER_XSS_FILTER = True
