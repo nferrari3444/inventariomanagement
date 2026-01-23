@@ -18,7 +18,7 @@ MIDDLEWARE = MIDDLEWARE + [
     # ...
 ]
 
-INTERNAL_IPS = ("127.0.0.1", "172.17.0.1")
+INTERNAL_IPS = ("127.0.0.1", "172.17.0.1",'localhost')
 
 STATIC_ROOT =  os.path.join(BASE_DIR, 'static/')    
 #print('STATIC_ROOT is {}'.format(STATIC_ROOT))

@@ -1310,52 +1310,95 @@ class StockListView(LoginRequiredMixin, FilteredListView, generic.ListView):
         category = self.request.GET.get('category', None)
         location = self.request.GET.get('location', None)
         print('supplier selected is', supplier)
-
+        fields_to_check = []
+        filter_params = {}
        # queryset = super().get_queryset()
        
         if category:
             category_filter = True
             categoryList = [category]
+            filter_params['product__category__in'] = categoryList
+            category_conditions = Q(product__category__in= categoryList)
            # filter = WarehousesProduct.objects.select_related('product').filter(name__in= warehouseList, product__category__in= categoryList, product__supplier__in=supplierList )
 
         else:
-            categoryList = Product.objects.all().values('category').distinct().order_by('category')
+            categoryList = Product.objects.all().values_list('category',flat=True).distinct().order_by('category')
+            price_conditions = Q(price=100) | Q(price=200)
+            fields_to_check.append('product__category')
+            categoryList = list(categoryList)
+            category_conditions = Q(product__category__in= categoryList) | Q(product__category__isnull=True) | Q(product__category='')
            # filter = WarehousesProduct.objects.select_related('product').filter(name__in= warehouseList, product__category__in= categoryList, product__supplier__in=supplierList )
 
         if location:
             locationList = [location]
+            filter_params['location__in'] = locationList
+            location_conditions = Q(location__in= locationList)
         else:
             locationList = WarehousesProduct.objects.values_list('location',flat=True).distinct().order_by('location')
-
+            fields_to_check.append('location')
+            locationList = list(locationList)
+            location_conditions = Q(location__in= locationList) | Q(location__isnull=True) | Q(location='')
+            locationList.append(None)  # to include products with empty location
+        
         if supplier:
             supplier_filter = True
             supplierList = [supplier]
+            filter_params['product__supplier__in'] = supplierList
+            supplier_conditions = Q(product__supplier__in=supplierList)
            # filter = WarehousesProduct.objects.select_related('product').filter(name__in= warehouseList, product__category__in= categoryList, product__supplier__in=supplierList )
 
         else:
-            supplierList = Product.objects.all().values('supplier').distinct().order_by('supplier')
+            supplierList = Product.objects.all().values_list('supplier',flat=True).distinct().order_by('supplier')
+            fields_to_check.append('product__supplier')
+            supplierList = list(supplierList)
+            supplier_conditions = Q(product__supplier__in=supplierList) | Q(product__supplier__isnull=True) | Q(product__supplier='')
+            supplierList.append(None)  # to include products with empty supplier
         #    filter = WarehousesProduct.objects.select_related('product').filter(name__in= warehouseList, product__category__in= categoryList, product__supplier__in=supplierList )
 
 
         if warehouse:
             warehouseList = [warehouse]
+            filter_params['name__in'] = warehouseList
+            warehouse_conditions = Q(name__in= warehouseList)
          #   filter = WarehousesProduct.objects.select_related('product').filter(name__in= warehouseList, product__category__in= categoryList, product__supplier__in=supplierList )
 
            
         else:
             warehouseList = WarehousesProduct.objects.values_list('name',flat=True).distinct().order_by('name')
+            warehouseList = list(warehouseList)
+            warehouse_conditions = Q(name__in= warehouseList) | Q(name__isnull=True) | Q(name='')
+            fields_to_check.append('name')
         #    filter = WarehousesProduct.objects.select_related('product').filter(name__in= warehouseList, product__category__in= categoryList, product__supplier__in=supplierList )
 
-        print('warehouse , category and supplier are {} {} {}'.format(warehouse,category,supplier))
-        if None not in (warehouse,category,supplier, location) :
-            filter = WarehousesProduct.objects.select_related('product').filter(name__in= warehouseList, location__in= locationList, product__category__in= categoryList, product__supplier__in=supplierList).order_by('product__internalCode')
 
-            
+        print('warehouse , category and supplier are {} {} {}'.format(warehouse,category,supplier))
+        if None not in (warehouse,category,supplier, location):
+            print('warehouseList is', warehouseList)
+            print('categoryList is', categoryList)
+            print('supplierList is', supplierList)
+            print('locationList is', locationList)
+            #fields_to_check = ['product__supplier', 'product__category', 'location']
+
+            # Create Q objects for the isnull condition for each field
+            q_objects = [Q(**{f'{field}__isnull': True}) for field in fields_to_check]
+            or_conditions = [warehouse_conditions, category_conditions, supplier_conditions, location_conditions]
+            # Combine Q objects using the OR operator ( | )
+            combined_q = reduce(lambda x, y: x | y, q_objects)
+            not_null_conditions = Q(quantity__gt=0) # Example condition to exclude null quantities
+            print('or_conditions are', or_conditions)
+            print('filter_params are', filter_params)
+            # Filter the queryset
+           # queryset = WarehousesProduct.objects.filter(Q(combined_q), name__in= warehouseList, product__category__in= categoryList, product__supplier__in=supplierList, location__in= locationList).order_by('product__internalCode')
+            queryset = WarehousesProduct.objects.select_related('product').filter(warehouse_conditions , category_conditions , supplier_conditions , location_conditions, not_null_conditions) #, **filter_params).order_by('product__internalCode')
+            #filter = WarehousesProduct.objects.select_related('product').filter(Q(product__supplier__in=supplierList) | Q(product__supplier__isnull=True), Q(product__category__in= categoryList) | Q(product__category__isnull=True), Q(location__in= locationList) | Q(location__isnull=True), name__in= warehouseList).order_by('product__internalCode')
+            #filter = WarehousesProduct.objects.filter(Q(name__in= warehouseList) & Q(location__in= locationList) & Q(product__category__in= categoryList) & Q(product__supplier__in=supplierList)).order_by('product__internalCode')
+
+            print('queryset in if is', queryset)
         else:
-            filter = Product.objects.all()
+            queryset = Product.objects.all()
             
         #filter = StockFilterSet(self.request.GET, queryset)
-        return filter #.qs
+        return queryset #.qs
 
     def get_context_data(self, **kwargs):
         
@@ -1380,33 +1423,43 @@ class StockListView(LoginRequiredMixin, FilteredListView, generic.ListView):
         if category:
             category_filter = True
             categoryList = [category]
+            category_conditions = Q(product__category__in= categoryList)
         else:
-            categoryList = Product.objects.all().values('category').distinct().order_by('category')
-
-        
+            categoryList = Product.objects.all().values_list('category',flat=True).distinct().order_by('category')
+            categoryList = list(categoryList)
+            category_conditions = Q(product__category__in= categoryList) | Q(product__category__isnull=True) | Q(product__category='')
         if location:
             locationList = [location]
+            location_conditions = Q(location__in= locationList)
         else:
             locationList = WarehousesProduct.objects.values_list('location',flat=True).distinct().order_by('location')
-
+            locationList = list(locationList)
+            location_conditions = Q(location__in= locationList) | Q(location__isnull=True) | Q(location='')
 
         if supplier:
             supplier_filter = True
             supplierList = [supplier]
+            supplier_conditions = Q(product__supplier__in=supplierList)
         
         else:
-            supplierList = Product.objects.all().values('supplier').distinct().order_by('supplier')
+            supplierList = Product.objects.all().values_list('supplier',flat=True).distinct().order_by('supplier')
+            supplierList = list(supplierList)
+            supplier_conditions = Q(product__supplier__in=supplierList) | Q(product__supplier__isnull=True) | Q(product__supplier='')
 
         if warehouse:
             warehouseList = [warehouse]
+            warehouse_conditions = Q(name__in= warehouseList)
            
         else:
             warehouseList = WarehousesProduct.objects.values_list('name',flat=True).distinct().order_by('name')
-          
+            warehouseList = list(warehouseList)
+            warehouse_conditions = Q(name__in= warehouseList) | Q(name__isnull=True) | Q(name='')
+        print('warehouse , category and supplier are {} {} {}'.format(warehouse,category,supplier))
            
         if None not in (warehouse,category,supplier, location) :
             filter = WarehousesProduct.objects.select_related('product').filter(name__in= warehouseList, product__category__in= categoryList, product__supplier__in=supplierList ).order_by('product__internalCode')
-
+            filter = WarehousesProduct.objects.filter(warehouse_conditions , category_conditions , supplier_conditions , location_conditions) #, **filter_params).order_by('product__internalCode')
+            print('filter in if is', filter)
            
         else:
             filter = Product.objects.all()

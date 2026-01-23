@@ -12,3 +12,11 @@ env
 venv/
 .venv/
 .venv
+output/
+output
+*.log
+output/*
+inputs/
+inputs
+input
+inputs/*

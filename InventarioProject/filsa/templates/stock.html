@@ -80,12 +80,8 @@
         {{ filterset.form.location }}
     </div>
 
-           
-       
             <button  class="mt-4 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 inline-flex focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-2 py-1 text-center items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="submit" >Consultar</button>
-         
-            
-          
+                   
             </form>
 
             <div class="sm:mt-4 sm:block lg:inline-flex">
@@ -141,9 +137,6 @@
   </svg></a> -->
                     </div>
                 </th>
-     {{request.user.groups.all.0.name.strip}} 
-     {{request.user|has_group:"Administrador"}}       
-     {{product.quantity}}   
     {% if request.user|has_group:"Administrador"  or request.user|has_group:"Comercial" %}
            
                 <th scope="col" class="px-3 py-2">
@@ -215,7 +208,6 @@
                 <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                 {% if 'name' in request.GET or 'supplier' in request.GET or 'category' in request.GET %}
                 
-             
                 {{product.product.name}}
                 
                 {% else %}
@@ -251,8 +243,7 @@
 
                 </td>
             {% if request.user|has_group:"Administrador"  or request.user|has_group:"Comercial" %}
-                 {{product.product.price}}
-                 {{product.price}}
+              
                 <td class="px-3 py-2">
                     {% if 'name' in request.GET or 'supplier' in request.GET or 'category' in request.GET %}                 
                     {{product.product.price}}
@@ -296,8 +287,6 @@
 
 
                 </td>
-
-                {{product.quantity}}
                 <td class="px-3 py-2">
                     
                 {% if 'name' in request.GET or 'supplier' in request.GET or 'category' in request.GET %}
@@ -429,7 +418,7 @@ $.ajax({
 
         
         console.log('data in hmtl',data.html_table)
-        $('#pagination').empty()
+    //    $('#pagination').empty()
 
         $(`#supplier`).val('')
         $(`#categoria`).val('')
@@ -575,7 +564,7 @@ $.ajax({
     },
     url: request_url,
     success: function(data){
-         $('#pagination').empty()
+       //  $('#pagination').empty()
     $('#productTable').html(data.html_table);
 
 }}

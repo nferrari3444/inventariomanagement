@@ -13,19 +13,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Filsa Inventario</title>
 
-    <!-- jQuery !-->
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"> </script>
-<!-- jQuery UI !-->
-<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css">
-<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
-<script src="https://code.jquery.com/jquery-3.6.0.js"></script>
-    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
-
+        <!-- ...existing head content... -->
+    <style>
+        .djDebug {
+            display: block !important;
+            z-index: 10000 !important;
+        }
+        .djdt-show-toolbar {
+            display: block !important;
+            position: fixed !important;
+            bottom: 10px !important;
+            right: 10px !important;
+            z-index: 10001 !important;
+        }
+    </style>
+ 
     <!-- Autocomplete JS -->
    <!-- Autocomplete CSS -->
    <!-- <script src="{% static 'js/autocomplete.js' %}"></script>
    <link rel="stylesheet" href="{% static 'css/autocomplete.min.css' %}"> -->
-    {% compress css %}
+     <!-- jQuery !-->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"> </script>
+<!-- jQuery UI !-->
+ <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css">
+
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+
+   {% compress css %}
     <link rel="stylesheet" href="{% static 'src/output.css' %}">  
     
     {% endcompress %}
@@ -141,7 +157,8 @@
     </div>
   </nav>
   
-
+<div class=""> 
+<body class="">
 
   {% block content %}
 
@@ -153,6 +170,7 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
 
-
+</body>
+</div>
 
 </html>

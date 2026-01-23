@@ -5,7 +5,14 @@
 @tailwind utilities;
 
 
-
+/* filepath: c:\Users\nicol\Inventario\InventarioProject\filsa\static\css\custom.css */
+.djdt-show-toolbar {
+    display: block !important;
+    z-index: 10000 !important;
+    position: fixed !important;
+    bottom: 10px !important;
+    right: 10px !important;
+}
 .w-32 {
 
     width: 8rem;
