@@ -776,17 +776,6 @@ def inboundView(request):
                     # Se comenta esto 31-10-2024 porque los productos no se mueven aun. Se pasa este codigo
                     # al momento que se confirma el producto. Finalmente se crea el producto con cantidad 0.
 
-                    # productWarehouseNoStock = WarehousesProduct.objects.filter(product = productdb, name='No Stock')
-                    # if productWarehouseNoStock.exists():                    
-                    #     print('Se elimina el producto {} en el deposito No Stock'.format(productWarehouseNoStock))
-                    #     productWarehouseNoStock.delete()
-                    
-                    # print('el producto {} no existe en el deposito {}'.format(product, warehouse))
-                    # #newproduct_db = Product.objects.create(name=product, barcode=barcode,internalCode=internalCode,quantity=0, 
-                    
-                    # #                       warehouse= warehouse_obj, deltaQuantity=0, stockSecurity= stockSecurity, inTransit=True)
-
-                    # #newproduct_db.save()
                     # 3-11-2024 Borramos el deposito del producto y le ingreso name=En Transito como
                     newWarehouseProduct_db = WarehousesProduct.objects.create(product=productdb, name=warehouse, quantity=0, deltaQuantity=0 , inTransit=True)
                     newWarehouseProduct_db.save()

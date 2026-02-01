@@ -1,6 +1,7 @@
 from django.test import TestCase, Client
 from django.urls import reverse
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
 from .models import Product, WarehousesProduct, Tasks, StockMovements, DiffProducts, Cotization
 from .views import update_product_warehouse, create_products_warehouse
 from functools import reduce
@@ -10,19 +11,6 @@ from .forms import InboundForm, OutboundOrderForm, TransferForm
 
 User = get_user_model()
 
-
-# import psycopg2
-
-# try: 
-#     conn = psycopg2.connect(
-#         host="127.0.0.1",
-#         database="filsadb_dev",
-#         user="filsa_dev",
-#         password="Filsa.2024",
-#         port=5432)
-#     print("Database connection successful")
-# except Exception as e:
-#     print(f"Database connection failed: {e}")
 class ProductModelTest(TestCase):
     def setUp(self):
         self.product = Product.objects.create(
@@ -209,6 +197,9 @@ class InboundViewTest(TestCase):
     def setUp(self):
         self.client = Client()
         self.user = User.objects.create_user(username='testuser', password='testpass',email='inbound@example.com')
+        # Create a group and assign it to the user to avoid IndexError in views
+        group = Group.objects.create(name='Supervisor')
+        self.user.groups.add(group)
         self.product = Product.objects.create(name='Inbound Product', internalCode=99999, quantity=0)
         self.warehouse = WarehousesProduct.objects.create(name='Inbound Warehouse', product=self.product, quantity=0, deltaQuantity=0.0)
 
@@ -216,48 +207,72 @@ class InboundViewTest(TestCase):
         self.client.force_login(self.user)
 #        self.client.login(username='testuser', password='testpass')
         data = {
-            'product': self.product.product_id,
-            'quantity': 10,
+            'producto_1': self.product.name,
+            'internalCode_1': self.product.internalCode,
+            'cantidad_1': 10,
             'warehouse': self.warehouse.name,
-            'motivoIngreso': 'Purchase',
+            'motivoIngreso': 'Compra en Plaza',
+            'extra_field_count': 1,
+            'department': 'Ventas',
+            'date': '2023-01-01',
+            'issuer': self.user.id,
+            'receptor': self.user.id,
         }
 
         initial_tasks = Tasks.objects.count()
+        initial_movements = StockMovements.objects.count()
         response = self.client.post(reverse('inbound'), data, follow=True)
         self.assertIn(response.status_code, [302, 200])  # Success on form submission
         self.assertGreater(Tasks.objects.count(), initial_tasks)
+        self.assertGreater(StockMovements.objects.count(), initial_movements)
         self.warehouse.refresh_from_db()
-        self.assertEqual(self.warehouse.quantity, 10)
+        # Quantity in warehouse is updated only when inbound is confirmed
+        self.assertEqual(self.warehouse.quantity, 0.0)
 
 
 class OutboundViewTest(TestCase):
     def setUp(self):
         self.client = Client()
         self.user = User.objects.create_user(username='testuser', password='testpass', email='outbound@example.com')
+        # Create a group and assign it to the user to avoid IndexError in views
+        group = Group.objects.create(name='Supervisor')
+        self.user.groups.add(group)
         self.product = Product.objects.create(name='Outbound Product', internalCode=88888, quantity=20)
         self.warehouse = WarehousesProduct.objects.create(name='Outbound Warehouse', product=self.product, quantity=20, deltaQuantity=0.0)
 
     def test_outbound_form_submission(self):
         self.client.force_login(self.user)
         data = {
-            'product': self.product.product_id,
-            'quantity': 5,
+            'producto_1': self.product.name,
+            'internalCode_1': self.product.internalCode,
+            'cantidad_1': 5,
             'warehouse': self.warehouse.name,
-            'motivoEgreso': 'Sale',
+            'motivoEgreso': 'Planta de Armado',
+            'extra_field_count': 1,
+            'department': 'Ventas',
+            'date': '2023-01-01',
+            'issuer': self.user.id,
+            'receptor': self.user.id,
         }
         
         initial_tasks = Tasks.objects.count()
+        initial_movements = StockMovements.objects.count()
         response = self.client.post(reverse('outboundorder'), data, follow=True)
         self.assertIn(response.status_code, [200, 302])
         self.assertGreater(Tasks.objects.count(), initial_tasks)
+        self.assertGreater(StockMovements.objects.count(), initial_movements)
         self.warehouse.refresh_from_db()
-        self.assertEqual(self.warehouse.quantity, 15)
+        # Quantity in warehouse is updated only when outbound is delivered/confirmed
+        self.assertEqual(self.warehouse.quantity, 20)
 
 
 class TransferViewTest(TestCase):
     def setUp(self):
         self.client = Client()
         self.user = User.objects.create_user(username='testuser', password='testpass', email="transfer@example.com")
+        # Create a group and assign it to the user to avoid IndexError in views
+        group = Group.objects.create(name='Supervisor')
+        self.user.groups.add(group)
         self.product = Product.objects.create(name='Transfer Product', internalCode=77777, quantity=30)
         self.source_warehouse = WarehousesProduct.objects.create(name='Source Warehouse', product=self.product, quantity=20, deltaQuantity=0.0)
         self.dest_warehouse = WarehousesProduct.objects.create(name='Dest Warehouse', product=self.product, quantity=10, deltaQuantity=0.0)
@@ -265,18 +280,27 @@ class TransferViewTest(TestCase):
     def test_transfer_form_submission(self):
         self.client.force_login(self.user)
         data = {
-            'product': self.product.product_id,
-            'quantity': 5,
-            'source_warehouse': self.source_warehouse.name,
-            'dest_warehouse': self.dest_warehouse.name,
+            'product_1': self.product.name,
+            'internalCode_1': self.product.internalCode,
+            'cantidad_1': 5,
+            'warehouse': self.source_warehouse.name,
+         #   'dest_warehouse': self.dest_warehouse.name,
+            'extra_field_count': 1,
+            'department': 'Ventas',
+            'date': '2023-01-01',
+            'issuer': self.user.id,
+            'receptor': self.user.id,
         }
 
         initial_tasks = Tasks.objects.count()
+        initial_movements = StockMovements.objects.count()
         response = self.client.post(reverse('transfer'), data, follow=True)
         self.assertIn(response.status_code, [200, 302])
         self.assertGreater(Tasks.objects.count(), initial_tasks)
+        self.assertGreater(StockMovements.objects.count(), initial_movements)
         self.source_warehouse.refresh_from_db()
         self.dest_warehouse.refresh_from_db()
-        self.assertEqual(self.source_warehouse.quantity, 15)
-        self.assertEqual(self.dest_warehouse.quantity, 15)
+        # Quantities are updated only when transfer is confirmed (transferReceptionView)
+        self.assertEqual(self.source_warehouse.quantity, 20)
+        self.assertEqual(self.dest_warehouse.quantity, 10)
 
