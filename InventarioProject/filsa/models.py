@@ -139,7 +139,7 @@ class Tasks(models.Model):
     motivoEgreso = models.CharField(max_length=30, choices = MOTIVOSEGRESO) #default='Transferencia Depósitos')
 
     warehouseProduct = models.ForeignKey(WarehousesProduct, on_delete= models.CASCADE, blank=True, null=True)
-    actionType = models.CharField(max_length=20,  default='Inbound')
+    actionType = models.CharField(max_length=30,  default='Inbound')
     observationsSolicitud = models.CharField(max_length=500,  blank= True)
     observationsConfirma = models.CharField(max_length=500,  blank= True)
 

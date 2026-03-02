@@ -707,14 +707,7 @@ def inboundView(request):
         print('form is valid', form.is_valid())
        
         if form.is_valid():
-        #     # process the data in form.cleaned_data as 
-        #     product = form.cleaned_data['product']
             date  =   datetime.today().strftime('%Y-%m-%d')
-           # print('form is:', form)
-
-        #     print(product)
-        #     print(date)
-            
             receptor = form.cleaned_data['receptor']
             warehouse = form.cleaned_data['warehouse']
             warehourse_inst = WarehousesProduct.objects.filter(name=warehouse).first()
@@ -736,7 +729,6 @@ def inboundView(request):
             task = Tasks.objects.create(date= date, receptor= receptor, warehouseProduct= warehourse_inst, issuer=solicitante,
                                         motivoIngreso=motivoIngreso,  actionType=actionType, department=department, observationsSolicitud= observaciones)
             
-            
             for i in range(1,int(numberOfProducts) + 1):
 
                 product = form.cleaned_data['producto_{}'.format(i)]
@@ -750,15 +742,9 @@ def inboundView(request):
                 warehouseProduct = WarehousesProduct.objects.filter(product= productdb, name=warehouse)
 
                 if warehouseProduct.exists():                     #Product.objects.filter(name=product, warehouse=warehouse).exists():
-                    print('el producto {} ya existe en el deposito {}'.format(product, warehouse))
-                    # print('warehouse in line 430 is', warehouse)
-                    # print('product in line 431 is', product)
+                    print('el producto {} ya existe en el deposito {}'.format(product, warehouse))       
 
                     warehouseproduct_db =  WarehousesProduct.objects.get(product=productdb, name=warehouse)          #Product.objects.get(name= product, warehouse=warehouse)
-                    
-                    # nuevoIngreso.barcode = form.cleaned_data['barcode_{}'.format(i)]
-                    # nuevoIngreso.internalCode = form.cleaned_data['internalCode_{}'.format(i)]
-                    
 
                     print('product is:', product)
                     print('quantity is:', quantity)
@@ -1858,11 +1844,6 @@ def cancelTaskView(request, requested_id):
         
             newWarehouseProduct_db.delete()
       
-
-       
-
-    
-
     return redirect('/tasks/')
     # else:
     #     return render(request, 'cancelTaskModal.html', context)
@@ -2007,7 +1988,6 @@ def crudProducts(request,action):
         
             numberOfProducts = len(data)
            
-
             if action == 'crear':
                 products = []
                 products_warehouse = []

@@ -56,11 +56,11 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'compressor',
-     'whitenoise',
-     'django.contrib.admin',
-     'django.contrib.sites',
-      'import_export',
-      'django_filters',
+    'whitenoise',
+    'django.contrib.admin',
+    'django.contrib.sites',
+    'import_export',
+    'django_filters',
      
 ]
 
@@ -145,13 +145,13 @@ AUTH_PASSWORD_VALIDATORS = [
 LOGIN_REDIRECT_URL = '/'
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'mail.filsa.com.uy'
+EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
-EMAIL_HOST_USER = 'ologistica@filsa.com.uy'
+EMAIL_HOST_USER = 'operacionesfilsa@gmail.com'
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
-DEFAULT_FROM_EMAIL  = 'ologistica@filsa.com.uy'
+DEFAULT_FROM_EMAIL  = 'operacionesfilsa@gmail.com'
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/

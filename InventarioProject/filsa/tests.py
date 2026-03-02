@@ -1,4 +1,4 @@
-from django.test import TestCase, Client
+from django.test import TestCase, Client, override_settings
 from django.urls import reverse
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
@@ -160,7 +160,6 @@ class TasksModelTest(TestCase):
             department="Ventas",
             date="2023-01-01",
             motivoIngreso="Compra en Plaza",
-            motivoEgreso="Ventas",
             warehouseProduct=self.warehouse_product,
             actionType="Inbound"
         )
@@ -193,6 +192,7 @@ class HomeViewTest(TestCase):
 
 # ...existing code...
 
+@override_settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend')
 class InboundViewTest(TestCase):
     def setUp(self):
         self.client = Client()
@@ -205,7 +205,6 @@ class InboundViewTest(TestCase):
 
     def test_inbound_form_submission(self):
         self.client.force_login(self.user)
-#        self.client.login(username='testuser', password='testpass')
         data = {
             'producto_1': self.product.name,
             'internalCode_1': self.product.internalCode,
@@ -221,8 +220,8 @@ class InboundViewTest(TestCase):
 
         initial_tasks = Tasks.objects.count()
         initial_movements = StockMovements.objects.count()
-        response = self.client.post(reverse('inbound'), data, follow=True)
-        self.assertIn(response.status_code, [302, 200])  # Success on form submission
+        response = self.client.post(reverse('inbound'), data)
+        self.assertEqual(response.status_code, 302)
         self.assertGreater(Tasks.objects.count(), initial_tasks)
         self.assertGreater(StockMovements.objects.count(), initial_movements)
         self.warehouse.refresh_from_db()
@@ -230,6 +229,7 @@ class InboundViewTest(TestCase):
         self.assertEqual(self.warehouse.quantity, 0.0)
 
 
+@override_settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend')
 class OutboundViewTest(TestCase):
     def setUp(self):
         self.client = Client()
@@ -254,11 +254,11 @@ class OutboundViewTest(TestCase):
             'issuer': self.user.id,
             'receptor': self.user.id,
         }
-        
+
         initial_tasks = Tasks.objects.count()
         initial_movements = StockMovements.objects.count()
-        response = self.client.post(reverse('outboundorder'), data, follow=True)
-        self.assertIn(response.status_code, [200, 302])
+        response = self.client.post(reverse('outboundorder'), data)
+        self.assertEqual(response.status_code, 302)
         self.assertGreater(Tasks.objects.count(), initial_tasks)
         self.assertGreater(StockMovements.objects.count(), initial_movements)
         self.warehouse.refresh_from_db()
@@ -266,6 +266,7 @@ class OutboundViewTest(TestCase):
         self.assertEqual(self.warehouse.quantity, 20)
 
 
+@override_settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend')
 class TransferViewTest(TestCase):
     def setUp(self):
         self.client = Client()
@@ -284,7 +285,6 @@ class TransferViewTest(TestCase):
             'internalCode_1': self.product.internalCode,
             'cantidad_1': 5,
             'warehouse': self.source_warehouse.name,
-         #   'dest_warehouse': self.dest_warehouse.name,
             'extra_field_count': 1,
             'department': 'Ventas',
             'date': '2023-01-01',
@@ -294,8 +294,8 @@ class TransferViewTest(TestCase):
 
         initial_tasks = Tasks.objects.count()
         initial_movements = StockMovements.objects.count()
-        response = self.client.post(reverse('transfer'), data, follow=True)
-        self.assertIn(response.status_code, [200, 302])
+        response = self.client.post(reverse('transfer'), data)
+        self.assertEqual(response.status_code, 302)
         self.assertGreater(Tasks.objects.count(), initial_tasks)
         self.assertGreater(StockMovements.objects.count(), initial_movements)
         self.source_warehouse.refresh_from_db()
@@ -304,3 +304,301 @@ class TransferViewTest(TestCase):
         self.assertEqual(self.source_warehouse.quantity, 20)
         self.assertEqual(self.dest_warehouse.quantity, 10)
 
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Integration Tests
+# ─────────────────────────────────────────────────────────────────────────────
+
+@override_settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend')
+class InboundIntegrationTest(TestCase):
+    """
+    Full integration test for the inbound flow:
+      1. Create inbound task          → inboundView
+      2. Edit the task                → inboundEditTask
+      3. Confirm reception            → inboundReceptionView
+    Stock quantities must only change at step 3.
+    """
+
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_user(
+            username='testuser', password='testpass', email='inbound_integration@example.com'
+        )
+        group = Group.objects.create(name='Supervisor')
+        self.user.groups.add(group)
+        self.product = Product.objects.create(
+            name='Integration Inbound Product', internalCode=10001, quantity=0
+        )
+        self.warehouse = WarehousesProduct.objects.create(
+            name='Deposito Inbound', product=self.product, quantity=0, deltaQuantity=0.0
+        )
+
+    def test_inbound_full_flow(self):
+        self.client.force_login(self.user)
+
+        # ── Step 1: Create the inbound task ──────────────────────────────────
+        response = self.client.post(reverse('inbound'), {
+            'producto_1': self.product.name,
+            'internalCode_1': self.product.internalCode,
+            'cantidad_1': 10,
+            'warehouse': self.warehouse.name,
+            'motivoIngreso': 'Compra en Plaza',
+            'extra_field_count': 1,
+            'department': 'Ventas',
+            'date': '2023-01-01',
+            'issuer': self.user.id,
+            'receptor': self.user.id,
+        })
+        self.assertEqual(response.status_code, 302)
+
+        task = Tasks.objects.filter(actionType='Nuevo Ingreso').latest('task_id')
+        self.assertEqual(task.status, 'Pending')
+        self.assertEqual(StockMovements.objects.filter(task=task).count(), 1)
+
+        # Quantity must not change until reception is confirmed
+        self.warehouse.refresh_from_db()
+        self.assertEqual(self.warehouse.quantity, 0.0)
+
+        # ── Step 2: Edit the task ─────────────────────────────────────────────
+        response = self.client.post(reverse('inboundedit', args=[task.task_id]), {
+            'motivoIngreso': 'Importación',
+            'receptor': self.user.id,
+            'department': 'Logística',
+            'date': '2023-01-01',
+            'warehouse': self.warehouse.name,
+            'extra_field_count': 1,
+            'producto_1': self.product.name,
+            'internalCode_1': self.product.internalCode,
+            'cantidad_1': 10,
+            'issuer': self.user.id,
+            'observationsSolicitud': 'Edited by integration test',
+        })
+        self.assertEqual(response.status_code, 302)
+
+        task.refresh_from_db()
+        self.assertEqual(task.department, 'Logística')
+        self.assertEqual(task.motivoIngreso, 'Importación')
+        # Stock still unchanged after edit
+        self.warehouse.refresh_from_db()
+        self.assertEqual(self.warehouse.quantity, 0.0)
+
+        # ── Step 3: Confirm reception ─────────────────────────────────────────
+        # The reception form reads product, quantity, warehouse and most task
+        # fields from the task instance via value_from_datadict overrides.
+        # Only cantidadNeta_{i} (0-indexed) must be submitted explicitly.
+        response = self.client.post(reverse('inboundreception', args=[task.task_id]), {
+            'extra_field_count': 1,
+            'cantidadNeta_0': 10,
+            'observationsConfirma': 'All units received',
+        })
+        self.assertEqual(response.status_code, 302)
+
+        task.refresh_from_db()
+        self.assertEqual(task.status, 'Confirmed')
+
+        self.warehouse.refresh_from_db()
+        self.assertEqual(self.warehouse.quantity, 10.0)
+
+        self.product.refresh_from_db()
+        self.assertEqual(self.product.quantity, 10.0)
+
+
+@override_settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend')
+class OutboundIntegrationTest(TestCase):
+    """
+    Full integration test for the outbound flow:
+      1. Create outbound order task   → outboundOrderView
+      2. Edit the task                → editDeliveryTask
+      3. Confirm delivery             → outboundDeliveryView
+    Stock quantities must only change at step 3.
+    """
+
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_user(
+            username='testuser', password='testpass', email='outbound_integration@example.com'
+        )
+        group = Group.objects.create(name='Supervisor')
+        self.user.groups.add(group)
+        self.product = Product.objects.create(
+            name='Integration Outbound Product', internalCode=10002, quantity=50
+        )
+        self.warehouse = WarehousesProduct.objects.create(
+            name='Deposito Outbound', product=self.product, quantity=50, deltaQuantity=0.0
+        )
+
+    def test_outbound_full_flow(self):
+        self.client.force_login(self.user)
+
+        # ── Step 1: Create the outbound order task ────────────────────────────
+        response = self.client.post(reverse('outboundorder'), {
+            'producto_1': self.product.name,
+            'internalCode_1': self.product.internalCode,
+            'cantidad_1': 15,
+            'warehouse': self.warehouse.name,
+            'motivoEgreso': 'Ventas',
+            'extra_field_count': 1,
+            'department': 'Ventas',
+            'date': '2023-01-01',
+            'issuer': self.user.id,
+            'receptor': self.user.id,
+        })
+        self.assertEqual(response.status_code, 302)
+
+        task = Tasks.objects.filter(actionType='Nuevo Egreso').latest('task_id')
+        self.assertEqual(task.status, 'Pending')
+        self.assertEqual(StockMovements.objects.filter(task=task).count(), 1)
+
+        # Quantity must not change until delivery is confirmed
+        self.warehouse.refresh_from_db()
+        self.assertEqual(self.warehouse.quantity, 50.0)
+
+        # ── Step 2: Edit the task ─────────────────────────────────────────────
+        response = self.client.post(reverse('editdeliverytask', args=[task.task_id]), {
+            'motivoEgreso': 'Planta de Armado',
+            'receptor': self.user.id,
+            'department': 'Logística',
+            'date': '2023-01-01',
+            'warehouse': self.warehouse.name,
+            'extra_field_count': 1,
+            'producto_1': self.product.name,
+            'internalCode_1': self.product.internalCode,
+            'cantidad_1': 15,
+            'issuer': self.user.id,
+            'observationsSolicitud': 'Edited by integration test',
+        })
+        self.assertEqual(response.status_code, 302)
+
+        task.refresh_from_db()
+        self.assertEqual(task.department, 'Logística')
+        self.assertEqual(task.motivoEgreso, 'Planta de Armado')
+        # Stock still unchanged after edit
+        self.warehouse.refresh_from_db()
+        self.assertEqual(self.warehouse.quantity, 50.0)
+
+        # ── Step 3: Confirm delivery ──────────────────────────────────────────
+        # Similar to inbound reception: most fields are read from the task
+        # instance. Only cantidadNeta_{i} (0-indexed) must be submitted.
+        response = self.client.post(reverse('outbounddelivery', args=[task.task_id]), {
+            'extra_field_count': 1,
+            'cantidadNeta_0': 15,
+            'observationsConfirma': 'All units delivered',
+        })
+        self.assertEqual(response.status_code, 302)
+
+        task.refresh_from_db()
+        self.assertEqual(task.status, 'Confirmed')
+
+        self.warehouse.refresh_from_db()
+        self.assertEqual(self.warehouse.quantity, 35.0)  # 50 - 15
+
+        self.product.refresh_from_db()
+        self.assertEqual(self.product.quantity, 35.0)  # 50 - 15
+
+
+@override_settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend')
+class TransferIntegrationTest(TestCase):
+    """
+    Full integration test for the transfer flow:
+      1. Create transfer task         → transferView
+         Products are placed in the 'En Transito' warehouse.
+      2. Edit the task                → transferEditTask
+      3. Confirm transfer reception   → transferReceptionView
+         Products leave 'En Transito' and arrive at the destination warehouse.
+    """
+
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_user(
+            username='testuser', password='testpass', email='transfer_integration@example.com'
+        )
+        group = Group.objects.create(name='Supervisor')
+        self.user.groups.add(group)
+        self.product = Product.objects.create(
+            name='Integration Transfer Product', internalCode=10003, quantity=30
+        )
+        self.source_warehouse = WarehousesProduct.objects.create(
+            name='Source Deposito', product=self.product, quantity=20, deltaQuantity=0.0
+        )
+        self.dest_warehouse = WarehousesProduct.objects.create(
+            name='Dest Deposito', product=self.product, quantity=10, deltaQuantity=0.0
+        )
+
+    def test_transfer_full_flow(self):
+        self.client.force_login(self.user)
+
+        # ── Step 1: Create the transfer task ──────────────────────────────────
+        response = self.client.post(reverse('transfer'), {
+            'product_1': self.product.name,
+            'internalCode_1': self.product.internalCode,
+            'cantidad_1': 5,
+            'warehouse': self.source_warehouse.name,
+            'extra_field_count': 1,
+            'department': 'Ventas',
+            'date': '2023-01-01',
+            'issuer': self.user.id,
+            'receptor': self.user.id,
+        })
+        self.assertEqual(response.status_code, 302)
+
+        task = Tasks.objects.filter(actionType='Transferencia').latest('task_id')
+        self.assertEqual(task.status, 'Pending')
+        self.assertEqual(StockMovements.objects.filter(task=task).count(), 1)
+
+        # Source warehouse quantity is still unchanged at this point
+        self.source_warehouse.refresh_from_db()
+        self.assertEqual(self.source_warehouse.quantity, 20.0)
+
+        # 'En Transito' warehouse entry must be created with the transferred quantity
+        en_transito = WarehousesProduct.objects.filter(product=self.product, name='En Transito')
+        self.assertTrue(en_transito.exists())
+        self.assertEqual(en_transito.first().quantity, 5.0)
+
+        # ── Step 2: Edit the task ─────────────────────────────────────────────
+        response = self.client.post(reverse('transferedit', args=[task.task_id]), {
+            'receptor': self.user.id,
+            'department': 'Logística',
+            'date': '2023-01-01',
+            'warehouse': self.source_warehouse.name,
+            'extra_field_count': 1,
+            'product_1': self.product.name,
+            'internalCode_1': self.product.internalCode,
+            'cantidad_1': 5,
+            'issuer': self.user.id,
+            'observationsSolicitud': 'Edited by integration test',
+        })
+        self.assertEqual(response.status_code, 302)
+
+        task.refresh_from_db()
+        self.assertEqual(task.department, 'Logística')
+        # No stock changes during edit
+        self.source_warehouse.refresh_from_db()
+        self.assertEqual(self.source_warehouse.quantity, 20.0)
+
+        # ── Step 3: Confirm transfer reception ────────────────────────────────
+        # The destination warehouse must be submitted explicitly.
+        # warehouseSalida (source) is read from the task instance automatically.
+        # cantidadNeta_{i} (0-indexed) must be submitted explicitly.
+        response = self.client.post(reverse('transferreception', args=[task.task_id]), {
+            'warehouse': self.dest_warehouse.name,
+            'extra_field_count': 1,
+            'cantidadNeta_0': 5,
+            'observationsConfirma': 'Transfer received',
+        })
+        self.assertEqual(response.status_code, 302)
+
+        task.refresh_from_db()
+        self.assertEqual(task.status, 'Confirmed')
+
+        # Source warehouse quantity is reduced by the transferred amount
+        self.source_warehouse.refresh_from_db()
+        self.assertEqual(self.source_warehouse.quantity, 15.0)  # 20 - 5
+
+        # Destination warehouse quantity is increased by the net received amount
+        self.dest_warehouse.refresh_from_db()
+        self.assertEqual(self.dest_warehouse.quantity, 15.0)  # 10 + 5
+
+        # 'En Transito' entry must be deleted after confirmation
+        self.assertFalse(
+            WarehousesProduct.objects.filter(product=self.product, name='En Transito').exists()
+        )
