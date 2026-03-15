@@ -6,6 +6,8 @@ as well as purchases and sales of products.
 Provide information of inventory of products and manage operations between warehouses regards the states of the transfers such as "Pending", "In Transit", "Confirmed".
 Also provide information about stock security, and has alerts over products that are below they stock security.
 
+The project implement asyncronous tasks for I/O operations with Excel Files in order to process background tasks for CRUD operations on products as well as to create a new inventory. This functionality is created with Celery and Redis as the message broker.
+
 <img width="943" height="465" alt="StockInventory" src="https://github.com/user-attachments/assets/019f800d-36aa-4d2e-8f18-9c6668eebb99" />
 
 
