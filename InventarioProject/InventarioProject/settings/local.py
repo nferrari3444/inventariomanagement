@@ -39,6 +39,12 @@ STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# ── Celery – Windows fix ───────────────────────────────────────────────────
+# The default 'prefork' pool uses POSIX semaphores that Windows restricts.
+# 'solo' runs tasks in the worker's own thread — fine for local development.
+CELERY_WORKER_POOL = 'solo'
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',

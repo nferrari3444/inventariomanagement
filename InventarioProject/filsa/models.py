@@ -169,7 +169,7 @@ class StockMovements(models.Model):
 
     
 class DiffProducts(models.Model):
-    
+
     class Meta:
       verbose_name = 'Faltante Producto Total'
       verbose_name_plural = 'Faltante Productos Total'
@@ -178,3 +178,39 @@ class DiffProducts(models.Model):
     totalPurchase = models.FloatField(verbose_name="Cantidad")
     totalQuantity = models.FloatField(verbose_name="Cantidad Neta")
     productDiff = models.IntegerField(verbose_name="Diferencia")
+
+
+class CrudProductTask(models.Model):
+    """Tracks the status of an asynchronous CRUD-products Celery task."""
+
+    class Meta:
+        verbose_name = 'Tarea CRUD Productos'
+        verbose_name_plural = 'Tareas CRUD Productos'
+
+    STATUS_PENDING  = 'PENDING'
+    STATUS_STARTED  = 'STARTED'
+    STATUS_SUCCESS  = 'SUCCESS'
+    STATUS_FAILURE  = 'FAILURE'
+
+    STATUS_CHOICES = [
+        (STATUS_PENDING, 'Pendiente'),
+        (STATUS_STARTED, 'En proceso'),
+        (STATUS_SUCCESS, 'Completado'),
+        (STATUS_FAILURE, 'Error'),
+    ]
+
+    task_id        = models.CharField(max_length=255, unique=True, verbose_name='Celery Task ID')
+    action         = models.CharField(max_length=50,  verbose_name='Acción')
+    status         = models.CharField(max_length=50, choices=STATUS_CHOICES,
+                                      default=STATUS_PENDING, verbose_name='Estado')
+    created_at     = models.DateTimeField(auto_now_add=True, verbose_name='Creado')
+    completed_at   = models.DateTimeField(null=True, blank=True, verbose_name='Completado')
+    result_message = models.TextField(blank=True, verbose_name='Resultado')
+    error_message  = models.TextField(blank=True, verbose_name='Error')
+    created_by     = models.ForeignKey(
+        CustomUser, on_delete=models.SET_NULL,
+        null=True, blank=True, verbose_name='Usuario'
+    )
+
+    def __str__(self):
+        return f'{self.action} – {self.status} ({self.task_id[:8]}…)'

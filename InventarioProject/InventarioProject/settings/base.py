@@ -175,4 +175,16 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
+# ── Celery ────────────────────────────────────────────────────────────────────
+# Redis is used as both the message broker and the result backend.
+# Set REDIS_URL in your .env file (e.g. redis://localhost:6379/0).
+REDIS_URL = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
 
+CELERY_BROKER_URL = REDIS_URL
+CELERY_RESULT_BACKEND = REDIS_URL
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = TIME_ZONE
+# Keep task results for 24 hours in Redis (86 400 seconds).
+CELERY_RESULT_EXPIRES = 86400

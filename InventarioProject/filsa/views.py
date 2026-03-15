@@ -1370,7 +1370,7 @@ class StockListView(LoginRequiredMixin, FilteredListView, generic.ListView):
 
             print('queryset in if is', queryset)
         else:
-            queryset = Product.objects.all()
+            queryset = Product.objects.all().order_by('internalCode')
             
         #filter = StockFilterSet(self.request.GET, queryset)
         return queryset #.qs
@@ -1970,24 +1970,88 @@ def cotizationView(request,cotization_id):
     return render(request, 'modal.html', context)
     #return JsonResponse({'products': list(products)})
 
-def crudProducts(request,action):
-    
-    print('request.Files are')
-    print(request.FILES)
-    cotizations = Cotization.objects.all()
+def crudProducts(request, action):
     title = action.capitalize() + ' Productos'
-    print('action is', action)
+
     if request.method == 'POST':
         form = CrudProductsForm(request.POST, request.FILES)
         if form.is_valid():
-            print('el form es valido')
+            from .tasks import process_crud_products
+            from .models import CrudProductTask
 
             data = handle_uploaded_file(request.FILES['archivo'])
-            
-            register_date = datetime.now().date()
-        
+
+            # Serialise the DataFrame to a plain list-of-lists so it can be
+            # passed through Celery's JSON serialiser without loss of None values.
+            rows = data.where(pd.notnull(data), None).values.tolist()
+
+            # Dispatch the task asynchronously.
+            task = process_crud_products.delay(action, rows, request.user.id)
+
+            # Create a tracking record so the polling endpoint can report status.
+            CrudProductTask.objects.create(
+                task_id=task.id,
+                action=action,
+                created_by=request.user,
+            )
+
+            return JsonResponse({
+                'task_id': task.id,
+                'status': CrudProductTask.STATUS_PENDING,
+                'message': f'Procesando {len(rows)} productos',
+            })
+
+        return JsonResponse({'error': 'Formulario inválido', 'errors': form.errors}, status=400)
+
+    else:
+        form = CrudProductsForm()
+        return render(request, 'crudProducts.html', {
+            'form': form, 'action': action, 'title': title,
+        })
+
+
+def crud_task_status(request, task_id):
+    """
+    Polling endpoint.  Returns JSON with the current status of a
+    process_crud_products Celery task.
+
+    Response shape:
+        {
+            "task_id":        "<uuid>",
+            "status":         "PENDING" | "STARTED" | "SUCCESS" | "FAILURE",
+            "result_message": "Se crean 42 productos",   // on success
+            "error_message":  "El producto …",           // on failure
+            "completed_at":   "2025-03-11T14:00:00Z"    // or null
+        }
+    """
+    from .models import CrudProductTask
+
+    try:
+        record = CrudProductTask.objects.get(task_id=task_id)
+    except CrudProductTask.DoesNotExist:
+        return JsonResponse({'task_id': task_id, 'status': 'NOT_FOUND'}, status=404)
+
+    return JsonResponse({
+        'task_id':        record.task_id,
+        'action':         record.action,
+        'status':         record.status,
+        'result_message': record.result_message,
+        'error_message':  record.error_message,
+        'completed_at':   record.completed_at.isoformat() if record.completed_at else None,
+    })
+
+
+# ── Legacy synchronous helpers kept intact – used by tasks.py ────────────────
+
+def _sync_crudProducts_unused(request, action):  # noqa: N802  (kept for reference only)
+    """Original synchronous implementation – superseded by the async view above."""
+    title = action.capitalize() + ' Productos'
+    cotizations = Cotization.objects.all()
+    if request.method == 'POST':
+        form = CrudProductsForm(request.POST, request.FILES)
+        if form.is_valid():
+            data = handle_uploaded_file(request.FILES['archivo'])
             numberOfProducts = len(data)
-           
             if action == 'crear':
                 products = []
                 products_warehouse = []
@@ -2007,26 +2071,15 @@ def crudProducts(request,action):
                         stockSecurity = data.iloc[i][6] # ['stock seguridad']
                         currency = data.iloc[i][8] # ['moneda']
                         location = data.iloc[i][10] # ['ubicacion']
-
-                        # El producto maestro se crea o actualiza
-                        # obj, created = Product.objects.update_or_create(
-                        # internalCode= product_code,
-                        # defaults={"quantity": F('quantity') + product_quantity,
-                        #         "barcode": product_barcode, 
-                        #         "name": name, "category": category, 
-                        #         "supplier": supplier, 
-                        #         "stockSecurity": stockSecurity, "currency": currency})
                         
                         newProduct = Product.objects.filter(internalCode = product_code).exists()
                         print('newProduct is:', newProduct)
                         
                         if newProduct:
                             messages.error(request, 'El Producto con codigo {} ya existe en la base de datos'.format(product_code), extra_tags='product_exists')
-            #                 messages.error(request, 'El Producto con codigo {} ya existe en la base de datos'.format(product_code), extra_tags='product_exists')
-                        
+            #                 messages.error(request, 'El Producto con codigo {} ya existe en la base de datos'.format(product_code), extra_tags='product_exists')                        
                             return HttpResponseRedirect(reverse('productscrud', args=[action,]))    
 
-                        
                         else:
                             print('product code is:', product_code)
                             print('product to add is:', newProduct)
@@ -2157,36 +2210,28 @@ def crudProducts(request,action):
                             productdb.price = price
                             productdb.name = product_name
                             productdb.save()
-                        #    newProduct.update(category= category, quantity = stock,  supplier=supplier, stock=stock, stockSecurity=stockSecurity, price=price, name= product_name)
                             
                             update_product_warehouse(deposits, productdb.internalCode, product_warehouse_quantities_list)
                            
     
-            #                 messages.error(request, 'El Producto con codigo {} ya existe en la base de datos'.format(product_code), extra_tags='product_exists')
-                          #  return HttpResponseRedirect(reverse('productscrud', args=[action,]))    
-
                         else:
                             newProduct = Product.objects.create(name=product_name, internalCode= product_code, barcode= product_code_origin, quantity= stock, price= price, category= category, supplier=supplier, stockSecurity=stockSecurity)
                             newProduct.save()
 
                             create_products_warehouse(deposits, newProduct.internalCode, product_warehouse_quantities_list)
-                            #newProductInDeposit= WarehousesProduct(product= newProduct.internalCode, name=deposit, quantity = product_quantity, location=location, deltaQuantity=0)
-                            
-                            # products.append(newProduct)
-                            #products_warehouse.append(newProductInDeposit)
+                        
 
                     except ValidationError as e:
                         
                         messages.error(request, "Creacion de Producto con codigo {} es incorrecta. Chequear campos".format(product_code), extra_tags='product format')
 
-                messages.info(request, "Se crean o actualizan {} productos".format(len(data)))    
-                return HttpResponseRedirect(reverse('productscrud', args=[action,]))    
-                
+                messages.info(request, "Se crean o actualizan {} productos".format(len(data)))
+                return HttpResponseRedirect(reverse('productscrud', args=[action,]))
+
     else:
         form = CrudProductsForm()
-        
-    
-    return render(request, 'crudProducts.html', {'form': form, 'action': action,  'title': title})
+
+    return render(request, 'crudProducts.html', {'form': form, 'action': action, 'title': title})
 
 def update_product_warehouse(deposits, product_code, product_warehouse_quantities):
     query_list = [Q(name__icontains=deposit) & Q(product__internalCode= product_code) for deposit in deposits]
@@ -2207,8 +2252,6 @@ def create_products_warehouse(deposits, product_code, product_warehouse_quantiti
         new_product_warehouse= WarehousesProduct(product= product_obj, name=product_warehouse_quantities[i][0], quantity = product_warehouse_quantities[i][1], location=product_warehouse_quantities[i][2], deltaQuantity=0)
         new_product_warehouse.save()
     
-
-
 
 def newCotization(request):
 

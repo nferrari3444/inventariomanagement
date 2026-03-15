@@ -1,4 +1,6 @@
 asgiref
+celery[redis]
+redis
 boto3
 botocore
 dj-database-url
