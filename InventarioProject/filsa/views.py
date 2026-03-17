@@ -1298,7 +1298,6 @@ class StockListView(LoginRequiredMixin, FilteredListView, generic.ListView):
 
         else:
             categoryList = Product.objects.all().values_list('category',flat=True).distinct().order_by('category')
-            price_conditions = Q(price=100) | Q(price=200)
             fields_to_check.append('product__category')
             categoryList = list(categoryList)
             category_conditions = Q(product__category__in= categoryList) | Q(product__category__isnull=True) | Q(product__category='')
@@ -1316,7 +1315,6 @@ class StockListView(LoginRequiredMixin, FilteredListView, generic.ListView):
             locationList.append(None)  # to include products with empty location
         
         if supplier:
-            supplier_filter = True
             supplierList = [supplier]
             filter_params['product__supplier__in'] = supplierList
             supplier_conditions = Q(product__supplier__in=supplierList)
@@ -1329,7 +1327,6 @@ class StockListView(LoginRequiredMixin, FilteredListView, generic.ListView):
             supplier_conditions = Q(product__supplier__in=supplierList) | Q(product__supplier__isnull=True) | Q(product__supplier='')
             supplierList.append(None)  # to include products with empty supplier
         #    filter = WarehousesProduct.objects.select_related('product').filter(name__in= warehouseList, product__category__in= categoryList, product__supplier__in=supplierList )
-
 
         if warehouse:
             warehouseList = [warehouse]
@@ -1359,7 +1356,7 @@ class StockListView(LoginRequiredMixin, FilteredListView, generic.ListView):
             or_conditions = [warehouse_conditions, category_conditions, supplier_conditions, location_conditions]
             # Combine Q objects using the OR operator ( | )
             combined_q = reduce(lambda x, y: x | y, q_objects)
-            not_null_conditions = Q(quantity__gt=0) # Example condition to exclude null quantities
+            not_null_conditions = Q(quantity__gte=0) # Example condition to exclude null quantities
             print('or_conditions are', or_conditions)
             print('filter_params are', filter_params)
             # Filter the queryset

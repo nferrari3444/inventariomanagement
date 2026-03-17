@@ -343,8 +343,8 @@
 </div>
     </div>
 
-    <div id="pagination" class = "px-4 relative mt-6">
-    <ul class="inline-flex -space-x-px text-sm">
+    <div id="pagination" class = "w-full px-4 relative mt-6">
+    <ul class="flex flex-wrap gap-1 text-sm">
     {% if is_paginated %}
     {% if page_obj.has_previous %}
       <a href="?{% param_replace page=1 %}" class="text-white bg-green-400 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-2 h-8 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" >Primera</a>
@@ -368,7 +368,7 @@
             <a href="#" aria-current="page" class="z-10 flex items-center justify-center px-3 h-8 leading-tight text-blue-600 border border-blue-300 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 dark:border-gray-700 dark:bg-gray-700 dark:text-white">{{i}}</a>
           </li>
         
-        {% elif i > page_obj.number|add:'-12' and i < page_obj.number|add:'12' %}
+        {% elif i > page_obj.number|add:'-30' and i < page_obj.number|add:'30' %}
          
         <li>
             <a href="?{% param_replace page=i %}" class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">{{i}}</a>
