@@ -1,8 +1,14 @@
 import os
 from celery import Celery
 
-# Default to the local settings module; override via DJANGO_SETTINGS_MODULE in production.
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'InventarioProject.settings.local')
+# Use DJANGO_SETTINGS_MODULE if already set (e.g. by the systemd service in production).
+# Fall back to local settings for development.
+_settings_module = os.getenv(
+    'DJANGO_SETTINGS_MODULE',
+    'InventarioProject.settings.production' if os.getenv('DJANGO_ENV') == 'production'
+    else 'InventarioProject.settings.local',
+)
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', _settings_module)
 
 app = Celery('InventarioProject')
 
