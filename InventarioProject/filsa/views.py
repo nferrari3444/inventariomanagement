@@ -2244,7 +2244,7 @@ def update_product_warehouse(deposits, product_code, product_warehouse_quantitie
 
 def create_products_warehouse(deposits, product_code, product_warehouse_quantities):
     for i, deposit in enumerate(deposits):
-        product_obj = Product.objects.get(internalCode= product_code)
+        product_obj = Product.objects.filter(internalCode=product_code).first()
         print('product warehouse quantities is:', product_warehouse_quantities[i]  )
         new_product_warehouse= WarehousesProduct(product= product_obj, name=product_warehouse_quantities[i][0], quantity = product_warehouse_quantities[i][1], location=product_warehouse_quantities[i][2], deltaQuantity=0)
         new_product_warehouse.save()

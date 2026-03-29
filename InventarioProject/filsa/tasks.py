@@ -148,7 +148,7 @@ def _task_eliminar(df: pd.DataFrame) -> dict:
         try:
             product_code = df.iloc[i][0]
             
-            Product.objects.get(internalCode=product_code).delete()
+            Product.objects.filter(internalCode=product_code).delete()
             products_deleted += 1
 
         except Product.DoesNotExist:
@@ -259,7 +259,7 @@ def _task_total(df: pd.DataFrame) -> dict:
             ).exists()
 
             if product_exists or wh_exists:
-                p = Product.objects.get(internalCode=product_code)
+                p = Product.objects.filter(internalCode=product_code).first()
                 p.category      = category
                 p.supplier      = supplier
                 p.stockSecurity = stock_security
@@ -283,9 +283,9 @@ def _task_total(df: pd.DataFrame) -> dict:
 
             processed += 1
 
-        except ValidationError:
+        except (ValidationError, DatabaseError):
             logger.warning(
-                'total: ValidationError for product code %s – skipping row',
+                'total: error for product code %s – skipping row',
                 df.iloc[i][0],
             )
 

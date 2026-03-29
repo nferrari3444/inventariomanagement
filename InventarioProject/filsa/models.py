@@ -41,8 +41,8 @@ class Cotization(models.Model):
 class Product(models.Model):
       
     class Meta:
-      verbose_name = 'Stock Productos vs Seguridad'
-      verbose_name_plural = 'Stock Productos vs Seguridad'
+        verbose_name = 'Stock Productos vs Seguridad'
+        verbose_name_plural = 'Stock Productos vs Seguridad'
     
     CURRENCIES= [('USD', 'Dolar'),
                   ('$', 'Pesos')]
@@ -50,7 +50,7 @@ class Product(models.Model):
     product_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100)
     barcode = models.CharField(max_length= 100, null=True, blank=True, verbose_name=u"Codigo de Barras")
-    internalCode = models.BigIntegerField(verbose_name=u"Codigo Interno")
+    internalCode = models.BigIntegerField(verbose_name=u"Codigo Interno", unique=True)
     quantity = models.FloatField(default=0, null=True, blank=True)
     category = models.CharField(max_length=100, default='Insumos') 
     
@@ -164,9 +164,6 @@ class StockMovements(models.Model):
     image = models.ImageField(upload_to='images/', null=True, blank=True)
 #    status = models.CharField(max_length=30, choices= STATUS, default='Pending')
     # warehouse = models.ForeignKey(Warehouses, on_delete= models.CASCADE, blank=True, null=True)
-
-
-
     
 class DiffProducts(models.Model):
 
