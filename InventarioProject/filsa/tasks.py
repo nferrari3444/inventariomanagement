@@ -283,10 +283,11 @@ def _task_total(df: pd.DataFrame) -> dict:
 
             processed += 1
 
-        except (ValidationError, DatabaseError):
+        except Exception as exc:
             logger.warning(
-                'total: error for product code %s – skipping row',
-                df.iloc[i][0],
+                'total: error for product code %s – skipping row: %s',
+                df.iloc[i][0] if len(df.columns) > 0 else '?',
+                exc,
             )
 
     return {

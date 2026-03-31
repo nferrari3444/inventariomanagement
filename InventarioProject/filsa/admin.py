@@ -3,7 +3,7 @@ from django.contrib import admin
 from django.db.models.query import QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.db import models
-from .models import WarehousesProduct, Product, StockMovements, DiffProducts, CustomUser
+from .models import WarehousesProduct, Product, StockMovements, DiffProducts, CustomUser, CrudProductTask
 from django.urls import reverse
 from django.utils.html import format_html
 from django.contrib.admin import SimpleListFilter
@@ -293,3 +293,4 @@ admin.site.register(Product,StockSecurity)
 admin.site.register(CustomUser, UsersData)
 admin.site.register(StockMovements,AdminStockMovements)
 admin.site.register(DiffProducts, AdminProductDiff)
+admin.site.register(CrudProductTask)
