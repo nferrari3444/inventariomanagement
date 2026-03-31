@@ -377,6 +377,8 @@ def process_crud_products(self, action: str, rows: list[list], user_id: int) -> 
 
     try:
         df = _rebuild_df(rows)
+        print('DataFrame rebuilt in task – shape is {}'.format(df.shape))
+        print('DataFrame head:\n{}'.format(df.head()))
         logger.info('process_crud_products: DataFrame rebuilt – %d rows, %d columns', len(df), len(df.columns))
 
         dispatch = {
