@@ -38,8 +38,10 @@ def _task_crear(df: pd.DataFrame) -> dict:
     """Create new products (Product + WarehousesProduct)."""
     from .models import Product, WarehousesProduct
 
+    logger.info('crear: starting – %d rows received', len(df))
+
     products_warehouse: list[WarehousesProduct] = []
- 
+
     for i in range(len(df)):
         try:
             product_code   = df.iloc[i][1]
@@ -54,7 +56,13 @@ def _task_crear(df: pd.DataFrame) -> dict:
             currency       = df.iloc[i][8]
             location       = df.iloc[i][10] if df.iloc[i][10] is not None else ''
 
+            logger.debug(
+                'crear: row %d – code=%s name=%s category=%s deposit=%s qty=%s',
+                i, product_code, name, category, deposit, product_qty,
+            )
+
             if Product.objects.filter(internalCode=product_code).exists():
+                logger.warning('crear: row %d – product code %s already exists', i, product_code)
                 return {
                     'success': False,
                     'error': (
@@ -75,6 +83,7 @@ def _task_crear(df: pd.DataFrame) -> dict:
                 stockSecurity=stock_security,
                 currency=currency,
             )
+            logger.info('crear: row %d – product %s (code=%s) created', i, name, product_code)
             products_warehouse.append(
                 WarehousesProduct(
                     product=new_product,
@@ -86,16 +95,18 @@ def _task_crear(df: pd.DataFrame) -> dict:
             )
 
         except (ValidationError, ValueError, KeyError, IndexError, DatabaseError) as exc:
+            logger.error('crear: row %d – error: %s', i, exc)
             return {
                 'success': False,
                 'error': (
                     f'Creacion de Producto con codigo {product_code} es incorrecta. '
-                    f'Chequear campos. Los campos Codigo Interno, Nombre, Categoría y Moneda, son obligatorios' 
+                    f'Chequear campos. Los campos Codigo Interno, Nombre, Categoría y Moneda, son obligatorios'
                     f'Error details: {str(exc)}'),
                 'extra_tags': 'product format',
             }
 
     WarehousesProduct.objects.bulk_create(products_warehouse)
+    logger.info('crear: finished – %d products created', len(products_warehouse))
     return {
         'success': True,
         'message': f'Se crean {len(products_warehouse)} productos',
@@ -106,12 +117,19 @@ def _task_actualizar(df: pd.DataFrame) -> dict:
     """Update quantity and price for existing products."""
     from .models import Product, WarehousesProduct
 
+    logger.info('actualizar: starting – %d rows received', len(df))
+
     for i in range(len(df)):
         try:
             product_code = df.iloc[i][0]
             product_qty  = df.iloc[i][1]
             product_price = df.iloc[i][2]
             deposit      = df.iloc[i][3]
+
+            logger.debug(
+                'actualizar: row %d – code=%s deposit=%s qty=%s price=%s',
+                i, product_code, deposit, product_qty, product_price,
+            )
 
             Product.objects.filter(internalCode=product_code).update(
                 quantity=F('quantity') + product_qty,
@@ -123,8 +141,13 @@ def _task_actualizar(df: pd.DataFrame) -> dict:
             )
             wp.quantity = product_qty
             wp.save()
+            logger.info('actualizar: row %d – product code %s updated', i, product_code)
 
         except WarehousesProduct.DoesNotExist:
+            logger.error(
+                'actualizar: row %d – product code %s not found in deposit %s',
+                i, product_code, deposit,
+            )
             return {
                 'success': False,
                 'error': (
@@ -134,6 +157,7 @@ def _task_actualizar(df: pd.DataFrame) -> dict:
                 'extra_tags': 'product format',
             }
 
+    logger.info('actualizar: finished – %d products updated', len(df))
     return {
         'success': True,
         'message': f'Se actualizan {len(df)} productos',
@@ -143,15 +167,21 @@ def _task_actualizar(df: pd.DataFrame) -> dict:
 def _task_eliminar(df: pd.DataFrame) -> dict:
     """Delete products from both Product and WarehousesProduct (via CASCADE)."""
     from .models import Product
+
+    logger.info('eliminar: starting – %d rows received', len(df))
+
     products_deleted = 0
     for i in range(len(df)):
         try:
             product_code = df.iloc[i][0]
-            
+            logger.debug('eliminar: row %d – deleting product code %s', i, product_code)
+
             Product.objects.filter(internalCode=product_code).delete()
             products_deleted += 1
+            logger.info('eliminar: row %d – product code %s deleted', i, product_code)
 
         except Product.DoesNotExist:
+            logger.error('eliminar: row %d – product code %s not found', i, product_code)
             return {
                  'success': False,
                  'error': (
@@ -160,6 +190,8 @@ def _task_eliminar(df: pd.DataFrame) -> dict:
                  ),
                  'extra_tags': 'product format',
              }
+
+    logger.info('eliminar: finished – %d products deleted', products_deleted)
     return {
         'success': True,
         'message': f'Se eliminan {products_deleted} productos',
@@ -167,7 +199,7 @@ def _task_eliminar(df: pd.DataFrame) -> dict:
         # If the product doesn't exist, consider it already "deleted" and skip
 
         # except Product.DoesNotExist:
-        #     
+        #
 
 def _parse_numeric(raw, default=0) -> float:
     """Parse a value that may use European decimal notation (1.234,56 → 1234.56)."""
@@ -210,6 +242,8 @@ def _task_total(df: pd.DataFrame) -> dict:
     from .models import Product, WarehousesProduct
     from .views import update_product_warehouse, create_products_warehouse
 
+    logger.info('total: starting – %d rows received, %d columns', len(df), len(df.columns))
+
     processed = 0
 
     for i in range(len(df)):
@@ -225,7 +259,13 @@ def _task_total(df: pd.DataFrame) -> dict:
                 pd.isna(product_name) or product_name in ('', None)
                 or pd.isna(category) or category in ('', None)
             ):
+                logger.debug('total: row %d – skipped (empty name or category)', i)
                 continue
+
+            logger.debug(
+                'total: row %d – code=%s name=%s category=%s supplier=%s',
+                i, product_code, product_name, category, supplier,
+            )
 
             stock          = _parse_numeric(df.iloc[i][6])
             stock_security = _parse_numeric(df.iloc[i][15])
@@ -259,6 +299,7 @@ def _task_total(df: pd.DataFrame) -> dict:
             ).exists()
 
             if product_exists or wh_exists:
+                logger.info('total: row %d – updating existing product code %s', i, product_code)
                 p = Product.objects.filter(internalCode=product_code).first()
                 p.category      = category
                 p.supplier      = supplier
@@ -268,7 +309,9 @@ def _task_total(df: pd.DataFrame) -> dict:
                 p.name          = product_name
                 p.save()
                 update_product_warehouse(deposits, p.internalCode, wh_quantities)
+                logger.info('total: row %d – product code %s updated', i, product_code)
             else:
+                logger.info('total: row %d – creating new product code %s', i, product_code)
                 p = Product.objects.create(
                     name=product_name,
                     internalCode=product_code,
@@ -280,16 +323,20 @@ def _task_total(df: pd.DataFrame) -> dict:
                     stockSecurity=stock_security,
                 )
                 create_products_warehouse(deposits, p.internalCode, wh_quantities)
+                logger.info('total: row %d – product code %s created', i, product_code)
 
             processed += 1
 
         except Exception as exc:
+            print(f'error in creating product {product_code}: error is: {exc}')
             logger.warning(
-                'total: error for product code %s – skipping row: %s',
+                'total: row %d – error for product code %s, skipping: %s',
+                i,
                 df.iloc[i][0] if len(df.columns) > 0 else '?',
                 exc,
             )
 
+    logger.info('total: finished – %d products processed out of %d rows', processed, len(df))
     return {
         'success': True,
         'message': f'Se crean o actualizan {processed} productos',
@@ -316,6 +363,11 @@ def process_crud_products(self, action: str, rows: list[list], user_id: int) -> 
     """
     from .models import CrudProductTask
 
+    logger.info(
+        'process_crud_products: task_id=%s action=%s user_id=%s rows=%d',
+        self.request.id, action, user_id, len(rows),
+    )
+
     task_record = CrudProductTask.objects.filter(task_id=self.request.id).first()
 
     # Mark as started
@@ -325,6 +377,7 @@ def process_crud_products(self, action: str, rows: list[list], user_id: int) -> 
 
     try:
         df = _rebuild_df(rows)
+        logger.info('process_crud_products: DataFrame rebuilt – %d rows, %d columns', len(df), len(df.columns))
 
         dispatch = {
             'crear':      _task_crear,
@@ -335,6 +388,7 @@ def process_crud_products(self, action: str, rows: list[list], user_id: int) -> 
 
         handler = dispatch.get(action)
         if handler is None:
+            logger.error('process_crud_products: unknown action=%s', action)
             result = {'success': False, 'error': f'Acción desconocida: {action}'}
         else:
             result = handler(df)
@@ -362,4 +416,8 @@ def process_crud_products(self, action: str, rows: list[list], user_id: int) -> 
             'status', 'result_message', 'error_message', 'completed_at'
         ])
 
+    logger.info(
+        'process_crud_products: task_id=%s action=%s finished – success=%s message=%s error=%s',
+        self.request.id, action, result.get('success'), result.get('message'), result.get('error'),
+    )
     return result
