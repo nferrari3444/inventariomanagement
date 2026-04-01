@@ -65,10 +65,10 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         # 'URL': os.getenv('DATABASE_URL'),
-        'NAME': 'filsadb',
-        'USER': 'filsa',
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('USER'),
         'HOST': 'localhost',
-        'PASSWORD': 'Filsa.2024',
+        'PASSWORD': os.getenv('PASSWORD'),
         'PORT': '5432'
 
     }
