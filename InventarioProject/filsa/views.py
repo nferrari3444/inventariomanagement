@@ -1982,18 +1982,27 @@ def crudProducts(request, action):
             # passed through Celery's JSON serialiser without loss of None values.
             rows = data.where(pd.notnull(data), None).values.tolist()
 
-            # Dispatch the task asynchronously.
-            task = process_crud_products.delay(action, rows, request.user.id)
+            # Pre-generate a task ID so the tracking record exists before the
+            # worker starts (avoids a race where a fast task finishes before the
+            # record is created and the status never leaves PENDING).
+            from celery import uuid as celery_uuid
+            task_id = celery_uuid()
 
-            # Create a tracking record so the polling endpoint can report status.
+            # Create the tracking record first.
             CrudProductTask.objects.create(
-                task_id=task.id,
+                task_id=task_id,
                 action=action,
                 created_by=request.user,
             )
 
+            # Dispatch the task with the pre-generated ID.
+            process_crud_products.apply_async(
+                args=[action, rows, request.user.id],
+                task_id=task_id,
+            )
+
             return JsonResponse({
-                'task_id': task.id,
+                'task_id': task_id,
                 'status': CrudProductTask.STATUS_PENDING,
                 'message': f'Procesando {len(rows)} productos',
             })
