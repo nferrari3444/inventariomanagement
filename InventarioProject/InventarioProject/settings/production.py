@@ -2,12 +2,12 @@ from .base import *
 
 import environ
 
-load_dotenv()
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+
+load_dotenv(os.path.join(BASE_DIR, '.env'))
 
 env = environ.Env()
-environ.Env.read_env()
-
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 # Define a base directory for logs (adjust as necessary)
 # LOG_DIR = os.path.join(os.path.dirname(__file__), '..', 'logs')

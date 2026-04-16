@@ -1,3 +1,7 @@
+import logging
+
+logger = logging.getLogger(__name__)
+
 from typing import Any
 from django.db.models.query import QuerySet
 from django.contrib import messages
@@ -415,17 +419,16 @@ def transferView(request):
           
             StockMovements.objects.bulk_create(datalist)     
 
-            send_mail(
-                subject='Transferencia de Productos entre Depositos',
-                message= 'Transferencia de {} productos a depósito {}'.format(numberOfProducts,warehouse_out),
-                from_email = settings.EMAIL_HOST_USER,
-                recipient_list=[receptor],
-                fail_silently=False,
-                auth_user=None,
-                auth_password=None,
-                connection=None,
-                html_message=None
-            )
+            try:
+                send_mail(
+                    subject='Transferencia de Productos entre Depositos',
+                    message='Transferencia de {} productos a depósito {}'.format(numberOfProducts, warehouse_out),
+                    from_email=settings.EMAIL_HOST_USER,
+                    recipient_list=[receptor],
+                    fail_silently=False,
+                )
+            except Exception:
+                logger.exception('Error sending transfer email to %s', receptor.email)
        
             return redirect('/tasks/')
             #return HttpResponseRedirect("/inbound/")
