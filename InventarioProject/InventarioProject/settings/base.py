@@ -152,6 +152,10 @@ EMAIL_HOST_USER = 'operacionesfilsa@gmail.com'
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL  = 'operacionesfilsa@gmail.com'
 
+# Claude API (Anthropic) - la clave se lee de la variable de entorno ANTHROPIC_API_KEY
+# (definila en .env). No hardcodear la clave en este archivo.
+ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
+
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
 

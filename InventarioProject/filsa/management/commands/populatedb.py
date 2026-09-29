@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand, CommandError
 from filsa.models import CustomUser, StockMovements, DiffProducts, Product, WarehousesProduct, Tasks, Cotization
 from django.contrib.auth.models import Group
+from django.db import transaction
 import csv
 from datetime import datetime
 import re
@@ -22,70 +23,38 @@ class Command(BaseCommand):
         #     help='path to csv file',
         #     type=str)
 
-    def handle(self, *args, **options):  
+    def handle(self, *args, **options):
+        self._load_users(os.path.join(dirname, 'usuariosFilsa.txt'))
 
+    @transaction.atomic
+    def _load_users(self, users_file):
+        # Archivo: Nombre,Contrasenia,Correo,Deparamento,Rol
+        # Idempotente: los usuarios cuyo email ya existe se saltean.
+        created = skipped = 0
+        with open(users_file, newline='', encoding='utf-8') as file:
+            for row in csv.DictReader(file):
+                row = {key.strip(): (value or '').strip() for key, value in row.items()}
+                email = row['Correo'].lower()
+                role = row['Rol']
 
-      #  customer = 'UTE'
-      #  numberOfProducts = 5
-      #  registered_date = datetime.now().date()
+                if CustomUser.objects.filter(email=email).exists():
+                    skipped += 1
+                    continue
 
-        Cotization.objects.create()
+                user = CustomUser.objects.create_user(
+                    email=email,
+                    password=row['Contrasenia'],
+                    username=row['Nombre'],
+                    departamento=row['Deparamento'],
+                    role=role,
+                )
+                group, _ = Group.objects.get_or_create(name=role)
+                group.user_set.add(user)
+                created += 1
 
-        warehouses_list = ['Anaya 2710' , 'Crocker 2652' , 'Juanico' ,'Taller', 'En Transito']
-
-        customer = 'UTE'
-        
-        # warehouse_object = []
-        # for i in range(0,len(warehouses_list)):
-        #     warehouses_model = Warehouses()
-        #     warehouses_model.name = warehouses_list[i]
-        #     warehouse_object.append(warehouses_model)
-
-        # Warehouses.objects.bulk_create(warehouse_object)
-
-    
-        #users_file = './usuariosFilsa.txt' 
-        #products_file = './productosFilsa.txt' 
-        users_file = os.path.join(dirname, './usuariosFilsa.txt')
-        products_file = os.path.join(dirname, './productosFilsa.txt')
-        new_products_file = os.path.join(dirname, '../filsa_out6.csv')
-        #f = open(users_file, "r")
-        #reader = f.read()
-        #users_lines = list(reader)
-        
-        with open(users_file, 'r') as file:
-        #     #print(file.readlines())
-            users_lines = file.readlines()
-        # # Archivo: Nombre,Correo,Contraseña, Deparamento,Rol
-            #users_obj = []
-            superuser = CustomUser.objects.create_superuser(username = 'filsacompany' , email='operaciones@filsa.com.uy', password='sitioweb_2024')
-            for line in users_lines[1:]:
-                
-                user_model = CustomUser()
-                # print('user line is ', line)
-                line = line.split(',')
-                print('lines is:',line)
-                nombre_usuario = line[0]
-                correo = line[2]
-                password = line[1]
-                departamento = line[3]
-                rol = line[4]
-                # print('username', line[0])
-                # user_model.username = line[0]
-                # print('email', line[2])
-                # user_model.email = line[2]
-                # user_model.password = line[1]
-                # user_model.departamento = line[3]
-                # user_model.role = line[4]
-                userobj = CustomUser.objects.create_user(username= nombre_usuario, password=password, email=correo, departamento=departamento,role=rol)
-               # userobj.save()
-                user_group ,  created = Group.objects.get_or_create(name=rol) 
-                user_group.user_set.add(userobj)
-                
-               # users_obj.append(user_model)
-
-
-            #CustomUser.objects.bulk_create(users_obj)
+        self.stdout.write(self.style.SUCCESS(
+            f'Usuarios: {created} creados, {skipped} ya existían.'
+        ))
         #f = open(products_file, "r")
         #reader = f.read()
         #lines = list(reader)
